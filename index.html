@@ -119,13 +119,6 @@
         .sig-box canvas{display:block;width:100%;height:200px;touch-action:none;cursor:crosshair}
         .sig-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--line2);pointer-events:none;text-align:center;letter-spacing:.08em;transition:opacity .3s}
         .sig-clr{margin-top:7px;width:100%;padding:9px;border-radius:var(--r3);background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.2);color:var(--rose-l);font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;transition:all .15s}
-        .cpills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:13px}
-        .cp{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.66rem;font-weight:600;letter-spacing:.04em;border:1px solid}
-        .cp .dot{width:6px;height:6px;border-radius:50%}
-        .cp-r{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.25);color:#b91c1c}.cp-r .dot{background:#ef4444}
-        .cp-b{background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.25);color:#1d4ed8}.cp-b .dot{background:#3b82f6}
-        .cp-g{background:rgba(21,128,61,.06);border-color:rgba(21,128,61,.25);color:#166534}.cp-g .dot{background:#22c55e}
-        .cp-k{background:rgba(100,116,139,.06);border-color:rgba(100,116,139,.25);color:#475569}.cp-k .dot{background:#94a3b8}
         .fab{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:672px;height:54px;border-radius:13px;border:none;background:linear-gradient(135deg,#2563eb,#1740b0);color:#fff;font-size:.93rem;font-weight:700;letter-spacing:.04em;font-family:'Sora',sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(37,99,235,.25);display:flex;align-items:center;justify-content:center;gap:9px;transition:all .15s;z-index:200}
         .fab:active{transform:translateX(-50%) scale(.98)}
         .fab svg{width:19px;height:19px}
@@ -185,21 +178,8 @@
         .ssep{display:flex;align-items:center;gap:8px;margin:14px 0 11px;font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
         .ssep::before,.ssep::after{content:'';flex:1;height:1px;background:var(--line)}
     </style>
-
-<link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#2563eb"/>
-
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js');
-    });
-}
-</script>
-
 </head>
 <body>
-<!-- PANTALLA DE CARGA -->
 <div id="load-bar">
     <div class="lb-mark">CMR</div>
     <div class="lb-name">CMR MANAGER PRO</div>
@@ -208,9 +188,7 @@ if ('serviceWorker' in navigator) {
     <div id="load-err"></div>
 </div>
 
-<!-- APP PRINCIPAL -->
 <div id="app-body">
-    <!-- TOPBAR -->
     <div id="topbar">
         <div class="logo">
             <div class="logo-mark">CMR</div>
@@ -226,18 +204,27 @@ if ('serviceWorker' in navigator) {
         </div>
     </div>
 
-    <!-- TABS -->
     <div id="tabs">
-        <div class="tab active" data-p="form" onclick="tab('form')">CMR</div>
+        <div class="tab active" data-p="form" onclick="tab('form')">Documento</div>
         <div class="tab" data-p="hist" onclick="tab('hist')">Historial <span class="tbadge" id="histBadge">0</span></div>
         <div class="tab" data-p="agenda" onclick="tab('agenda')">Agenda</div>
         <div class="tab" data-p="tmpl" onclick="tab('tmpl')">Plantillas</div>
         <div class="tab" data-p="cfg" onclick="tab('cfg')">Config</div>
     </div>
 
-    <!-- PANEL FORM -->
     <div id="panel-form" class="panel active">
-        <div class="block"><div class="bhead"><span class="btag a">DOC</span><span class="btitle">Datos del Documento</span></div><div class="bbody"><div class="fr2"><div class="fr"><label>N.º CMR</label><input id="docNum" type="text" placeholder="auto"/></div><div class="fr"><label>Fecha</label><input id="docDate" type="date"/></div></div><div class="fr2"><div class="fr"><label>Lugar Emisión</label><input id="placeEmission" type="text" placeholder="Sevilla"/></div><div class="fr"><label>Docs Anexos</label><input id="docsAnexos" type="text" placeholder="Albarán" oninput="updateDocNum()"/></div></div><button onclick="saveAsTemplate()" class="save-btn" style="width:100%;justify-content:center;margin-top:10px">Guardar como plantilla</button></div></div>
+        <div class="block"><div class="bhead"><span class="btag a">DOC</span><span class="btitle">Datos del Documento</span></div><div class="bbody">
+            <div class="fr"><label>Tipo de Documento</label>
+                <select id="tipoDoc" onchange="onTipoDocChange()">
+                    <option value="cmr">CMR Internacional (Convenio CMR)</option>
+                    <option value="nacional">Carta de Porte Nacional (Ley 15/2009)</option>
+                </select>
+            </div>
+            <div class="fr2"><div class="fr"><label>N.º Documento</label><input id="docNum" type="text" placeholder="auto"/></div><div class="fr"><label>Fecha</label><input id="docDate" type="date"/></div></div>
+            <div class="fr2"><div class="fr"><label>Lugar Emisión</label><input id="placeEmission" type="text" placeholder="Sevilla"/></div><div class="fr"><label>Docs Anexos</label><input id="docsAnexos" type="text" placeholder="Albarán" oninput="updateDocNum()"/></div></div>
+            <button onclick="saveAsTemplate()" class="save-btn" style="width:100%;justify-content:center;margin-top:10px">Guardar como plantilla</button>
+        </div></div>
+
         <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="5"></textarea></div></div></div>
         <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Destinatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="5"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
         <div class="block"><div class="bhead"><span class="btag g">3 · 4 · 5</span><span class="btitle">Recogida y Entrega</span></div><div class="bbody"><div class="fr"><label>3 Lugar de Carga</label><input id="placeLoading" type="text" placeholder="Polígono Industrial Norte, Sevilla"/></div><div class="fr"><label>4 Lugar de Entrega</label><input id="placeDelivery" type="text" placeholder="Almacén Central, Berlín"/></div><div class="fr2"><div class="fr"><label>5 Fecha Prevista</label><input id="dateDelivery" type="date"/></div><div class="fr"><label>Referencia Cliente</label><input id="clientRef" type="text" placeholder="PO-2024-XXX"/></div></div></div></div>
@@ -250,46 +237,40 @@ if ('serviceWorker' in navigator) {
         <div class="block"><div class="bhead"><span class="btag g">23</span><span class="btitle">Firma del Conductor</span></div><div class="bbody"><div class="sig-box" id="sigWrap"><canvas id="sigCanvas"></canvas><div class="sig-hint" id="sigHint">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSig()">✕ Borrar firma</button></div></div>
     </div>
 
-    <!-- PANEL HISTORIAL -->
     <div id="panel-hist" class="panel">
-        <div class="stats"><div class="stat"><div class="stat-n" id="st0">0</div><div class="stat-l">Total CMR</div></div><div class="stat"><div class="stat-n" id="st1">0</div><div class="stat-l">Este Mes</div></div><div class="stat"><div class="stat-n" id="st2">—</div><div class="stat-l">Kg Totales</div></div><div class="stat"><div class="stat-n" id="st3">—</div><div class="stat-l">Kg Mes</div></div></div>
-        <div class="search-row"><input id="histSearch" type="text" placeholder="Buscar por número, destinatario, país…" oninput="renderHist()"/><select class="fsel" id="histFilter" onchange="renderHist()"><option value="">Todos</option><option value="month">Este mes</option><option value="week">Esta semana</option></select><select class="fsel" id="histGroup" onchange="renderHist()"><option value="">Sin agrupar</option><option value="dest">Por Destino</option><option value="carrier">Por Transportista</option></select></div>
+        <div class="stats"><div class="stat"><div class="stat-n" id="st0">0</div><div class="stat-l">Total Docs</div></div><div class="stat"><div class="stat-n" id="st1">0</div><div class="stat-l">Este Mes</div></div><div class="stat"><div class="stat-n" id="st2">—</div><div class="stat-l">Kg Totales</div></div><div class="stat"><div class="stat-n" id="st3">—</div><div class="stat-l">Kg Mes</div></div></div>
+        <div class="search-row"><input id="histSearch" type="text" placeholder="Buscar por número, destinatario…" oninput="renderHist()"/><select class="fsel" id="histFilter" onchange="renderHist()"><option value="">Todos</option><option value="month">Este mes</option><option value="week">Esta semana</option></select><select class="fsel" id="histGroup" onchange="renderHist()"><option value="">Sin agrupar</option><option value="dest">Por Destino</option><option value="carrier">Por Transportista</option></select></div>
         <div id="histList"></div>
     </div>
 
-    <!-- PANEL AGENDA -->
     <div id="panel-agenda" class="panel">
         <div class="block"><div class="bhead"><span class="btag b">DEST.</span><span class="btitle">Destinatarios Frecuentes</span></div><div class="bbody" id="agRcvList"><div class="hist-empty" style="padding:20px 0">Sin destinatarios guardados</div></div></div>
         <div class="block"><div class="bhead"><span class="btag g">COND.</span><span class="btitle">Conductores y Vehículos</span></div><div class="bbody" id="agDrvList"><div class="hist-empty" style="padding:20px 0">Sin conductores guardados</div></div></div>
     </div>
 
-    <!-- PANEL PLANTILLAS -->
     <div id="panel-tmpl" class="panel">
         <div class="block"><div class="bhead"><span class="btag t">TPL</span><span class="btitle">Plantillas Guardadas</span></div><div class="bbody" id="tmplList"><div class="hist-empty" style="padding:20px 0">Sin plantillas guardadas</div></div></div>
     </div>
 
-    <!-- PANEL CONFIG -->
     <div id="panel-cfg" class="panel">
-        <div class="block"><div class="bhead"><span class="btag a">NUM</span><span class="btitle">Numeración Automática</span></div><div class="bbody"><div class="hint">El número CMR se genera como <b>PREFIJO-AÑO-SECUENCIA</b>. Puedes editarlo manualmente.</div><div class="fr3"><div class="fr"><label>Prefijo</label><input id="cfgPrefix" type="text" placeholder="CMR" maxlength="8"/></div><div class="fr"><label>Siguiente N.º</label><input id="cfgSeq" type="number" min="1" placeholder="1"/></div><div class="fr"><label>Dígitos</label><select id="cfgDigits"><option value="3">3 (001)</option><option value="4">4 (0001)</option><option value="5">5 (00001)</option></select></div></div><div style="font-size:.7rem;color:var(--dim);margin-top:4px" id="numPreview"></div></div></div>
+        <div class="block"><div class="bhead"><span class="btag a">NUM</span><span class="btitle">Numeración Automática</span></div><div class="bbody"><div class="hint">El número se genera como <b>PREFIJO-AÑO-SECUENCIA</b>. Puedes editarlo manualmente.</div><div class="fr3"><div class="fr"><label>Prefijo</label><input id="cfgPrefix" type="text" placeholder="CMR" maxlength="8"/></div><div class="fr"><label>Siguiente N.º</label><input id="cfgSeq" type="number" min="1" placeholder="1"/></div><div class="fr"><label>Dígitos</label><select id="cfgDigits"><option value="3">3 (001)</option><option value="4">4 (0001)</option><option value="5">5 (00001)</option></select></div></div><div style="font-size:.7rem;color:var(--dim);margin-top:4px" id="numPreview"></div></div></div>
         <div class="block"><div class="bhead"><span class="btag v">LOGO</span><span class="btitle">Logo de Empresa en PDF</span></div><div class="bbody"><div style="display:flex;align-items:center;gap:14px"><div class="logo-preview" id="logoPreview" onclick="document.getElementById('logoInput').click()"><span>+ Logo</span></div><div style="flex:1"><div style="font-size:.78rem;font-weight:600;margin-bottom:4px">Imagen del logo</div><div style="font-size:.7rem;color:var(--dim);line-height:1.6">PNG o JPG. Se incluirá en la cabecera del PDF.</div><button style="margin-top:8px;font-size:.7rem;padding:5px 10px;border-radius:6px;border:1px solid var(--rose-l);background:transparent;color:var(--rose-l);cursor:pointer;font-family:'Sora',sans-serif" onclick="removeLogo()">Quitar logo</button></div><input type="file" id="logoInput" accept="image/*" style="display:none" onchange="loadLogo(event)"/></div></div></div>
         <div class="block"><div class="bhead"><span class="btag t">DEF</span><span class="btitle">Datos por Defecto</span></div><div class="bbody"><div class="ssep">Remitente Habitual</div><div class="fr"><textarea id="cfgSenderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45&#10;41500 Sevilla&#10;España" rows="5"></textarea></div><div class="divl"></div><div class="ssep">Transportista Habitual</div><div class="fr"><textarea id="cfgCarrierBlock" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="5"></textarea></div><div class="fr"><label>Lugar Emisión por Defecto</label><input id="cfgEmission" type="text" placeholder="Sevilla, España"/></div><button onclick="saveCfg()" style="width:100%;height:44px;margin-top:10px;border-radius:var(--r3);border:none;background:var(--blue);color:#fff;font-size:.88rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">Guardar Configuración</button></div></div>
-        <div class="block"><div class="bhead"><span class="btag r">BD</span><span class="btitle">Base de Datos (IndexedDB)</span></div><div class="bbody"><div class="hint">Los CMR se guardan automáticamente en la BD local. Persisten aunque cierres la app.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="exportDB()" class="save-btn" style="flex:1;justify-content:center;height:42px">Exportar JSON</button><button onclick="importClick()" class="save-btn" style="flex:1;justify-content:center;height:42px">Importar JSON</button><button onclick="confirmClear()" class="save-btn" style="flex:1;justify-content:center;height:42px;border-color:rgba(244,63,94,.3);color:var(--rose-l)">Vaciar BD</button></div><input type="file" id="importInput" accept=".json" style="display:none" onchange="importDB(event)"/></div></div>
+        <div class="block"><div class="bhead"><span class="btag r">BD</span><span class="btitle">Base de Datos (IndexedDB)</span></div><div class="bbody"><div class="hint">Los documentos se guardan automáticamente en la BD local. Persisten aunque cierres la app.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="exportDB()" class="save-btn" style="flex:1;justify-content:center;height:42px">Exportar JSON</button><button onclick="importClick()" class="save-btn" style="flex:1;justify-content:center;height:42px">Importar JSON</button><button onclick="confirmClear()" class="save-btn" style="flex:1;justify-content:center;height:42px;border-color:rgba(244,63,94,.3);color:var(--rose-l)">Vaciar BD</button></div><input type="file" id="importInput" accept=".json" style="display:none" onchange="importDB(event)"/></div></div>
     </div>
 
-    <!-- FAB -->
     <button class="fab" onclick="generateCMR()">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
-        GENERAR CMR — 4 COPIAS IRU
+        GENERAR DOCUMENTO
     </button>
 </div>
 
-<!-- OVERLAY, TOAST, BOTTOM SHEET -->
 <div id="ov"><div class="ov-spin"></div><div class="ov-txt" id="ovTxt">GENERANDO PDF…</div></div>
 <div id="toast"></div>
 <div id="bs-bg"><div id="bs"><div class="bs-handle"></div><div class="bs-title" id="bsTitle"></div><div class="bs-body" id="bsBody"></div><div class="bs-acts" id="bsActs"></div></div></div>
 
 <script>
-// ════════════════════════════ JAVASCRIPT COMPLETO ════════════════════════════
+// ════════════════════════════ JAVASCRIPT COMPLETO (SIN RESTRICCIONES) ════════════════════════════
 let sigPad, sigPadSender, _db=null, logoDataURL=null;
 const DB_N='cmr_pro_v5', STORE='cmr', AG='agenda', TPL='plantillas';
 
@@ -316,7 +297,7 @@ async function dbClear(st){const db=await openDB();return new Promise((res,rej)=
 
 const gv=id=>(document.getElementById(id)||{}).value?.trim()||'';
 const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||''};
-const FIELDS=['docNum','docDate','placeEmission','docsAnexos','senderBlock','rcvBlock','placeLoading','placeDelivery','dateDelivery','clientRef','carrierBlock','driverName','driverDNI','plateTractor','plateTrailer','senderInstr','freightTerms','codAmount','observations'];
+const FIELDS=['docNum','docDate','placeEmission','docsAnexos','senderBlock','rcvBlock','placeLoading','placeDelivery','dateDelivery','clientRef','carrierBlock','driverName','driverDNI','plateTractor','plateTrailer','senderInstr','freightTerms','codAmount','observations','tipoDoc'];
 function collect(){
     const d={savedAt:new Date().toISOString()};
     FIELDS.forEach(f=>{d[f]=gv(f)});
@@ -336,6 +317,7 @@ function doNewCMR(){
     closeBS();
     FIELDS.forEach(id=>sv(id,''));
     sv('freightTerms','PORT PAGADO');
+    sv('tipoDoc','cmr');
     fillGoodsLines([]);
     fillSuccessiveCarriers([]);
     clearSig(); clearSigSender();
@@ -343,15 +325,36 @@ function doNewCMR(){
     sv('docDate',new Date().toISOString().split('T')[0]);
     tab('form');toast('✓ Formulario limpio','ok');
 }
+function onTipoDocChange(){
+    updateDocNum();
+}
 
-function genDocNum(){ const now=new Date(); const yyyy=now.getFullYear(); const mm=String(now.getMonth()+1).padStart(2,'0'); const dd=String(now.getDate()).padStart(2,'0'); const albaran=gv('docsAnexos')||''; const digits=albaran.replace(/\D/g,'').slice(-4).padStart(4,'0'); return `${yyyy}${mm}${dd}${digits}`; }
-function updateDocNum(){ const current=gv('docNum'); const auto=genDocNum(); if(!current||/^\d{12}$/.test(current)) sv('docNum',auto); }
-function updateNumPreview(){ const el=document.getElementById('numPreview');if(!el)return; const prefix=gv('cfgPrefix')||'CMR'; const digits=parseInt(document.getElementById('cfgDigits')?.value||'3'); const seq=parseInt(document.getElementById('cfgSeq')?.value||'1'); el.textContent='Próximo: '+prefix+'-'+new Date().getFullYear()+'-'+String(seq).padStart(digits,'0'); }
+function genDocNum(){
+    const now=new Date();
+    const yyyy=now.getFullYear();
+    const mm=String(now.getMonth()+1).padStart(2,'0');
+    const dd=String(now.getDate()).padStart(2,'0');
+    const albaran=gv('docsAnexos')||'';
+    const digits=albaran.replace(/\D/g,'').slice(-4).padStart(4,'0');
+    return `${yyyy}${mm}${dd}${digits}`;
+}
+function updateDocNum(){
+    const current=gv('docNum');
+    const auto=genDocNum();
+    if(!current||/^\d{12}$/.test(current)) sv('docNum',auto);
+}
+function updateNumPreview(){
+    const el=document.getElementById('numPreview');if(!el)return;
+    const prefix=gv('cfgPrefix')||'CMR';
+    const digits=parseInt(document.getElementById('cfgDigits')?.value||'3');
+    const seq=parseInt(document.getElementById('cfgSeq')?.value||'1');
+    el.textContent='Próximo: '+prefix+'-'+new Date().getFullYear()+'-'+String(seq).padStart(digits,'0');
+}
 document.addEventListener('input',e=>{if(['cfgPrefix','cfgSeq','cfgDigits'].includes(e.target.id))updateNumPreview()});
 
 function saveDefaults(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); Object.assign(cfg,{senderBlock:gv('senderBlock'),carrierBlock:gv('carrierBlock'),placeEmission:gv('placeEmission')}); localStorage.setItem('cmr_cfg',JSON.stringify(cfg)); showBadges(true);toast('✓ Remitente y transportista guardados','ok'); }
 function saveCfg(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); Object.assign(cfg,{ senderBlock:gv('cfgSenderBlock'),carrierBlock:gv('cfgCarrierBlock'),placeEmission:gv('cfgEmission'), prefix:gv('cfgPrefix')||'CMR',seq:parseInt(gv('cfgSeq')||'1'),digits:document.getElementById('cfgDigits')?.value||'3' }); localStorage.setItem('cmr_cfg',JSON.stringify(cfg)); loadDefaults();toast('✓ Configuración guardada','ok'); }
-function loadDefaults(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); if(cfg.senderBlock) sv('senderBlock',cfg.senderBlock); if(cfg.carrierBlock) sv('carrierBlock',cfg.carrierBlock); if(cfg.placeEmission) sv('placeEmission',cfg.placeEmission); if(!gv('docDate')) sv('docDate',new Date().toISOString().split('T')[0]); if(!gv('docNum')) sv('docNum',genDocNum()); if(cfg.senderBlock||cfg.carrierBlock) showBadges(true); logoDataURL=localStorage.getItem('cmr_logo')||null; if(logoDataURL) showLogoPreview(logoDataURL); }
+function loadDefaults(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); if(cfg.senderBlock) sv('senderBlock',cfg.senderBlock); if(cfg.carrierBlock) sv('carrierBlock',cfg.carrierBlock); if(cfg.placeEmission) sv('placeEmission',cfg.placeEmission); if(!gv('docDate')) sv('docDate',new Date().toISOString().split('T')[0]); if(!gv('docNum')) sv('docNum',genDocNum()); if(!gv('tipoDoc')) sv('tipoDoc','cmr'); if(cfg.senderBlock||cfg.carrierBlock) showBadges(true); logoDataURL=localStorage.getItem('cmr_logo')||null; if(logoDataURL) showLogoPreview(logoDataURL); }
 function syncCfgPanel(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); sv('cfgSenderBlock',cfg.senderBlock);sv('cfgCarrierBlock',cfg.carrierBlock);sv('cfgEmission',cfg.placeEmission); sv('cfgPrefix',cfg.prefix||'CMR');sv('cfgSeq',cfg.seq||1); if(document.getElementById('cfgDigits')) document.getElementById('cfgDigits').value=cfg.digits||'3'; updateNumPreview(); }
 function showBadges(v){ document.getElementById('bs-sender').style.display=v?'block':'none'; document.getElementById('bs-carrier').style.display=v?'block':'none'; }
 
@@ -414,15 +417,15 @@ async function renderHist(){
         data.forEach(r=>{const key=groupKey(r);if(!grouped[key])grouped[key]=[];grouped[key].push(r);});
         const html=Object.entries(grouped).map(([key,items])=>{
             const kilos=items.reduce((s,r)=>s+(parseFloat(r.goodsWeight)||0),0);
-            return `<div style="margin-bottom:16px"><div style="font-weight:600;color:var(--snow)">${key} (${items.length})</div>${items.map(r=>`<div class="hitem" style="margin:4px 0"><div class="hico">📄</div><div class="hinfo"><div class="hnum">${r.docNum||'Sin N.º'}</div><div class="hsub">${[(r.rcvBlock||'').split('\n')[0],r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${r.savedAt?new Date(r.savedAt).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—'}</div><div class="hacts"><div class="hb lo" onclick="loadRec(${r.id})">⬆</div><div class="hb du" onclick="dupRec(${r.id})">📋</div><div class="hb pd" onclick="regenPDF(${r.id})">📄</div><div class="hb de" onclick="delRec(${r.id})">🗑</div></div></div>`).join('')}</div>`;
+            return `<div style="margin-bottom:16px"><div style="font-weight:600;color:var(--snow)">${key} (${items.length})</div>${items.map(r=>`<div class="hitem" style="margin:4px 0"><div class="hico">📄</div><div class="hinfo"><div class="hnum">${r.docNum||'Sin N.º'} ${r.tipoDoc==='nacional'?'<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>':''}</div><div class="hsub">${[(r.rcvBlock||'').split('\n')[0],r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${r.savedAt?new Date(r.savedAt).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—'}</div><div class="hacts"><div class="hb lo" onclick="loadRec(${r.id})">⬆</div><div class="hb du" onclick="dupRec(${r.id})">📋</div><div class="hb pd" onclick="regenPDF(${r.id})">📄</div><div class="hb de" onclick="delRec(${r.id})">🗑</div></div></div>`).join('')}</div>`;
         }).join('');
         document.getElementById('histList').innerHTML=html||'<div class="hist-empty">Sin resultados</div>';
     } else {
         const el=document.getElementById('histList');
-        if(!data.length){ el.innerHTML=`<div class="hist-empty">${all.length?'Sin resultados':'Aún no hay CMR.<br>Genera tu primer documento.'}</div>`; return; }
+        if(!data.length){ el.innerHTML=`<div class="hist-empty">${all.length?'Sin resultados':'Aún no hay documentos.<br>Genera tu primer documento.'}</div>`; return; }
         el.innerHTML=data.map(r=>{
             const dt=r.savedAt?new Date(r.savedAt).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—';
-            return`<div class="hitem"><div class="hico">📄</div><div class="hinfo"><div class="hnum">${r.docNum||'Sin N.º'} ${r.goodsWeight?`<span class="hwbadge">${r.goodsWeight}kg</span>`:''}</div><div class="hsub">${[(r.rcvBlock||'').split('\n')[0],r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" onclick="loadRec(${r.id})">⬆</div><div class="hb du" onclick="dupRec(${r.id})">📋</div><div class="hb pd" onclick="regenPDF(${r.id})">📄</div><div class="hb de" onclick="delRec(${r.id})">🗑</div></div></div>`;
+            return`<div class="hitem"><div class="hico">📄</div><div class="hinfo"><div class="hnum">${r.docNum||'Sin N.º'} ${r.tipoDoc==='nacional'?'<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>':''} ${r.goodsWeight?`<span class="hwbadge">${r.goodsWeight}kg</span>`:''}</div><div class="hsub">${[(r.rcvBlock||'').split('\n')[0],r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" onclick="loadRec(${r.id})">⬆</div><div class="hb du" onclick="dupRec(${r.id})">📋</div><div class="hb pd" onclick="regenPDF(${r.id})">📄</div><div class="hb de" onclick="delRec(${r.id})">🗑</div></div></div>`;
         }).join('');
     }
     const allMonth=all.filter(r=>{try{const d=new Date(r.savedAt);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()}catch{return false}});
@@ -433,16 +436,16 @@ async function renderHist(){
     document.getElementById('st2').textContent=totalKg>0?(totalKg>=1000?(totalKg/1000).toFixed(1)+'t':Math.round(totalKg)):'—';
     document.getElementById('st3').textContent=monthKg>0?(monthKg>=1000?(monthKg/1000).toFixed(1)+'t':Math.round(monthKg)):'—';
 }
-async function loadRec(id){ const all=await dbAll(STORE); const r=all.find(x=>x.id===id); if(!r)return; fill(r); clearSig();clearSigSender(); tab('form'); toast('✓ CMR cargado','ok'); }
-async function dupRec(id){ const all=await dbAll(STORE); const r=all.find(x=>x.id===id); if(!r)return; const d={...r}; delete d.id; d.docNum=genDocNum(); d.docDate=new Date().toISOString().split('T')[0]; d.savedAt=new Date().toISOString(); fill(d); clearSig();clearSigSender(); tab('form'); toast('✓ CMR duplicado','ok'); }
+async function loadRec(id){ const all=await dbAll(STORE); const r=all.find(x=>x.id===id); if(!r)return; fill(r); clearSig();clearSigSender(); tab('form'); toast('✓ Documento cargado','ok'); }
+async function dupRec(id){ const all=await dbAll(STORE); const r=all.find(x=>x.id===id); if(!r)return; const d={...r}; delete d.id; d.docNum=genDocNum(); d.docDate=new Date().toISOString().split('T')[0]; d.savedAt=new Date().toISOString(); fill(d); clearSig();clearSigSender(); tab('form'); toast('✓ Documento duplicado','ok'); }
 async function regenPDF(id){ const all=await dbAll(STORE); const r=all.find(x=>x.id===id); if(!r)return; showOv(true); const st=setTimeout(()=>{showOv(false);toast('⚠ Tiempo agotado','err',5000)},25000); try{buildPDF(r,st)}catch(e){clearTimeout(st);showOv(false);toast('⚠ Error: '+e.message,'err',5000)} }
-function delRec(id){ showBS('Eliminar CMR','Este registro se eliminará permanentemente.',[{label:'Cancelar',cls:'cancel',fn:'closeBS()'},{label:'Eliminar',cls:'danger',fn:`_delOk(${id})`}]); }
+function delRec(id){ showBS('Eliminar Documento','Este registro se eliminará permanentemente.',[{label:'Cancelar',cls:'cancel',fn:'closeBS()'},{label:'Eliminar',cls:'danger',fn:`_delOk(${id})`}]); }
 async function _delOk(id){ closeBS(); await dbDel(STORE,id); await renderHist(); await updateHistBadge(); toast('Eliminado','warn'); }
 
 async function exportDB(){ const all=await dbAll(STORE); if(!all.length){toast('BD vacía','warn');return} const b=new Blob([JSON.stringify(all,null,2)],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u;a.download='CMR_Export_'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a);a.click();document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(u),10000);toast('✓ JSON exportado','ok'); }
 function importClick(){document.getElementById('importInput').click()}
-async function importDB(e){ const f=e.target.files[0];if(!f)return; const t=await f.text(); try{ const arr=JSON.parse(t);if(!Array.isArray(arr))throw new Error('No es un array'); let c=0;for(const r of arr){const d={...r};delete d.id;await dbAdd(STORE,d);c++;} await updateHistBadge();toast(`✓ ${c} CMR importados`,'ok'); }catch(err){toast('JSON inválido: '+err.message,'err')} e.target.value=''; }
-function confirmClear(){ showBS('Vaciar Base de Datos','Se eliminarán TODOS los CMR.',[{label:'Cancelar',cls:'cancel',fn:'closeBS()'},{label:'Vaciar BD',cls:'danger',fn:'_clearOk()'}]); }
+async function importDB(e){ const f=e.target.files[0];if(!f)return; const t=await f.text(); try{ const arr=JSON.parse(t);if(!Array.isArray(arr))throw new Error('No es un array'); let c=0;for(const r of arr){const d={...r};delete d.id;await dbAdd(STORE,d);c++;} await updateHistBadge();toast(`✓ ${c} documentos importados`,'ok'); }catch(err){toast('JSON inválido: '+err.message,'err')} e.target.value=''; }
+function confirmClear(){ showBS('Vaciar Base de Datos','Se eliminarán TODOS los documentos.',[{label:'Cancelar',cls:'cancel',fn:'closeBS()'},{label:'Vaciar BD',cls:'danger',fn:'_clearOk()'}]); }
 async function _clearOk(){ closeBS(); await dbClear(STORE); await renderHist(); await updateHistBadge(); toast('BD vaciada','warn'); }
 
 let succId=0;
@@ -479,10 +482,6 @@ async function renderTemplates(){
 async function generateCMR(){
     if(typeof pdfMake==='undefined'){toast('⚠ pdfmake no cargado','err',5000);return;}
     if(!pdfMake.vfs||Object.keys(pdfMake.vfs).length===0){toast('⚠ Fuentes PDF no cargadas','err',5000);return;}
-    const req=[['senderBlock','Remitente'],['rcvBlock','Destinatario'],['carrierBlock','Transportista']];
-    for(const[id,lbl]of req){if(!gv(id)){toast('⚠ Falta: '+lbl,'err');return}}
-    const lines=collectGoodsLines();
-    if(!lines.length||!lines[0].desc){toast('⚠ Añade al menos una línea de mercancía','err');return}
     const data=collect();
     try{const id=await dbAdd(STORE,data);data.id=id;await updateHistBadge()}catch(e){console.warn('DB save:',e)}
     showOv(true);
@@ -492,44 +491,116 @@ async function generateCMR(){
 
 function fmtD(iso){if(!iso)return'—';try{return new Date(iso).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})}catch{return iso}}
 function buildPDF(D,safetyTimer){
-    const num=D.docNum||'CMR-'+Date.now(); const dateStr=fmtD(D.docDate); const delivStr=fmtD(D.dateDelivery);
+    const isNacional = D.tipoDoc === 'nacional';
+    const num=D.docNum||'CMR-'+Date.now();
+    const dateStr=fmtD(D.docDate); const delivStr=fmtD(D.dateDelivery);
     const senderBlock=D.senderBlock||'—'; const rcvBlock=D.rcvBlock||'—'; const carrierBlock=D.carrierBlock||'—';
-    const copies=[ {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#b91c1c',BG:'#fff5f5',LT:'#fff0f0'}, {lbl:'COPIA 2',sub:'DESTINATARIO / CONSIGNEE',AC:'#1e3a8a',BG:'#f5f8ff',LT:'#eef2ff'}, {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#065f46',BG:'#f2fff9',LT:'#e6ffef'}, {lbl:'COPIA 4',sub:'ADMINISTRACIÓN / ADMIN', AC:'#1f2937',BG:'#f9fafb',LT:'#f3f4f6'} ];
-    const clausulasTexto=`Este contrato de transporte se rige por el Convenio relativo al contrato de transporte internacional de mercancías por carretera (CMR), Ginebra, 19 de mayo de 1956, y el Protocolo de 5 de julio de 1978.\n1. El transportista responde de la pérdida total o parcial y de las averías que se produzcan desde el momento de la recepción de la mercancía hasta el de su entrega.\n2. La indemnización no excederá de 8,33 DEG por kilogramo de peso bruto faltante.\n3. El retraso en la entrega sólo dará lugar a indemnización si se ha formulado reserva por escrito.\n4. Las reclamaciones deberán dirigirse al transportista dentro del plazo de un año, o de tres años en caso de dolo o culpa grave.\n5. Los daños y perjuicios que no resulten de la pérdida o avería de la mercancía se limitan al importe del porte.\n6. El destinatario deberá manifestar por escrito al transportista las reservas por pérdidas o averías en el momento de la entrega, o a más tardar en los siete días siguientes.`;
+
+    const copies = isNacional ? [
+        {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#0f766e',BG:'#f0fdfa',LT:'#ccfbf1'},
+        {lbl:'COPIA 2',sub:'DESTINATARIO / CONSIGNEE',AC:'#1e40af',BG:'#eff6ff',LT:'#dbeafe'},
+        {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#7c3aed',BG:'#faf5ff',LT:'#ede9fe'}
+    ] : [
+        {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#b91c1c',BG:'#fff5f5',LT:'#fff0f0'},
+        {lbl:'COPIA 2',sub:'DESTINATARIO / CONSIGNEE',AC:'#1e3a8a',BG:'#f5f8ff',LT:'#eef2ff'},
+        {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#065f46',BG:'#f2fff9',LT:'#e6ffef'},
+        {lbl:'COPIA 4',sub:'ADMINISTRACIÓN / ADMIN', AC:'#1f2937',BG:'#f9fafb',LT:'#f3f4f6'}
+    ];
+
+    const tituloDocumento = isNacional ? 'CARTA DE PORTE NACIONAL' : 'CARTA DE PORTE INTERNACIONAL (CMR)';
+    const subtituloLegal = isNacional
+        ? 'Ley 15/2009 del Contrato de Transporte Terrestre de Mercancías — Orden FOM/1882/2012'
+        : 'Convenio CMR Ginebra 1956 — Protocolo 5 julio 1978';
+
+    const clausulasTexto = isNacional ? 
+        `Este contrato de transporte se rige por la Ley 15/2009, de 11 de noviembre, del contrato de transporte terrestre de mercancías, y la Orden FOM/1882/2012.
+1. El porteador responde de la pérdida total o parcial y de las averías desde la recepción hasta la entrega.
+2. La indemnización por pérdida o avería no excederá del valor de mercado de la mercancía o 1/3 del IPREM por kilogramo.
+3. El retraso en la entrega dará lugar a indemnización si se ha formulado reserva en el momento de la entrega.
+4. Las reclamaciones prescribirán al año, salvo dolo o culpa grave (3 años).
+5. El destinatario deberá manifestar las reservas en el momento de la entrega o dentro de los siete días siguientes.
+6. La carta de porte deberá ser firmada por remitente, transportista y destinatario.`
+        : `Este contrato de transporte se rige por el Convenio relativo al contrato de transporte internacional de mercancías por carretera (CMR), Ginebra, 19 de mayo de 1956, y el Protocolo de 5 de julio de 1978.\n1. El transportista responde de la pérdida total o parcial y de las averías que se produzcan desde el momento de la recepción de la mercancía hasta el de su entrega.\n2. La indemnización no excederá de 8,33 DEG por kilogramo de peso bruto faltante.\n3. El retraso en la entrega sólo dará lugar a indemnización si se ha formulado reserva por escrito.\n4. Las reclamaciones deberán dirigirse al transportista dentro del plazo de un año, o de tres años en caso de dolo o culpa grave.\n5. Los daños y perjuicios que no resulten de la pérdida o avería de la mercancía se limitan al importe del porte.\n6. El destinatario deberá manifestar por escrito al transportista las reservas por pérdidas o averías en el momento de la entrega, o a más tardar en los siete días siguientes.`;
+
     const content=[];
     copies.forEach((cp,ci)=>{
         const{AC,BG,LT}=cp; const lay={hLineWidth:()=>1, vLineWidth:()=>1, hLineColor:()=>AC, vLineColor:()=>AC};
         content.push({canvas:[{type:'rect',x:0,y:0,w:595.28-36,h:841.89-36,color:BG}],absolutePosition:{x:18,y:18}});
-        const box=(cas,title,content,opts={})=>{ const lines=content.split('\n'); return {stack:[ {columns:[{text:String(cas),fontSize:6,bold:true,color:AC,width:'auto'},{text:title,fontSize:6,color:'#555',width:'*',alignment:'right'}],margin:[5,4,5,2]}, {text:lines[0]||'—',fontSize:8.5,bold:!!lines[0],color:'#111',margin:[5,0,5,0]}, ...(lines.slice(1).length?[{text:lines.slice(1).join('\n'),fontSize:7.5,color:'#333',margin:[5,2,5,4],lineHeight:1.25}]:[{text:'',margin:[5,0,5,4]}]) ],border:[true,true,true,true],fillColor:opts.fill||'#fff',margin:[0,0,0,0]}; };
-        if(logoDataURL){ content.push({table:{widths:['auto','*','auto'],body:[[ {image:logoDataURL,width:52,height:32,margin:[10,8,6,8],border:[false,false,false,false]}, {stack:[{text:'CARTA DE PORTE INTERNACIONAL (CMR)',fontSize:12,bold:true,color:AC},{text:'Convenio CMR Ginebra 1956 — Protocolo 5 julio 1978',fontSize:6,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7.5,color:'#333'}],border:[false,false,false,false],margin:[0,8,0,8]}, {stack:[{text:cp.lbl,fontSize:10,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:6,color:'#666',alignment:'right'}],border:[false,false,false,false],margin:[0,8,10,8]} ]]},layout:'noBorders',margin:[0,0,0,1]}); } else { content.push({table:{widths:['*','auto'],body:[[ {stack:[{text:'CARTA DE PORTE INTERNACIONAL (CMR)',fontSize:13,bold:true,color:AC},{text:'Convenio CMR Ginebra 1956 — Protocolo 5 julio 1978',fontSize:6,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7.5,color:'#333'}],border:[false,false,false,false],margin:[10,8,0,8]}, {stack:[{text:cp.lbl,fontSize:10,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:6,color:'#666',alignment:'right'}],border:[false,false,false,false],margin:[0,8,10,8]} ]]},layout:'noBorders',margin:[0,0,0,1]}); }
+        const box=(cas,title,cnt,opts={})=>{ const lines=cnt.split('\n'); return {stack:[ {columns:[{text:String(cas),fontSize:6,bold:true,color:AC,width:'auto'},{text:title,fontSize:6,color:'#555',width:'*',alignment:'right'}],margin:[5,4,5,2]}, {text:lines[0]||'—',fontSize:8.5,bold:!!lines[0],color:'#111',margin:[5,0,5,0]}, ...(lines.slice(1).length?[{text:lines.slice(1).join('\n'),fontSize:7.5,color:'#333',margin:[5,2,5,4],lineHeight:1.25}]:[{text:'',margin:[5,0,5,4]}]) ],border:[true,true,true,true],fillColor:opts.fill||'#fff',margin:[0,0,0,0]}; };
+        if(logoDataURL){ content.push({table:{widths:['auto','*','auto'],body:[[ {image:logoDataURL,width:52,height:32,margin:[10,8,6,8],border:[false,false,false,false]}, {stack:[{text:tituloDocumento,fontSize:12,bold:true,color:AC},{text:subtituloLegal,fontSize:6,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7.5,color:'#333'}],border:[false,false,false,false],margin:[0,8,0,8]}, {stack:[{text:cp.lbl,fontSize:10,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:6,color:'#666',alignment:'right'}],border:[false,false,false,false],margin:[0,8,10,8]} ]]},layout:'noBorders',margin:[0,0,0,1]}); } else { content.push({table:{widths:['*','auto'],body:[[ {stack:[{text:tituloDocumento,fontSize:13,bold:true,color:AC},{text:subtituloLegal,fontSize:6,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7.5,color:'#333'}],border:[false,false,false,false],margin:[10,8,0,8]}, {stack:[{text:cp.lbl,fontSize:10,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:6,color:'#666',alignment:'right'}],border:[false,false,false,false],margin:[0,8,10,8]} ]]},layout:'noBorders',margin:[0,0,0,1]}); }
         content.push({table:{widths:['*','*'],body:[[box(1,'Remitente · Sender',senderBlock),box(2,'Destinatario · Consignee',rcvBlock)]]},layout:lay,margin:[0,0,0,1]});
         content.push({table:{widths:['*','*','auto'],body:[[box(3,'Lugar de carga',(D.placeLoading||'—')+(D.clientRef?'\nRef: '+D.clientRef:'')),box(4,'Lugar de entrega',(D.placeDelivery||'—')),box(5,'Fecha prev. entrega',delivStr)]]},layout:lay,margin:[0,0,0,1]});
         content.push({table:{widths:['*','auto','auto'],body:[[box(5,'Docs. anexos / Albarán',D.docsAnexos||'—'),box(19,'Franqueo',D.freightTerms||'—',{fill:LT}),box(14,'Reembolso €',D.codAmount||'—',{fill:LT})]]},layout:lay,margin:[0,0,0,1]});
         content.push({table:{widths:['*','auto','auto'],body:[[box(16,'Transportista · Carrier',carrierBlock),box('16f','Conductor',[D.driverName||'—',D.driverDNI?'DNI '+D.driverDNI:''].filter(Boolean).join('\n')),box('16b','Matrícula',[D.plateTractor||'—',D.plateTrailer||'—'].filter(Boolean).join('\n'),{fill:LT})]]},layout:lay,margin:[0,0,0,1]});
         const succCarriers=D.successiveCarriers&&D.successiveCarriers.length?D.successiveCarriers:[];
         if(succCarriers.length){ const succText=succCarriers.map(s=>`${s.name}\n${s.address}`).join('\n\n'); content.push({table:{widths:['*'],body:[[box(17,'Porteadores Sucesivos',succText)]]},layout:lay,margin:[0,0,0,1]}); } else { content.push({table:{widths:['*'],body:[[box(17,'Porteadores Sucesivos','No designados')]]},layout:lay,margin:[0,0,0,1]}); }
-        const MAX_ROWS=8; const goodsLines=D.goodsLines&&D.goodsLines.length?D.goodsLines:[{desc:'',marks:'',packing:'',qty:'',weight:'',volume:''}];
-        const totalQty=goodsLines.reduce((s,l)=>s+(parseFloat(l.qty)||0),0), totalWeight=goodsLines.reduce((s,l)=>s+(parseFloat(l.weight)||0),0), totalVolume=goodsLines.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
-        const paddedLines=[...goodsLines]; while(paddedLines.length<MAX_ROWS)paddedLines.push({desc:'',marks:'',packing:'',qty:'',weight:'',volume:''});
-        const goodsHeader=[ {text:'6 Marcas y Núm.',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'}, {text:'7 Núm. Bultos',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'}, {text:'8 Clase Embalaje',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'}, {text:'9 Naturaleza Mercancía',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'}, {text:'11 Peso Bruto kg',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'}, {text:'12 Vol. m³',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'} ];
-        const goodsBody=[goodsHeader];
-        paddedLines.forEach(l=>{ goodsBody.push([ {text:l.marks||' ',fontSize:7.5,color:l.marks?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff'}, {text:l.qty||' ',fontSize:7.5,color:l.qty?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff',alignment:'center'}, {text:l.packing||' ',fontSize:7.5,color:l.packing?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff'}, {text:l.desc||' ',fontSize:7.5,bold:!!l.desc,color:l.desc?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff'}, {text:l.weight?l.weight+' kg':' ',fontSize:7.5,color:l.weight?'#111':'#fff',margin:[4,3,4,3],fillColor:LT,alignment:'center'}, {text:l.volume?l.volume+' m³':' ',fontSize:7.5,color:l.volume?'#111':'#fff',margin:[4,3,4,3],fillColor:LT,alignment:'center'} ]); });
-        goodsBody.push([ {text:'TOTALES',fontSize:6.5,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],colSpan:2,alignment:'right'},{}, {text:'',fillColor:LT,margin:[4,3,4,3]},{text:'',fillColor:LT,margin:[4,3,4,3]}, {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:7.5,bold:true,color:'#111',fillColor:LT,margin:[4,3,4,3],alignment:'center'}, {text:totalVolume?totalVolume.toFixed(2)+' m³':'—',fontSize:7.5,bold:true,color:'#111',fillColor:LT,margin:[4,3,4,3],alignment:'center'} ]);
+
+        // MERCANCÍAS con 10 filas vacías si no hay datos
+        const goodsLines = D.goodsLines && D.goodsLines.length ? D.goodsLines : [{desc:'',marks:'',packing:'',qty:'',weight:'',volume:''}];
+        const totalQty = goodsLines.reduce((s,l)=>s+(parseFloat(l.qty)||0),0);
+        const totalWeight = goodsLines.reduce((s,l)=>s+(parseFloat(l.weight)||0),0);
+        const totalVolume = goodsLines.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
+        const allRows = [];
+        for (let i = 0; i < Math.min(goodsLines.length, 10); i++) {
+            allRows.push(goodsLines[i]);
+        }
+        while (allRows.length < 10) {
+            allRows.push({desc:'', marks:'', packing:'', qty:'', weight:'', volume:''});
+        }
+        const goodsHeader = [
+            {text:'6 Marcas y Núm.',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
+            {text:'7 Núm. Bultos',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
+            {text:'8 Clase Embalaje',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
+            {text:'9 Naturaleza Mercancía',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
+            {text:'11 Peso Bruto kg',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
+            {text:'12 Vol. m³',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'}
+        ];
+        const goodsBody = [goodsHeader];
+        allRows.forEach(l => {
+            goodsBody.push([
+                {text:l.marks||' ',fontSize:7.5,color:l.marks?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff'},
+                {text:l.qty||' ',fontSize:7.5,color:l.qty?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff',alignment:'center'},
+                {text:l.packing||' ',fontSize:7.5,color:l.packing?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff'},
+                {text:l.desc||' ',fontSize:7.5,bold:!!l.desc,color:l.desc?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff'},
+                {text:l.weight?l.weight+' kg':' ',fontSize:7.5,color:l.weight?'#111':'#fff',margin:[4,3,4,3],fillColor:LT,alignment:'center'},
+                {text:l.volume?l.volume+' m³':' ',fontSize:7.5,color:l.volume?'#111':'#fff',margin:[4,3,4,3],fillColor:LT,alignment:'center'}
+            ]);
+        });
+        // Fila de totales
+        goodsBody.push([
+            {text:'TOTALES',fontSize:6.5,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],colSpan:2,alignment:'right'},{},
+            {text:'',fillColor:LT,margin:[4,3,4,3]},{text:'',fillColor:LT,margin:[4,3,4,3]},
+            {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:7.5,bold:true,color:'#111',fillColor:LT,margin:[4,3,4,3],alignment:'center'},
+            {text:totalVolume?totalVolume.toFixed(2)+' m³':'—',fontSize:7.5,bold:true,color:'#111',fillColor:LT,margin:[4,3,4,3],alignment:'center'}
+        ]);
+        // Dos líneas en blanco (sin líneas verticales)
+        goodsBody.push([{text:' ',fontSize:7.5,fillColor:'#fff',margin:[4,3,4,3],colSpan:6}, {}, {}, {}, {}, {}]);
+        goodsBody.push([{text:' ',fontSize:7.5,fillColor:'#fff',margin:[4,3,4,3],colSpan:6}, {}, {}, {}, {}, {}]);
+
         content.push({table:{widths:['auto','auto','auto','*','auto','auto'],body:goodsBody,dontBreakRows:true},layout:lay,margin:[0,0,0,1]});
+
         content.push({table:{widths:['*','*'],body:[[box(13,'Instrucciones del Remitente',D.senderInstr||'—'),box(18,'Reservas y Observaciones',D.observations||'Sin observaciones')]]},layout:lay,margin:[0,0,0,1]});
-        const sigSenderCell=()=>{ const hasSig=D.sigSender && D.sigSender.startsWith('data:image'); if(hasSig){ return {stack:[ {columns:[{text:'22',fontSize:6,bold:true,color:AC},{text:'Firma Remitente',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,3]}, {image:D.sigSender,width:130,height:55,alignment:'center'}, {text:(D.senderBlock||'').split('\n')[0]||'',fontSize:7,alignment:'center',margin:[0,2,0,0]} ],border:[true,true,true,true],margin:[3,3,3,3]}; } else { return {stack:[ {columns:[{text:'22',fontSize:6,bold:true,color:AC},{text:'Firma Remitente',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,8]}, {canvas:[{type:'rect',x:4,y:0,w:100,h:36,r:2,lineWidth:.5,lineColor:AC}],margin:[0,0,0,4]}, {text:(D.senderBlock||'').split('\n')[0]||'',fontSize:7,alignment:'center',color:'#888'} ],border:[true,true,true,true],margin:[3,3,3,3]}; } };
-        const sigDriverCell=()=>{ const hasSig=D.sigDriver && D.sigDriver.startsWith('data:image'); if(hasSig){ return {stack:[ {columns:[{text:'23',fontSize:6,bold:true,color:AC},{text:'Firma Transportista',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,3]}, {image:D.sigDriver,width:130,height:55,alignment:'center'}, {text:D.driverName||'',fontSize:7,alignment:'center',margin:[0,2,0,0]} ],border:[true,true,true,true],margin:[3,3,3,3]}; } else { return {stack:[ {columns:[{text:'23',fontSize:6,bold:true,color:AC},{text:'Firma Transportista',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,8]}, {canvas:[{type:'rect',x:4,y:0,w:100,h:36,r:2,lineWidth:.5,lineColor:AC}],margin:[0,0,0,4]}, {text:D.driverName||'',fontSize:7,alignment:'center',color:'#888'} ],border:[true,true,true,true],margin:[3,3,3,3]}; } };
-        const sigConsCell=()=>({stack:[ {columns:[{text:'24',fontSize:6,bold:true,color:AC},{text:'Firma Destinatario',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,8]}, {canvas:[{type:'rect',x:4,y:0,w:100,h:36,r:2,lineWidth:.5,lineColor:AC}],margin:[0,0,0,4]}, {text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:7,alignment:'center',color:'#888'} ],border:[true,true,true,true],margin:[3,3,3,3]});
+
+        // Firmas
+        const sigSenderCell=()=>{ const hasSig=D.sigSender && D.sigSender.startsWith('data:image'); if(hasSig){ return {stack:[ {columns:[{text:'22',fontSize:6,bold:true,color:AC},{text:'Firma Remitente',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,3]}, {image:D.sigSender,width:130,height:65,alignment:'center'}, {text:(D.senderBlock||'').split('\n')[0]||'',fontSize:7,alignment:'center',margin:[0,2,0,0]} ],border:[true,true,true,true],margin:[3,3,3,3]}; } else { return {stack:[ {columns:[{text:'22',fontSize:6,bold:true,color:AC},{text:'Firma Remitente',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,8]}, {canvas:[{type:'rect',x:4,y:0,w:120,h:50,r:2,lineWidth:.5,lineColor:AC}],margin:[0,0,0,4]}, {text:(D.senderBlock||'').split('\n')[0]||'',fontSize:7,alignment:'center',color:'#888'} ],border:[true,true,true,true],margin:[3,3,3,3]}; } };
+        const sigDriverCell=()=>{ const hasSig=D.sigDriver && D.sigDriver.startsWith('data:image'); if(hasSig){ return {stack:[ {columns:[{text:'23',fontSize:6,bold:true,color:AC},{text:'Firma Transportista',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,3]}, {image:D.sigDriver,width:130,height:65,alignment:'center'}, {text:D.driverName||'',fontSize:7,alignment:'center',margin:[0,2,0,0]} ],border:[true,true,true,true],margin:[3,3,3,3]}; } else { return {stack:[ {columns:[{text:'23',fontSize:6,bold:true,color:AC},{text:'Firma Transportista',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,8]}, {canvas:[{type:'rect',x:4,y:0,w:120,h:50,r:2,lineWidth:.5,lineColor:AC}],margin:[0,0,0,4]}, {text:D.driverName||'',fontSize:7,alignment:'center',color:'#888'} ],border:[true,true,true,true],margin:[3,3,3,3]}; } };
+        const sigConsCell=()=>({stack:[ {columns:[{text:'24',fontSize:6,bold:true,color:AC},{text:'Firma Destinatario',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,8]}, {text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:7,alignment:'center',color:'#888'} ],border:[true,true,true,true],margin:[3,3,3,3]});
+
         content.push({table:{widths:['*','*','*'],body:[[sigSenderCell(),sigDriverCell(),sigConsCell()]]},layout:lay,margin:[0,0,0,1]});
-        content.push({table:{widths:['*'],body:[[{stack:[{text:'CLÁUSULAS DEL CONVENIO CMR',fontSize:6,bold:true,color:AC,margin:[0,0,0,2]},{text:clausulasTexto,fontSize:5.5,color:'#444',lineHeight:1.2}],border:[true,true,true,true],fillColor:LT,margin:[3,2,3,2]}]]},layout:'noBorders',margin:[0,2,0,1]});
-        content.push({columns:[{text:'CMR N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:5.5,color:'#999'},{text:'CMR Manager Pro  ·  Convenio CMR Ginebra 1956',fontSize:5.5,color:'#bbb',alignment:'right'}],margin:[0,2,0,0]});
-        if(ci<3) content.push({text:'',pageBreak:'after'});
+
+        const tituloClausulas = isNacional ? 'CLÁUSULAS LEGALES (Ley 15/2009 y Orden FOM/1882/2012)' : 'CLÁUSULAS DEL CONVENIO CMR';
+        content.push({table:{widths:['*'],body:[[{stack:[{text:tituloClausulas,fontSize:6,bold:true,color:AC,margin:[0,0,0,2]},{text:clausulasTexto,fontSize:5.5,color:'#444',lineHeight:1.2}],border:[true,true,true,true],fillColor:LT,margin:[3,2,3,2]}]]},layout:'noBorders',margin:[0,2,0,1]});
+        const pieTexto = isNacional
+            ? 'Documento generado conforme a la Ley 15/2009 y Orden FOM/1882/2012'
+            : 'CMR Manager Pro  ·  Convenio CMR Ginebra 1956';
+        content.push({columns:[{text:(isNacional?'CARTA PORTE NAC. ':'CMR N.º ')+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:5.5,color:'#999'},{text:pieTexto,fontSize:5.5,color:'#bbb',alignment:'right'}],margin:[0,2,0,0]});
+        if(ci<copies.length-1) content.push({text:'',pageBreak:'after'});
     });
     try{
-        pdfMake.createPdf({pageSize:'A4',pageMargins:[18,18,18,18],content,defaultStyle:{font:'Roboto',fontSize:9,color:'#111'},info:{title:'CMR '+num,author:'CMR Manager Pro',subject:'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
+        pdfMake.createPdf({pageSize:'A4',pageMargins:[18,18,18,10],content,defaultStyle:{font:'Roboto',fontSize:9,color:'#111'},info:{title:(isNacional?'Carta Porte Nacional ':'CMR ')+num,author:'CMR Manager Pro',subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
             clearTimeout(safetyTimer);showOv(false);
             const url=URL.createObjectURL(blob); const win=window.open(url,'_blank');
-            if(!win){ const a=document.createElement('a');a.href=url;a.download='CMR_'+num.replace(/[^a-z0-9]/gi,'_')+'.pdf'; document.body.appendChild(a);a.click();document.body.removeChild(a); toast('✓ PDF descargado','ok'); } else toast('✓ CMR generado — 4 copias IRU','ok');
+            if(!win){ const a=document.createElement('a');a.href=url;a.download=(isNacional?'CARTA_PORTE_NAC_':'CMR_')+num.replace(/[^a-z0-9]/gi,'_')+'.pdf'; document.body.appendChild(a);a.click();document.body.removeChild(a); toast('✓ PDF descargado','ok'); } else toast('✓ Documento generado — '+copies.length+' copias','ok');
             setTimeout(()=>URL.revokeObjectURL(url),30000);
         });
     }catch(pdfErr){ clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+pdfErr.message,'err',6000); }
@@ -560,6 +631,7 @@ function collectGoodsLines(){
         lines.push({ desc:el.value.trim(), marks:(document.getElementById('gl-marks-'+id)||{}).value?.trim()||'', packing:(document.getElementById('gl-packing-'+id)||{}).value?.trim()||'', qty:(document.getElementById('gl-qty-'+id)||{}).value?.trim()||'', weight:(document.getElementById('gl-weight-'+id)||{}).value?.trim()||'', volume:(document.getElementById('gl-volume-'+id)||{}).value?.trim()||'' });
         const pv=(document.getElementById('gl-packing-'+id)||{}).value?.trim(); if(pv)savePackingValue(pv);
     });
+    if (lines.length === 0) lines.push({desc:'', marks:'', packing:'', qty:'', weight:'', volume:''});
     return lines;
 }
 function fillGoodsLines(lines){ document.getElementById('goods-lines').innerHTML=''; goodsLineId=0; if(!lines||!lines.length){addGoodsLine();return} lines.forEach(l=>addGoodsLine(l)); }
