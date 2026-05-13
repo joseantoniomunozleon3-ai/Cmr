@@ -44,7 +44,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 
     <style>
-        /* ========== ESTILOS COMPLETOS (TEMA CLARO) ========== */
         #load-bar{position:fixed;inset:0;background:#0f1e2e;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
         .lb-mark{width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#1a4fd6,#0f2e8a);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:#fff}
         .lb-name{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:#d8e8f5;letter-spacing:.05em;font-weight:600}
@@ -53,10 +52,9 @@
         #load-err{color:#e11d48;font-size:.75rem;font-family:'JetBrains Mono',monospace;text-align:center;padding:10px 24px;max-width:320px;line-height:1.6;display:none;background:rgba(225,29,72,.08);border:1px solid rgba(225,29,72,.25);border-radius:8px}
         #app-body{display:none}
         @keyframes spin{to{transform:rotate(360deg)}}
-
         :root{
             --bg:#f0f4f8;--bg2:#ffffff;--bg3:#e8edf5;--bg4:#dce3ee;--line:#b8c4d8;--line2:#8fa3c0;
-            --dim:#4a5e78;--mid:#2d3f56;--lt:#1a2a3a;--snow:#0f1e2e;--white:#060e18;
+            --dim:#3a4f68;--mid:#1e3048;--lt:#1a2a3a;--snow:#0f1e2e;--white:#060e18;
             --blue:#1a4fd6;--blue-l:#2563eb;--blue-xl:#4f83f7;--blue-glow:rgba(26,79,214,.18);
             --green:#14692f;--green-l:#16a34a;--green-xl:#4ade80;--amber:#92400e;--amber-l:#d97706;--amber-xl:#fbbf24;
             --rose:#9f1239;--rose-l:#e11d48;--rose-xl:#fb7185;--violet:#5b21b6;--violet-l:#7c3aed;--teal:#0e7490;--teal-l:#0891b2;
@@ -65,7 +63,6 @@
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
         html{scroll-behavior:smooth}
         body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--snow);min-height:100vh;overscroll-behavior:none}
-
         #topbar{position:sticky;top:0;z-index:300;height:56px;background:rgba(240,244,248,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 14px;}
         .logo{display:flex;align-items:center;gap:10px}
         .logo-mark{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--blue),#0f2e8a);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:600;color:#fff}
@@ -78,13 +75,12 @@
         .save-btn:active{transform:scale(.97)}
         .gen-top{height:34px;padding:0 13px;border-radius:var(--r3);border:none;background:linear-gradient(135deg,var(--blue),#0f2e8a);color:#fff;font-size:.73rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Sora',sans-serif;box-shadow:0 2px 12px var(--blue-glow);transition:all .15s}
         .gen-top:active{transform:scale(.97)} .save-btn svg,.gen-top svg{width:14px;height:14px;flex-shrink:0}
-
         #tabs{position:sticky;top:56px;z-index:299;display:flex;background:var(--bg);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+        #autosave-bar.visible ~ #tabs, #autosave-bar.visible ~ * #tabs{ top:84px }
         #tabs::-webkit-scrollbar{display:none}
         .tab{flex-shrink:0;height:42px;padding:0 16px;display:flex;align-items:center;gap:6px;font-size:.76rem;font-weight:500;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
         .tab.active{color:var(--blue-l);border-bottom-color:var(--blue-l)} .tab svg{width:13px;height:13px}
         .tbadge{font-size:.58rem;font-family:'JetBrains Mono',monospace;background:rgba(26,79,214,.12);border:1px solid rgba(26,79,214,.3);color:var(--blue-l);padding:1px 5px;border-radius:4px;display:none}
-
         .panel{display:none;padding:16px 12px 96px;max-width:700px;margin:0 auto}
         .panel.active{display:block}
         .block{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);margin-bottom:11px;overflow:hidden;transition:border-color .2s}
@@ -100,7 +96,6 @@
         .btitle{font-size:.82rem;font-weight:600;letter-spacing:-.01em;flex:1;color:var(--snow)}
         .bsaved{font-size:.6rem;color:var(--green-l);font-family:'JetBrains Mono',monospace;display:none}
         .bbody{padding:15px}
-
         .fr{display:flex;flex-direction:column;gap:4px;margin-bottom:11px}
         .fr:last-child,.fr.last{margin-bottom:0}
         .fr2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px}
@@ -108,6 +103,11 @@
         label{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--dim);display:flex;align-items:center;gap:5px}
         input,textarea,select{width:100%;background:#fff;border:1.5px solid var(--line2);color:var(--snow);border-radius:var(--r3);padding:9px 12px;font-size:.9rem;font-family:'Sora',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none}
         input:focus,textarea:focus,select:focus{border-color:var(--blue-l);box-shadow:0 0 0 3px var(--blue-glow)}
+        :focus-visible{outline:2.5px solid var(--blue-l);outline-offset:2px}
+        button:focus-visible,a:focus-visible{outline:2.5px solid var(--blue-l);outline-offset:2px;border-radius:4px}
+        .tab:focus-visible{outline:2.5px solid var(--blue-l);outline-offset:-2px}
+        #skip-link{position:absolute;left:-9999px;top:8px;background:var(--blue);color:#fff;padding:8px 16px;border-radius:6px;font-size:.82rem;font-weight:600;z-index:99999;text-decoration:none}
+        #skip-link:focus{left:12px}
         textarea{resize:vertical;min-height:60px;line-height:1.55}
         select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' fill='%234a5e78' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;cursor:pointer}
         ::placeholder{color:#a0aec0;font-size:.82rem}
@@ -177,6 +177,17 @@
         .logo-preview img{width:100%;height:100%;object-fit:contain}
         .ssep{display:flex;align-items:center;gap:8px;margin:14px 0 11px;font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
         .ssep::before,.ssep::after{content:'';flex:1;height:1px;background:var(--line)}
+        /* Autosave indicator */
+        #autosave-bar{position:fixed;top:56px;left:0;right:0;z-index:298;height:28px;background:rgba(240,244,248,.97);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--dim);letter-spacing:.06em;opacity:0;transition:opacity .4s;pointer-events:none}
+        #autosave-bar.visible{opacity:1}
+        #autosave-bar.saving{color:var(--amber-l)}
+        #autosave-bar.saved{color:var(--green-l)}
+        #autosave-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+        #autosave-bar.saving #autosave-dot{animation:pulse .7s ease-in-out infinite alternate}
+        @keyframes pulse{from{opacity:.3}to{opacity:1}}
+        /* Export/import section */
+        .backup-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+        .backup-row .save-btn{flex:1;justify-content:center;height:42px;min-width:120px}
     </style>
 </head>
 <body>
@@ -189,6 +200,7 @@
 </div>
 
 <div id="app-body">
+    <a id="skip-link" href="#panel-form">Saltar al formulario</a>
     <div id="topbar">
         <div class="logo">
             <div class="logo-mark">CMR</div>
@@ -198,68 +210,70 @@
             </div>
         </div>
         <div class="tb-right">
-            <button class="ico-btn" title="Nuevo CMR" onclick="newCMR()">+</button>
-            <button class="save-btn" onclick="saveDefaults()">Guardar</button>
-            <button class="gen-top" onclick="generateCMR()">PDF</button>
+            <button class="ico-btn" aria-label="Nuevo documento CMR" title="Nuevo CMR" onclick="newCMR()">+</button>
+            <button class="save-btn" aria-label="Guardar remitente y transportista por defecto" onclick="saveDefaults()">Guardar</button>
+            <button class="gen-top" aria-label="Generar documento PDF" onclick="generateCMR()">PDF</button>
         </div>
     </div>
 
-    <div id="tabs">
-        <div class="tab active" data-p="form" onclick="tab('form')">Documento</div>
-        <div class="tab" data-p="hist" onclick="tab('hist')">Historial <span class="tbadge" id="histBadge">0</span></div>
-        <div class="tab" data-p="agenda" onclick="tab('agenda')">Agenda</div>
-        <div class="tab" data-p="tmpl" onclick="tab('tmpl')">Plantillas</div>
-        <div class="tab" data-p="cfg" onclick="tab('cfg')">Config</div>
+    <div id="autosave-bar"><div id="autosave-dot"></div><span id="autosave-txt">BORRADOR GUARDADO</span></div>
+
+    <div id="tabs" role="tablist" aria-label="Secciones de la aplicación">
+        <div class="tab active" role="tab" tabindex="0" aria-selected="true"  aria-controls="panel-form" data-p="form"   onclick="tab('form')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('form')">Documento</div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-hist" data-p="hist"   onclick="tab('hist')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('hist')">Historial <span class="tbadge" id="histBadge" aria-label="documentos guardados">0</span></div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-agenda" data-p="agenda" onclick="tab('agenda')" onkeydown="if(event.key==='Enter'||event.key===' ')tab('agenda')">Agenda</div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-tmpl" data-p="tmpl"   onclick="tab('tmpl')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('tmpl')">Plantillas</div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-cfg"  data-p="cfg"    onclick="tab('cfg')"    onkeydown="if(event.key==='Enter'||event.key===' ')tab('cfg')">Config</div>
     </div>
 
-    <div id="panel-form" class="panel active">
+    <div id="panel-form" role="tabpanel" aria-labelledby="tab-form" class="panel active">
         <div class="block"><div class="bhead"><span class="btag a">DOC</span><span class="btitle">Datos del Documento</span></div><div class="bbody">
             <div class="fr"><label>Tipo de Documento</label>
-                <select id="tipoDoc" onchange="onTipoDocChange()">
+                <select id="tipoDoc" aria-label="Tipo de documento" onchange="onTipoDocChange()">
                     <option value="cmr">CMR Internacional (Convenio CMR)</option>
                     <option value="nacional">Carta de Porte Nacional (Ley 15/2009)</option>
                 </select>
             </div>
-            <div class="fr2"><div class="fr"><label>N.º Documento</label><input id="docNum" type="text" placeholder="auto"/></div><div class="fr"><label>Fecha</label><input id="docDate" type="date"/></div></div>
-            <div class="fr2"><div class="fr"><label>Lugar Emisión</label><input id="placeEmission" type="text" placeholder="Sevilla"/></div><div class="fr"><label>Docs Anexos</label><input id="docsAnexos" type="text" placeholder="Albarán" oninput="updateDocNum()"/></div></div>
+            <div class="fr2"><div class="fr"><label for="docNum" style="display:flex;align-items:center;justify-content:space-between">N.º Documento <span id="docNumLockBtn" onclick="toggleDocNumLock()" style="cursor:pointer;font-size:.65rem;padding:2px 7px;border-radius:4px;background:rgba(26,79,214,.1);border:1px solid rgba(26,79,214,.25);color:var(--blue-l);font-family:'JetBrains Mono',monospace;letter-spacing:.03em">🔒 auto</span></label><input id="docNum" type="text" placeholder="auto" readonly style="background:#f7f9fc;color:var(--dim);cursor:not-allowed"/></div><div class="fr"><label for="docDate">Fecha de emisión</label><input id="docDate" aria-label="Fecha de emisión" type="date"/></div></div>
+            <div class="fr2"><div class="fr"><label for="placeEmission">Lugar Emisión</label><input id="placeEmission" type="text" placeholder="Sevilla"/></div><div class="fr"><label for="docsAnexos">Docs Anexos</label><input id="docsAnexos" type="text" placeholder="Albarán" oninput="updateDocNum()"/></div></div>
             <button onclick="saveAsTemplate()" class="save-btn" style="width:100%;justify-content:center;margin-top:10px">Guardar como plantilla</button>
         </div></div>
 
-        <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="5"></textarea></div></div></div>
-        <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Destinatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="5"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
-        <div class="block"><div class="bhead"><span class="btag g">3 · 4 · 5</span><span class="btitle">Recogida y Entrega</span></div><div class="bbody"><div class="fr"><label>3 Lugar de Carga</label><input id="placeLoading" type="text" placeholder="Polígono Industrial Norte, Sevilla"/></div><div class="fr"><label>4 Lugar de Entrega</label><input id="placeDelivery" type="text" placeholder="Almacén Central, Berlín"/></div><div class="fr2"><div class="fr"><label>5 Fecha Prevista</label><input id="dateDelivery" type="date"/></div><div class="fr"><label>Referencia Cliente</label><input id="clientRef" type="text" placeholder="PO-2024-XXX"/></div></div></div></div>
-        <div class="block"><div class="bhead"><span class="btag g">16</span><span class="btitle">Transportista</span><span class="bsaved" id="bs-carrier">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="carrierBlock" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="5"></textarea></div><div class="divl"></div><div class="ssep">Vehículo y Conductor</div><div class="qf-row" id="drv-qf"></div><div class="fr"><label>Conductor</label><input id="driverName" type="text" placeholder="Nombre y apellidos"/></div><div class="fr"><label>DNI Conductor</label><input id="driverDNI" type="text" placeholder="12345678X"/></div><div class="fr2"><div class="fr"><label>Matrícula Tractora</label><input id="plateTractor" type="text" placeholder="1234 ABC" style="text-transform:uppercase"/></div><div class="fr"><label>Matrícula Semirremolque</label><input id="plateTrailer" type="text" placeholder="R-5678 BC" style="text-transform:uppercase"/></div></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveDrvToAgenda()">+ Guardar conductor en agenda</span></div></div></div>
+        <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" aria-label="Casilla 1: Datos del remitente" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="5"></textarea></div></div></div>
+        <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Destinatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" aria-label="Casilla 2: Datos del destinatario" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="5"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
+        <div class="block"><div class="bhead"><span class="btag g">3 · 4 · 5</span><span class="btitle">Recogida y Entrega</span></div><div class="bbody"><div class="fr"><label for="placeLoading">Lugar de Carga</label><input id="placeLoading" aria-label="Casilla 3: Lugar de carga" type="text" placeholder="Polígono Industrial Norte, Sevilla"/></div><div class="fr"><label for="placeDelivery">Lugar de Entrega</label><input id="placeDelivery" aria-label="Casilla 4: Lugar de entrega" type="text" placeholder="Almacén Central, Berlín"/></div><div class="fr2"><div class="fr"><label for="dateDelivery">Fecha Prevista Entrega</label><input id="dateDelivery" aria-label="Casilla 5: Fecha prevista de entrega" type="date"/></div><div class="fr"><label for="clientRef">Referencia Cliente</label><input id="clientRef" type="text" placeholder="PO-2024-XXX"/></div></div></div></div>
+        <div class="block"><div class="bhead"><span class="btag g">16</span><span class="btitle">Transportista</span><span class="bsaved" id="bs-carrier">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="carrierBlock" aria-label="Casilla 16: Datos del transportista" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="5"></textarea></div><div class="divl"></div><div class="ssep">Vehículo y Conductor</div><div class="qf-row" id="drv-qf"></div><div class="fr"><label for="driverName">Conductor</label><input id="driverName" type="text" placeholder="Nombre y apellidos"/></div><div class="fr"><label for="driverDNI">DNI Conductor</label><input id="driverDNI" type="text" placeholder="12345678X"/></div><div class="fr2"><div class="fr"><label for="plateTractor">Matrícula Tractora</label><input id="plateTractor" type="text" placeholder="1234 ABC" style="text-transform:uppercase"/></div><div class="fr"><label for="plateTrailer">Matrícula Semirremolque</label><input id="plateTrailer" type="text" placeholder="R-5678 BC" style="text-transform:uppercase"/></div></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveDrvToAgenda()">+ Guardar conductor en agenda</span></div></div></div>
         <div class="block"><div class="bhead"><span class="btag v">17</span><span class="btitle">Porteadores Sucesivos</span></div><div class="bbody"><div id="successive-list"></div><button onclick="addSuccessiveCarrier()" style="width:100%;margin:8px 0 4px;padding:9px;border-radius:var(--r3);border:1px dashed var(--line2);background:transparent;color:var(--violet-l);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">+ Añadir porteador sucesivo</button></div></div>
-        <div class="block"><div class="bhead"><span class="btag a">6 · 7 · 8 · 9</span><span class="btitle">Descripción de la Mercancía</span></div><div class="bbody"><div id="goods-lines"></div><button onclick="addGoodsLine()" style="width:100%;margin:8px 0 4px;padding:9px;border-radius:var(--r3);border:1px dashed var(--line2);background:transparent;color:var(--blue-l);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">+ Añadir línea de mercancía</button><div style="display:flex;gap:8px;margin-top:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--r3);border:1px solid var(--line)"><div style="flex:1;text-align:center"><div style="font-size:.6rem;color:var(--dim)">Total Bultos</div><div id="totalQty" style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--snow)">0</div></div><div style="width:1px;background:var(--line)"></div><div style="flex:1;text-align:center"><div style="font-size:.6rem;color:var(--dim)">Total Peso kg</div><div id="totalWeight" style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--snow)">0</div></div><div style="width:1px;background:var(--line)"></div><div style="flex:1;text-align:center"><div style="font-size:.6rem;color:var(--dim)">Volumen m³</div><div id="totalVolume" style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--snow)">0</div></div></div><div style="margin-top:10px;border:1px solid var(--line);border-radius:var(--r3);overflow:hidden"><div style="padding:6px 10px;background:linear-gradient(90deg,#f0f4f8,var(--bg2));border-bottom:1px solid var(--line);font-size:.6rem;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.08em">Líneas libres (texto sin columnas)</div><textarea id="gl-free-1" placeholder="Línea libre 1 — texto adicional sin restricciones..." rows="2" style="width:100%;border:none;border-bottom:1px solid var(--line);border-radius:0;background:var(--bg);resize:vertical"></textarea><textarea id="gl-free-2" placeholder="Línea libre 2 — texto adicional sin restricciones..." rows="2" style="width:100%;border:none;border-radius:0;background:var(--bg);resize:vertical"></textarea></div></div></div>
-        <div class="block"><div class="bhead"><span class="btag b">13 · 19 · 14</span><span class="btitle">Instrucciones y Condiciones</span></div><div class="bbody"><div class="fr"><label>13 Instrucciones del Remitente</label><textarea id="senderInstr" rows="2"></textarea></div><div class="fr2"><div class="fr"><label>19 Franqueo</label><select id="freightTerms"><option value="PORT PAGADO">Port Pagado</option><option value="PORT DEBIDO">Port Debido</option><option value="CONTRA REEMBOLSO">Contra Reembolso</option></select></div><div class="fr"><label>14 Reembolso €</label><input id="codAmount" type="number" placeholder="0.00" step="0.01" min="0"/></div></div></div></div>
-        <div class="block"><div class="bhead"><span class="btag r">18</span><span class="btitle">Reservas y Observaciones</span></div><div class="bbody"><div class="fr"><textarea id="observations" rows="3"></textarea></div></div></div>
-        <div class="block"><div class="bhead"><span class="btag r">22</span><span class="btitle">Firma del Remitente</span></div><div class="bbody"><div class="sig-box" id="sigWrapSender"><canvas id="sigCanvasSender"></canvas><div class="sig-hint" id="sigHintSender">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSigSender()">✕ Borrar firma</button></div></div>
-        <div class="block"><div class="bhead"><span class="btag g">23</span><span class="btitle">Firma del Conductor</span></div><div class="bbody"><div class="sig-box" id="sigWrap"><canvas id="sigCanvas"></canvas><div class="sig-hint" id="sigHint">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSig()">✕ Borrar firma</button></div></div>
+        <div class="block"><div class="bhead"><span class="btag a">6 · 7 · 8 · 9</span><span class="btitle">Descripción de la Mercancía</span></div><div class="bbody"><div id="goods-lines"></div><button onclick="addGoodsLine()" style="width:100%;margin:8px 0 4px;padding:9px;border-radius:var(--r3);border:1px dashed var(--line2);background:transparent;color:var(--blue-l);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">+ Añadir línea de mercancía</button><div style="display:flex;gap:8px;margin-top:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--r3);border:1px solid var(--line)"><div style="flex:1;text-align:center"><div style="font-size:.6rem;color:var(--dim)">Total Bultos</div><div id="totalQty" style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--snow)">0</div></div><div style="width:1px;background:var(--line)"></div><div style="flex:1;text-align:center"><div style="font-size:.6rem;color:var(--dim)">Total Peso kg</div><div id="totalWeight" style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--snow)">0</div></div><div style="width:1px;background:var(--line)"></div><div style="flex:1;text-align:center"><div style="font-size:.6rem;color:var(--dim)">Volumen m³</div><div id="totalVolume" style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--snow)">0</div></div></div><div style="margin-top:10px;border:1px solid var(--line);border-radius:var(--r3);overflow:hidden"><div style="padding:6px 10px;background:linear-gradient(90deg,#f0f4f8,var(--bg2));border-bottom:1px solid var(--line);font-size:.6rem;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.08em">Líneas libres (texto sin columnas)</div><textarea id="gl-free-1" aria-label="Línea libre 1: texto adicional" placeholder="Línea libre 1 — texto adicional sin restricciones..." rows="2" style="width:100%;border:none;border-bottom:1px solid var(--line);border-radius:0;background:var(--bg);resize:vertical"></textarea><textarea id="gl-free-2" aria-label="Línea libre 2: texto adicional" placeholder="Línea libre 2 — texto adicional sin restricciones..." rows="2" style="width:100%;border:none;border-radius:0;background:var(--bg);resize:vertical"></textarea><div style="display:flex;gap:8px;padding:6px 10px;background:var(--bg);border-top:1px solid var(--line);align-items:center"><div style="display:flex;align-items:center;gap:4px"><label style="font-size:.6rem;white-space:nowrap">Eurp. Cargados</label><input id="eurosCargados" type="text" placeholder="0" style="width:50px;font-size:.78rem;padding:4px 6px;text-align:center"/></div><div style="display:flex;align-items:center;gap:4px"><label style="font-size:.6rem;white-space:nowrap">Eurp. Devueltos</label><input id="eurosDevueltos" type="text" placeholder="0" style="width:50px;font-size:.78rem;padding:4px 6px;text-align:center"/></div></div></div></div></div>
+        <div class="block"><div class="bhead"><span class="btag b">13 · 19 · 14</span><span class="btitle">Instrucciones y Condiciones</span></div><div class="bbody"><div class="fr"><label for="senderInstr">Instrucciones del Remitente</label><textarea id="senderInstr" aria-label="Casilla 13: Instrucciones del remitente" rows="2"></textarea></div><div class="fr2"><div class="fr"><label for="freightTerms">Franqueo</label><select id="freightTerms" aria-label="Casilla 19: Condiciones de franqueo"><option value="PORT PAGADO">Port Pagado</option><option value="PORT DEBIDO">Port Debido</option><option value="CONTRA REEMBOLSO">Contra Reembolso</option></select></div><div class="fr"><label for="codAmount">Reembolso €</label><input id="codAmount" aria-label="Casilla 14: Importe de reembolso en euros" type="number" placeholder="0.00" step="0.01" min="0"/></div></div></div></div>
+        <div class="block"><div class="bhead"><span class="btag r">18</span><span class="btitle">Reservas y Observaciones</span></div><div class="bbody"><div class="fr"><textarea id="observations" aria-label="Casilla 18: Reservas y observaciones" rows="3"></textarea></div></div></div>
+        <div class="block"><div class="bhead"><span class="btag r">22</span><span class="btitle">Firma del Remitente</span></div><div class="bbody"><div class="sig-box" id="sigWrapSender"><canvas id="sigCanvasSender" role="img" aria-label="Área de firma del remitente"></canvas><div class="sig-hint" id="sigHintSender">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSigSender()">✕ Borrar firma</button></div></div>
+        <div class="block"><div class="bhead"><span class="btag g">23</span><span class="btitle">Firma del Conductor</span></div><div class="bbody"><div class="sig-box" id="sigWrap"><canvas id="sigCanvas" role="img" aria-label="Área de firma del conductor"></canvas><div class="sig-hint" id="sigHint">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSig()">✕ Borrar firma</button></div></div>
     </div>
 
-    <div id="panel-hist" class="panel">
+    <div id="panel-hist" role="tabpanel" aria-labelledby="tab-hist" class="panel">
         <div class="stats"><div class="stat"><div class="stat-n" id="st0">0</div><div class="stat-l">Total Docs</div></div><div class="stat"><div class="stat-n" id="st1">0</div><div class="stat-l">Este Mes</div></div><div class="stat"><div class="stat-n" id="st2">—</div><div class="stat-l">Kg Totales</div></div><div class="stat"><div class="stat-n" id="st3">—</div><div class="stat-l">Kg Mes</div></div></div>
         <div class="search-row"><input id="histSearch" type="text" placeholder="Buscar por número, destinatario…" oninput="renderHist()"/><select class="fsel" id="histFilter" onchange="renderHist()"><option value="">Todos</option><option value="month">Este mes</option><option value="week">Esta semana</option></select><select class="fsel" id="histGroup" onchange="renderHist()"><option value="">Sin agrupar</option><option value="dest">Por Destino</option><option value="carrier">Por Transportista</option></select></div>
         <div id="histList"></div>
     </div>
 
-    <div id="panel-agenda" class="panel">
+    <div id="panel-agenda" role="tabpanel" aria-labelledby="tab-agenda" class="panel">
         <div class="block"><div class="bhead"><span class="btag b">DEST.</span><span class="btitle">Destinatarios Frecuentes</span></div><div class="bbody" id="agRcvList"><div class="hist-empty" style="padding:20px 0">Sin destinatarios guardados</div></div></div>
         <div class="block"><div class="bhead"><span class="btag g">COND.</span><span class="btitle">Conductores y Vehículos</span></div><div class="bbody" id="agDrvList"><div class="hist-empty" style="padding:20px 0">Sin conductores guardados</div></div></div>
     </div>
 
-    <div id="panel-tmpl" class="panel">
+    <div id="panel-tmpl" role="tabpanel" aria-labelledby="tab-tmpl" class="panel">
         <div class="block"><div class="bhead"><span class="btag t">TPL</span><span class="btitle">Plantillas Guardadas</span></div><div class="bbody" id="tmplList"><div class="hist-empty" style="padding:20px 0">Sin plantillas guardadas</div></div></div>
     </div>
 
-    <div id="panel-cfg" class="panel">
-        <div class="block"><div class="bhead"><span class="btag a">NUM</span><span class="btitle">Numeración Automática</span></div><div class="bbody"><div class="hint">El número se genera como <b>PREFIJO-AÑO-SECUENCIA</b>. Puedes editarlo manualmente.</div><div class="fr3"><div class="fr"><label>Prefijo</label><input id="cfgPrefix" type="text" placeholder="CMR" maxlength="8"/></div><div class="fr"><label>Siguiente N.º</label><input id="cfgSeq" type="number" min="1" placeholder="1"/></div><div class="fr"><label>Dígitos</label><select id="cfgDigits"><option value="3">3 (001)</option><option value="4">4 (0001)</option><option value="5">5 (00001)</option></select></div></div><div style="font-size:.7rem;color:var(--dim);margin-top:4px" id="numPreview"></div></div></div>
+    <div id="panel-cfg" role="tabpanel" aria-labelledby="tab-cfg" class="panel">
+        <div class="block"><div class="bhead"><span class="btag a">NUM</span><span class="btitle">Numeración Automática</span></div><div class="bbody"><div class="hint">El número se genera como <b>PREFIJO-AAAAMMDD-XXXX</b> donde XXXX son las <b>4 últimas cifras del albarán</b> introducido en Docs Anexos.</div><div class="fr"><label>Prefijo</label><input id="cfgPrefix" type="text" placeholder="CMR" maxlength="8" oninput="updateNumPreview()"/></div><div style="font-size:.7rem;color:var(--dim);margin-top:4px" id="numPreview"></div></div></div>
         <div class="block"><div class="bhead"><span class="btag v">LOGO</span><span class="btitle">Logo de Empresa en PDF</span></div><div class="bbody"><div style="display:flex;align-items:center;gap:14px"><div class="logo-preview" id="logoPreview" onclick="document.getElementById('logoInput').click()"><span>+ Logo</span></div><div style="flex:1"><div style="font-size:.78rem;font-weight:600;margin-bottom:4px">Imagen del logo</div><div style="font-size:.7rem;color:var(--dim);line-height:1.6">PNG o JPG. Se incluirá en la cabecera del PDF.</div><button style="margin-top:8px;font-size:.7rem;padding:5px 10px;border-radius:6px;border:1px solid var(--rose-l);background:transparent;color:var(--rose-l);cursor:pointer;font-family:'Sora',sans-serif" onclick="removeLogo()">Quitar logo</button></div><input type="file" id="logoInput" accept="image/*" style="display:none" onchange="loadLogo(event)"/></div></div></div>
         <div class="block"><div class="bhead"><span class="btag t">DEF</span><span class="btitle">Datos por Defecto</span></div><div class="bbody"><div class="ssep">Remitente Habitual</div><div class="fr"><textarea id="cfgSenderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45&#10;41500 Sevilla&#10;España" rows="5"></textarea></div><div class="divl"></div><div class="ssep">Transportista Habitual</div><div class="fr"><textarea id="cfgCarrierBlock" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="5"></textarea></div><div class="fr"><label>Lugar Emisión por Defecto</label><input id="cfgEmission" type="text" placeholder="Sevilla, España"/></div><button onclick="saveCfg()" style="width:100%;height:44px;margin-top:10px;border-radius:var(--r3);border:none;background:var(--blue);color:#fff;font-size:.88rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">Guardar Configuración</button></div></div>
-        <div class="block"><div class="bhead"><span class="btag r">BD</span><span class="btitle">Base de Datos (IndexedDB)</span></div><div class="bbody"><div class="hint">Los documentos se guardan automáticamente en la BD local. Persisten aunque cierres la app.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="exportDB()" class="save-btn" style="flex:1;justify-content:center;height:42px">Exportar JSON</button><button onclick="importClick()" class="save-btn" style="flex:1;justify-content:center;height:42px">Importar JSON</button><button onclick="confirmClear()" class="save-btn" style="flex:1;justify-content:center;height:42px;border-color:rgba(244,63,94,.3);color:var(--rose-l)">Vaciar BD</button></div><input type="file" id="importInput" accept=".json" style="display:none" onchange="importDB(event)"/></div></div>
+        <div class="block"><div class="bhead"><span class="btag r">BD</span><span class="btitle">Copia de Seguridad</span></div><div class="bbody"><div class="hint">Exporta todos tus documentos, agenda y plantillas a un archivo JSON. Puedes importarlo en cualquier dispositivo para restaurar tus datos.</div><div class="backup-row"><button onclick="exportDB()" class="save-btn" style="border-color:rgba(26,79,214,.3);color:var(--blue-l)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>Exportar JSON</button><button onclick="importClick()" class="save-btn"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>Importar JSON</button><button onclick="confirmClear()" class="save-btn" style="border-color:rgba(244,63,94,.3);color:var(--rose-l)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>Vaciar BD</button></div><div id="backup-stats" style="font-size:.68rem;color:var(--dim);text-align:center;padding:4px 0"></div><input type="file" id="importInput" accept=".json" style="display:none" onchange="importDB(event)"/></div></div>
     </div>
 
-    <button class="fab" onclick="generateCMR()">
+    <button class="fab" onclick="generateCMR()" aria-label="Generar y descargar documento PDF">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
         GENERAR DOCUMENTO
     </button>
@@ -270,12 +284,15 @@
 <div id="bs-bg"><div id="bs"><div class="bs-handle"></div><div class="bs-title" id="bsTitle"></div><div class="bs-body" id="bsBody"></div><div class="bs-acts" id="bsActs"></div></div></div>
 
 <script>
-// ════════════════════════════ JAVASCRIPT COMPLETO (SIN RESTRICCIONES) ════════════════════════════
 let sigPad, sigPadSender, _db=null, logoDataURL=null;
 const DB_N='cmr_pro_v5', STORE='cmr', AG='agenda', TPL='plantillas';
 
 function tab(n){
-    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===n));
+    document.querySelectorAll('.tab').forEach(t=>{
+        const active=t.dataset.p===n;
+        t.classList.toggle('active',active);
+        t.setAttribute('aria-selected',active?'true':'false');
+    });
     document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+n));
     if(n==='hist') renderHist();
     if(n==='agenda') renderAgenda();
@@ -295,12 +312,99 @@ async function dbAll(st){const db=await openDB();return new Promise((res,rej)=>{
 async function dbDel(st,id){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readwrite').objectStore(st).delete(id);r.onsuccess=res;r.onerror=rej})}
 async function dbClear(st){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readwrite').objectStore(st).clear();r.onsuccess=res;r.onerror=rej})}
 
+// ========== AUTOGUARDADO ==========
+const DRAFT_KEY = 'cmr_draft_v1';
+let _autosaveTimer = null;
+let _lastDraftHash = null;
+
+function _draftHash(data) {
+    // Lightweight hash to avoid saving when nothing changed
+    return JSON.stringify(data).length + '_' + (data.docNum||'') + '_' + (data.rcvBlock||'').slice(0,20);
+}
+
+function saveDraft() {
+    try {
+        const data = collect();
+        const hash = _draftHash(data);
+        if (hash === _lastDraftHash) return; // No changes
+        _lastDraftHash = hash;
+        data._draftSavedAt = new Date().toISOString();
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+        showAutosaveBar('saved', 'BORRADOR GUARDADO · ' + new Date().toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'}));
+    } catch(e) {
+        console.warn('Autoguardado fallido:', e);
+    }
+}
+
+function loadDraft() {
+    try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (!data._draftSavedAt) return false;
+        const age = (Date.now() - new Date(data._draftSavedAt)) / 1000;
+        if (age > 86400) { localStorage.removeItem(DRAFT_KEY); return false; } // Expire after 24h
+        return data;
+    } catch(e) { return false; }
+}
+
+function clearDraft() {
+    localStorage.removeItem(DRAFT_KEY);
+    _lastDraftHash = null;
+}
+
+function showAutosaveBar(state, msg) {
+    const bar = document.getElementById('autosave-bar');
+    const txt = document.getElementById('autosave-txt');
+    if (!bar || !txt) return;
+    bar.className = 'visible ' + state;
+    txt.textContent = msg;
+    clearTimeout(bar._hideTimer);
+    bar._hideTimer = setTimeout(() => { bar.classList.remove('visible'); }, 3000);
+}
+
+function scheduleAutosave() {
+    clearTimeout(_autosaveTimer);
+    _autosaveTimer = setTimeout(saveDraft, 8000); // 8s after last change
+    // Show "saving..." hint immediately
+    const bar = document.getElementById('autosave-bar');
+    const txt = document.getElementById('autosave-txt');
+    if (bar && txt) { bar.className = 'visible saving'; txt.textContent = 'GUARDANDO BORRADOR…'; }
+}
+
+// Attach autosave listener to all form inputs
+function attachAutosaveListeners() {
+    const panel = document.getElementById('panel-form');
+    if (!panel) return;
+    panel.addEventListener('input', scheduleAutosave);
+    panel.addEventListener('change', scheduleAutosave);
+    // Forzar mayúsculas en tiempo real en los campos de matrícula
+    ['plateTractor','plateTrailer'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', function() {
+            const pos = this.selectionStart;
+            this.value = this.value.toUpperCase();
+            this.setSelectionRange(pos, pos);
+        });
+    });
+}
+
+// Periodic autosave every 30s regardless of changes
+setInterval(saveDraft, 30000);
+
+
+
 const gv=id=>(document.getElementById(id)||{}).value?.trim()||'';
+const gvUp=id=>gv(id).toUpperCase(); // getValue + forzar mayúsculas
 const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||''};
-const FIELDS=['docNum','docDate','placeEmission','docsAnexos','senderBlock','rcvBlock','placeLoading','placeDelivery','dateDelivery','clientRef','carrierBlock','driverName','driverDNI','plateTractor','plateTrailer','senderInstr','freightTerms','codAmount','observations','tipoDoc','gl-free-1','gl-free-2'];
+const FIELDS=['docNum','docDate','placeEmission','docsAnexos','senderBlock','rcvBlock','placeLoading','placeDelivery','dateDelivery','clientRef','carrierBlock','driverName','driverDNI','plateTractor','plateTrailer','senderInstr','freightTerms','codAmount','observations','tipoDoc','gl-free-1','gl-free-2','eurosCargados','eurosDevueltos'];
 function collect(){
     const d={savedAt:new Date().toISOString()};
     FIELDS.forEach(f=>{d[f]=gv(f)});
+    // Normalizar matrículas a mayúsculas reales
+    d['plateTractor']=(d['plateTractor']||'').toUpperCase();
+    d['plateTrailer']=(d['plateTrailer']||'').toUpperCase();
     d.goodsLines=collectGoodsLines();
     d.successiveCarriers=collectSuccessiveCarriers();
     d.sigDriver=(sigPad&&!sigPad.isEmpty())?sigPad.toDataURL('image/png'):null;
@@ -312,6 +416,22 @@ function fill(d){
     try { fillGoodsLines(d.goodsLines||[]); } catch(e){}
     try { fillSuccessiveCarriers(d.successiveCarriers||[]); } catch(e){}
 }
+function _restoreDraft() {
+    closeBS();
+    const draft = loadDraft();
+    if (!draft) return;
+    fill(draft);
+    if (draft.sigDriver) { /* signatures are not stored in draft for privacy */ }
+    _lastDraftHash = _draftHash(draft);
+    toast('✓ Borrador restaurado', 'ok');
+}
+
+function _discardDraft() {
+    closeBS();
+    clearDraft();
+    toast('Borrador descartado', 'warn');
+}
+
 function newCMR(){ doNewCMR(); }
 function doNewCMR(){
     closeBS();
@@ -323,39 +443,70 @@ function doNewCMR(){
     clearSig(); clearSigSender();
     sv('docNum',genDocNum());
     sv('docDate',new Date().toISOString().split('T')[0]);
-    tab('form');toast('✓ Formulario limpio','ok');
+    clearDraft(); // Clear draft on new CMR
+    tab('form'); toast('✓ Formulario limpio','ok');
+}
+function toggleDocNumLock(){
+    const inp = document.getElementById('docNum');
+    const btn = document.getElementById('docNumLockBtn');
+    if(!inp || !btn) return;
+    const isLocked = inp.readOnly;
+    inp.readOnly = !isLocked;
+    inp.style.background = isLocked ? '#fff' : '#f7f9fc';
+    inp.style.color = isLocked ? '' : 'var(--dim)';
+    inp.style.cursor = isLocked ? '' : 'not-allowed';
+    btn.textContent = isLocked ? '✏️ manual' : '🔒 auto';
+    if(!isLocked) { sv('docNum', genDocNum()); }
+    if(isLocked) inp.focus();
 }
 function onTipoDocChange(){
     updateDocNum();
 }
-
 function genDocNum(){
-    const now=new Date();
-    const yyyy=now.getFullYear();
-    const mm=String(now.getMonth()+1).padStart(2,'0');
-    const dd=String(now.getDate()).padStart(2,'0');
-    const albaran=gv('docsAnexos')||'';
-    const digits=albaran.replace(/\D/g,'').slice(-4).padStart(4,'0');
-    return `${yyyy}${mm}${dd}${digits}`;
+    const cfg = JSON.parse(localStorage.getItem('cmr_cfg')||'{}');
+    const prefix = cfg.prefix || 'CMR';
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth()+1).padStart(2,'0');
+    const dd = String(now.getDate()).padStart(2,'0');
+    const dateStr = ''+yyyy+mm+dd;
+    const albaran = gv('docsAnexos').replace(/\D/g,'');
+    const suffix = albaran ? albaran.slice(-4).padStart(4,'0') : '0000';
+    return prefix+'-'+dateStr+'-'+suffix;
 }
+
+function _advanceSeq(){ /* no-op: secuencia reemplazada por fecha+albarán */ }
+
 function updateDocNum(){
-    const current=gv('docNum');
-    const auto=genDocNum();
-    if(!current||/^\d{12}$/.test(current)) sv('docNum',auto);
+    const inp = document.getElementById('docNum');
+    if(inp && !inp.readOnly) return;
+    const current = gv('docNum');
+    const autoPattern = /^[A-Z0-9]+-\d{6,8}-\d+$/;
+    if (!current || autoPattern.test(current)) sv('docNum', genDocNum());
 }
 function updateNumPreview(){
     const el=document.getElementById('numPreview');if(!el)return;
     const prefix=gv('cfgPrefix')||'CMR';
-    const digits=parseInt(document.getElementById('cfgDigits')?.value||'3');
-    const seq=parseInt(document.getElementById('cfgSeq')?.value||'1');
-    el.textContent='Próximo: '+prefix+'-'+new Date().getFullYear()+'-'+String(seq).padStart(digits,'0');
+    const now=new Date();const yyyyp=now.getFullYear();const mmp=String(now.getMonth()+1).padStart(2,'0');const ddp=String(now.getDate()).padStart(2,'0');el.textContent='Ejemplo: '+prefix+'-'+yyyyp+mmp+ddp+'-XXXX (4 últimas cifras del albarán)';
 }
-document.addEventListener('input',e=>{if(['cfgPrefix','cfgSeq','cfgDigits'].includes(e.target.id))updateNumPreview()});
+document.addEventListener('input',e=>{if(e.target.id==='cfgPrefix')updateNumPreview()});
 
 function saveDefaults(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); Object.assign(cfg,{senderBlock:gv('senderBlock'),carrierBlock:gv('carrierBlock'),placeEmission:gv('placeEmission')}); localStorage.setItem('cmr_cfg',JSON.stringify(cfg)); showBadges(true);toast('✓ Remitente y transportista guardados','ok'); }
-function saveCfg(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); Object.assign(cfg,{ senderBlock:gv('cfgSenderBlock'),carrierBlock:gv('cfgCarrierBlock'),placeEmission:gv('cfgEmission'), prefix:gv('cfgPrefix')||'CMR',seq:parseInt(gv('cfgSeq')||'1'),digits:document.getElementById('cfgDigits')?.value||'3' }); localStorage.setItem('cmr_cfg',JSON.stringify(cfg)); loadDefaults();toast('✓ Configuración guardada','ok'); }
-function loadDefaults(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); if(cfg.senderBlock) sv('senderBlock',cfg.senderBlock); if(cfg.carrierBlock) sv('carrierBlock',cfg.carrierBlock); if(cfg.placeEmission) sv('placeEmission',cfg.placeEmission); if(!gv('docDate')) sv('docDate',new Date().toISOString().split('T')[0]); if(!gv('docNum')) sv('docNum',genDocNum()); if(!gv('tipoDoc')) sv('tipoDoc','cmr'); if(cfg.senderBlock||cfg.carrierBlock) showBadges(true); logoDataURL=localStorage.getItem('cmr_logo')||null; if(logoDataURL) showLogoPreview(logoDataURL); }
-function syncCfgPanel(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); sv('cfgSenderBlock',cfg.senderBlock);sv('cfgCarrierBlock',cfg.carrierBlock);sv('cfgEmission',cfg.placeEmission); sv('cfgPrefix',cfg.prefix||'CMR');sv('cfgSeq',cfg.seq||1); if(document.getElementById('cfgDigits')) document.getElementById('cfgDigits').value=cfg.digits||'3'; updateNumPreview(); }
+function saveCfg(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); Object.assign(cfg,{ senderBlock:gv('cfgSenderBlock'),carrierBlock:gv('cfgCarrierBlock'),placeEmission:gv('cfgEmission'), prefix:gv('cfgPrefix')||'CMR' }); localStorage.setItem('cmr_cfg',JSON.stringify(cfg)); loadDefaults();toast('✓ Configuración guardada','ok'); }
+function loadDefaults(){
+    const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}');
+    if(!cfg.seq){ cfg.seq=1; localStorage.setItem('cmr_cfg',JSON.stringify(cfg)); }
+    if(cfg.senderBlock) sv('senderBlock',cfg.senderBlock);
+    if(cfg.carrierBlock) sv('carrierBlock',cfg.carrierBlock);
+    if(cfg.placeEmission) sv('placeEmission',cfg.placeEmission);
+    if(!gv('docDate')) sv('docDate',new Date().toISOString().split('T')[0]);
+    if(!gv('docNum')) sv('docNum',genDocNum());
+    if(!gv('tipoDoc')) sv('tipoDoc','cmr');
+    if(cfg.senderBlock||cfg.carrierBlock) showBadges(true);
+    logoDataURL=localStorage.getItem('cmr_logo')||null;
+    if(logoDataURL) showLogoPreview(logoDataURL);
+}
+function syncCfgPanel(){ const cfg=JSON.parse(localStorage.getItem('cmr_cfg')||'{}'); sv('cfgSenderBlock',cfg.senderBlock);sv('cfgCarrierBlock',cfg.carrierBlock);sv('cfgEmission',cfg.placeEmission); sv('cfgPrefix',cfg.prefix||'CMR'); updateNumPreview(); }
 function showBadges(v){ document.getElementById('bs-sender').style.display=v?'block':'none'; document.getElementById('bs-carrier').style.display=v?'block':'none'; }
 
 function loadLogo(e){ const f=e.target.files[0];if(!f)return; const r=new FileReader(); r.onload=ev=>{logoDataURL=ev.target.result;localStorage.setItem('cmr_logo',logoDataURL);showLogoPreview(logoDataURL);toast('✓ Logo cargado','ok')}; r.readAsDataURL(f); }
@@ -390,7 +541,7 @@ window.addEventListener('resize',()=>{
 });
 
 async function saveRcvToAgenda(){ const val=gv('rcvBlock');if(!val){toast('Rellena el destinatario primero','err');return} const name=val.split('\n')[0].trim(); await dbAdd(AG,{type:'rcv',name,block:val,savedAt:new Date().toISOString()}); toast('✓ Destinatario guardado','ok');renderRcvQF(); }
-async function saveDrvToAgenda(){ const name=gv('driverName');if(!name){toast('Rellena el conductor primero','err');return} await dbAdd(AG,{type:'drv',name,tractor:gv('plateTractor'),trailer:gv('plateTrailer'),savedAt:new Date().toISOString()}); toast('✓ Conductor guardado','ok');renderDrvQF(); }
+async function saveDrvToAgenda(){ const name=gv('driverName');if(!name){toast('Rellena el conductor primero','err');return} await dbAdd(AG,{type:'drv',name,tractor:gvUp('plateTractor'),trailer:gvUp('plateTrailer'),savedAt:new Date().toISOString()}); toast('✓ Conductor guardado','ok');renderDrvQF(); }
 async function renderAgenda(){ const all=await dbAll(AG); const rcvs=all.filter(x=>x.type==='rcv'); const drvs=all.filter(x=>x.type==='drv'); const xi=`<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>`; document.getElementById('agRcvList').innerHTML=rcvs.length?rcvs.map(r=>`<div class="ag-item" onclick="fillRcv(${r.id})"><div class="ag-ico rcv">${r.name.slice(0,2).toUpperCase()}</div><div class="ag-info"><div class="ag-name">${r.name}</div><div class="ag-sub">${[r.city,r.country].filter(Boolean).join(', ')}</div></div><div class="hacts"><div class="hb de" onclick="event.stopPropagation();delAg(${r.id})">${xi}</div></div></div>`).join(''):'<div class="hist-empty" style="padding:20px 0">Sin destinatarios</div>'; document.getElementById('agDrvList').innerHTML=drvs.length?drvs.map(d=>`<div class="ag-item" onclick="fillDrv(${d.id})"><div class="ag-ico drv">${d.name.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase()}</div><div class="ag-info"><div class="ag-name">${d.name}</div><div class="ag-sub">${[d.tractor,d.trailer].filter(Boolean).join(' · ')}</div></div><div class="hacts"><div class="hb de" onclick="event.stopPropagation();delAg(${d.id})">${xi}</div></div></div>`).join(''):'<div class="hist-empty" style="padding:20px 0">Sin conductores</div>'; }
 async function fillRcv(id){const all=await dbAll(AG);const r=all.find(x=>x.id===id);if(!r)return;sv('rcvBlock',r.block);tab('form');toast('✓ Destinatario cargado','ok')}
 async function fillDrv(id){const all=await dbAll(AG);const d=all.find(x=>x.id===id);if(!d)return;sv('driverName',d.name);sv('plateTractor',d.tractor);sv('plateTrailer',d.trailer);tab('form');toast('✓ Conductor cargado','ok')}
@@ -416,8 +567,7 @@ async function renderHist(){
         const groupKey={ dest:(r)=>r.placeDelivery||'Sin destino', carrier:(r)=>(r.carrierBlock||'').split('\n')[0]||'Sin transportista' }[group];
         data.forEach(r=>{const key=groupKey(r);if(!grouped[key])grouped[key]=[];grouped[key].push(r);});
         const html=Object.entries(grouped).map(([key,items])=>{
-            const kilos=items.reduce((s,r)=>s+(parseFloat(r.goodsWeight)||0),0);
-            return `<div style="margin-bottom:16px"><div style="font-weight:600;color:var(--snow)">${key} (${items.length})</div>${items.map(r=>`<div class="hitem" style="margin:4px 0"><div class="hico">📄</div><div class="hinfo"><div class="hnum">${r.docNum||'Sin N.º'} ${r.tipoDoc==='nacional'?'<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>':''}</div><div class="hsub">${[(r.rcvBlock||'').split('\n')[0],r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${r.savedAt?new Date(r.savedAt).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—'}</div><div class="hacts"><div class="hb lo" onclick="loadRec(${r.id})">⬆</div><div class="hb du" onclick="dupRec(${r.id})">📋</div><div class="hb pd" onclick="regenPDF(${r.id})">📄</div><div class="hb de" onclick="delRec(${r.id})">🗑</div></div></div>`).join('')}</div>`;
+            return `<div style="margin-bottom:16px"><div style="font-weight:600;color:var(--snow)">${key} (${items.length})</div>${items.map(r=>`<div class="hitem" style="margin:4px 0"><div class="hico">📄</div><div class="hinfo"><div class="hnum">${r.docNum||'Sin N.º'} ${r.tipoDoc==='nacional'?'<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>':''}</div><div class="hsub">${[(r.rcvBlock||'').split('\n')[0],r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${r.savedAt?new Date(r.savedAt).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—'}</div><div class="hacts"><div class="hb lo" role="button" tabindex="0" aria-label="Cargar documento" onclick="loadRec(${r.id})">⬆</div><div class="hb du" role="button" tabindex="0" aria-label="Duplicar documento" onclick="dupRec(${r.id})">📋</div><div class="hb pd" role="button" tabindex="0" aria-label="Regenerar PDF" onclick="regenPDF(${r.id})">📄</div><div class="hb de" role="button" tabindex="0" aria-label="Eliminar documento" onclick="delRec(${r.id})">🗑</div></div></div>`).join('')}</div>`;
         }).join('');
         document.getElementById('histList').innerHTML=html||'<div class="hist-empty">Sin resultados</div>';
     } else {
@@ -425,7 +575,7 @@ async function renderHist(){
         if(!data.length){ el.innerHTML=`<div class="hist-empty">${all.length?'Sin resultados':'Aún no hay documentos.<br>Genera tu primer documento.'}</div>`; return; }
         el.innerHTML=data.map(r=>{
             const dt=r.savedAt?new Date(r.savedAt).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—';
-            return`<div class="hitem"><div class="hico">📄</div><div class="hinfo"><div class="hnum">${r.docNum||'Sin N.º'} ${r.tipoDoc==='nacional'?'<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>':''} ${r.goodsWeight?`<span class="hwbadge">${r.goodsWeight}kg</span>`:''}</div><div class="hsub">${[(r.rcvBlock||'').split('\n')[0],r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" onclick="loadRec(${r.id})">⬆</div><div class="hb du" onclick="dupRec(${r.id})">📋</div><div class="hb pd" onclick="regenPDF(${r.id})">📄</div><div class="hb de" onclick="delRec(${r.id})">🗑</div></div></div>`;
+            return`<div class="hitem"><div class="hico">📄</div><div class="hinfo"><div class="hnum">${r.docNum||'Sin N.º'} ${r.tipoDoc==='nacional'?'<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>':''} ${r.goodsWeight?`<span class="hwbadge">${r.goodsWeight}kg</span>`:''}</div><div class="hsub">${[(r.rcvBlock||'').split('\n')[0],r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" role="button" tabindex="0" aria-label="Cargar documento" onclick="loadRec(${r.id})">⬆</div><div class="hb du" role="button" tabindex="0" aria-label="Duplicar documento" onclick="dupRec(${r.id})">📋</div><div class="hb pd" role="button" tabindex="0" aria-label="Regenerar PDF" onclick="regenPDF(${r.id})">📄</div><div class="hb de" role="button" tabindex="0" aria-label="Eliminar documento" onclick="delRec(${r.id})">🗑</div></div></div>`;
         }).join('');
     }
     const allMonth=all.filter(r=>{try{const d=new Date(r.savedAt);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()}catch{return false}});
@@ -437,14 +587,92 @@ async function renderHist(){
     document.getElementById('st3').textContent=monthKg>0?(monthKg>=1000?(monthKg/1000).toFixed(1)+'t':Math.round(monthKg)):'—';
 }
 async function loadRec(id){ const all=await dbAll(STORE); const r=all.find(x=>x.id===id); if(!r)return; fill(r); clearSig();clearSigSender(); tab('form'); toast('✓ Documento cargado','ok'); }
-async function dupRec(id){ const all=await dbAll(STORE); const r=all.find(x=>x.id===id); if(!r)return; const d={...r}; delete d.id; d.docNum=genDocNum(); d.docDate=new Date().toISOString().split('T')[0]; d.savedAt=new Date().toISOString(); fill(d); clearSig();clearSigSender(); tab('form'); toast('✓ Documento duplicado','ok'); }
+async function dupRec(id){ const all=await dbAll(STORE); const r=all.find(x=>x.id===id); if(!r)return; const d={...r}; delete d.id; d.docDate=new Date().toISOString().split('T')[0]; d.savedAt=new Date().toISOString(); fill(d); sv('docNum',genDocNum()); clearSig();clearSigSender(); tab('form'); toast('✓ Duplicado — cambia el albarán para actualizar el N.º','warn',5000); }
 async function regenPDF(id){ const all=await dbAll(STORE); const r=all.find(x=>x.id===id); if(!r)return; showOv(true); const st=setTimeout(()=>{showOv(false);toast('⚠ Tiempo agotado','err',5000)},25000); try{buildPDF(r,st)}catch(e){clearTimeout(st);showOv(false);toast('⚠ Error: '+e.message,'err',5000)} }
 function delRec(id){ showBS('Eliminar Documento','Este registro se eliminará permanentemente.',[{label:'Cancelar',cls:'cancel',fn:'closeBS()'},{label:'Eliminar',cls:'danger',fn:`_delOk(${id})`}]); }
 async function _delOk(id){ closeBS(); await dbDel(STORE,id); await renderHist(); await updateHistBadge(); toast('Eliminado','warn'); }
 
-async function exportDB(){ const all=await dbAll(STORE); if(!all.length){toast('BD vacía','warn');return} const b=new Blob([JSON.stringify(all,null,2)],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u;a.download='CMR_Export_'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a);a.click();document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(u),10000);toast('✓ JSON exportado','ok'); }
-function importClick(){document.getElementById('importInput').click()}
-async function importDB(e){ const f=e.target.files[0];if(!f)return; const t=await f.text(); try{ const arr=JSON.parse(t);if(!Array.isArray(arr))throw new Error('No es un array'); let c=0;for(const r of arr){const d={...r};delete d.id;await dbAdd(STORE,d);c++;} await updateHistBadge();toast(`✓ ${c} documentos importados`,'ok'); }catch(err){toast('JSON inválido: '+err.message,'err')} e.target.value=''; }
+async function exportDB(){
+    const [docs, agenda, plantillas] = await Promise.all([dbAll(STORE), dbAll(AG), dbAll(TPL)]);
+    if (!docs.length && !agenda.length && !plantillas.length) { toast('No hay datos para exportar','warn'); return; }
+    const backup = {
+        _version: 1,
+        _exportedAt: new Date().toISOString(),
+        _app: 'CMR Manager Pro',
+        docs,
+        agenda,
+        plantillas
+    };
+    const b = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+    const u = URL.createObjectURL(b);
+    const a = document.createElement('a');
+    a.href = u; a.download = 'CMR_Backup_' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(u), 10000);
+    toast(`✓ Backup exportado: ${docs.length} docs, ${agenda.length} agenda, ${plantillas.length} plantillas`, 'ok');
+}
+
+function importClick() { document.getElementById('importInput').click(); }
+
+async function importDB(e) {
+    const f = e.target.files[0]; if (!f) return;
+    const t = await f.text();
+    try {
+        const parsed = JSON.parse(t);
+        // Support both old format (array) and new format (object with _version)
+        let docsArr = [], agendaArr = [], plantillasArr = [];
+        if (Array.isArray(parsed)) {
+            docsArr = parsed; // legacy: just docs
+        } else if (parsed._version) {
+            docsArr = parsed.docs || [];
+            agendaArr = parsed.agenda || [];
+            plantillasArr = parsed.plantillas || [];
+        } else {
+            throw new Error('Formato de backup no reconocido');
+        }
+        showBS(
+            'Importar Backup',
+            `<p style="margin-bottom:10px">Se importarán:</p>
+             <ul style="padding-left:16px;line-height:2">
+               <li><b>${docsArr.length}</b> documentos</li>
+               <li><b>${agendaArr.length}</b> contactos de agenda</li>
+               <li><b>${plantillasArr.length}</b> plantillas</li>
+             </ul>
+             <p style="margin-top:10px;color:var(--dim);font-size:.78rem">Los datos existentes no se eliminarán. Se añadirán como nuevos registros.</p>`,
+            [
+                {label:'Cancelar', cls:'cancel', fn:'closeBS()'},
+                {label:'Importar', cls:'ok', fn:`_doImport(${JSON.stringify(JSON.stringify({d:docsArr,a:agendaArr,p:plantillasArr}))})`}
+            ]
+        );
+        window._pendingImport = {d: docsArr, a: agendaArr, p: plantillasArr};
+    } catch(err) {
+        toast('JSON inválido: ' + err.message, 'err');
+    }
+    e.target.value = '';
+}
+
+async function _doImport(jsonStr) {
+    closeBS();
+    const data = window._pendingImport;
+    if (!data) return;
+    let counts = {d:0, a:0, p:0};
+    for (const r of data.d) { const rec={...r}; delete rec.id; await dbAdd(STORE,rec); counts.d++; }
+    for (const r of data.a) { const rec={...r}; delete rec.id; await dbAdd(AG,rec); counts.a++; }
+    for (const r of data.p) { const rec={...r}; delete rec.id; await dbAdd(TPL,rec); counts.p++; }
+    delete window._pendingImport;
+    await updateHistBadge();
+    toast(`✓ Importados: ${counts.d} docs, ${counts.a} agenda, ${counts.p} plantillas`, 'ok');
+    await updateBackupStats();
+}
+
+async function updateBackupStats() {
+    const el = document.getElementById('backup-stats');
+    if (!el) return;
+    const [docs, agenda] = await Promise.all([dbAll(STORE), dbAll(AG)]);
+    el.textContent = `${docs.length} documentos · ${agenda.length} contactos en agenda`;
+}
+
+
 function confirmClear(){ showBS('Vaciar Base de Datos','Se eliminarán TODOS los documentos.',[{label:'Cancelar',cls:'cancel',fn:'closeBS()'},{label:'Vaciar BD',cls:'danger',fn:'_clearOk()'}]); }
 async function _clearOk(){ closeBS(); await dbClear(STORE); await renderHist(); await updateHistBadge(); toast('BD vaciada','warn'); }
 
@@ -480,10 +708,22 @@ async function renderTemplates(){
 }
 
 async function generateCMR(){
+    // Validación campos obligatorios
+    const missing=[];
+    if(!gv('senderBlock')) missing.push('Remitente (casilla 1)');
+    if(!gv('rcvBlock')) missing.push('Destinatario (casilla 2)');
+    if(!gv('placeLoading')) missing.push('Lugar de Carga (casilla 3)');
+    if(!gv('placeDelivery')) missing.push('Lugar de Entrega (casilla 4)');
+    if(missing.length){
+        showBS('Campos Obligatorios',
+            '<p style="margin-bottom:10px">Faltan los siguientes campos:</p><ul style="padding-left:16px;line-height:2">'+missing.map(f=>'<li><b>'+f+'</b></li>').join('')+'</ul>',
+            [{label:'Entendido',cls:'ok',fn:'closeBS()'}]);
+        return;
+    }
     if(typeof pdfMake==='undefined'){toast('⚠ pdfmake no cargado','err',5000);return;}
     if(!pdfMake.vfs||Object.keys(pdfMake.vfs).length===0){toast('⚠ Fuentes PDF no cargadas','err',5000);return;}
     const data=collect();
-    try{const id=await dbAdd(STORE,data);data.id=id;await updateHistBadge()}catch(e){console.warn('DB save:',e)}
+    try{const id=await dbAdd(STORE,data);data.id=id;await updateHistBadge();clearDraft();_advanceSeq();}catch(e){console.warn('DB save:',e)}
     showOv(true);
     const safetyTimer=setTimeout(()=>{showOv(false);toast('⚠ Tiempo agotado','err',5000)},25000);
     try{buildPDF(data,safetyTimer);}catch(err){clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+err.message,'err',6000);}
@@ -497,14 +737,14 @@ function buildPDF(D,safetyTimer){
     const senderBlock=D.senderBlock||'—'; const rcvBlock=D.rcvBlock||'—'; const carrierBlock=D.carrierBlock||'—';
 
     const copies = isNacional ? [
-        {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#0f766e',BG:'#f0fdfa',LT:'#ccfbf1'},
-        {lbl:'COPIA 2',sub:'DESTINATARIO / CONSIGNEE',AC:'#1e40af',BG:'#eff6ff',LT:'#dbeafe'},
-        {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#7c3aed',BG:'#faf5ff',LT:'#ede9fe'}
+        {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#0f766e'},
+        {lbl:'COPIA 2',sub:'DESTINATARIO / CONSIGNEE',AC:'#1e40af'},
+        {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#7c3aed'}
     ] : [
-        {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#b91c1c',BG:'#fff5f5',LT:'#fff0f0'},
-        {lbl:'COPIA 2',sub:'DESTINATARIO / CONSIGNEE',AC:'#1e3a8a',BG:'#f5f8ff',LT:'#eef2ff'},
-        {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#065f46',BG:'#f2fff9',LT:'#e6ffef'},
-        {lbl:'COPIA 4',sub:'ADMINISTRACIÓN / ADMIN', AC:'#1f2937',BG:'#f9fafb',LT:'#f3f4f6'}
+        {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#b91c1c'},
+        {lbl:'COPIA 2',sub:'DESTINATARIO / CONSIGNEE',AC:'#1e3a8a'},
+        {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#065f46'},
+        {lbl:'COPIA 4',sub:'ADMINISTRACIÓN / ADMIN', AC:'#1f2937'}
     ];
 
     const tituloDocumento = isNacional ? 'CARTA DE PORTE NACIONAL' : 'CARTA DE PORTE INTERNACIONAL (CMR)';
@@ -524,20 +764,23 @@ function buildPDF(D,safetyTimer){
 
     const content=[];
     copies.forEach((cp,ci)=>{
-        const{AC,BG,LT}=cp; const lay={hLineWidth:()=>1, vLineWidth:()=>1, hLineColor:()=>AC, vLineColor:()=>AC};
-        content.push({canvas:[{type:'rect',x:0,y:0,w:595.28-36,h:841.89-36,color:BG}],absolutePosition:{x:18,y:18}});
-        const box=(cas,title,cnt,opts={})=>{ const lines=cnt.split('\n'); return {stack:[ {columns:[{text:String(cas),fontSize:6,bold:true,color:AC,width:'auto'},{text:title,fontSize:6,color:'#555',width:'*',alignment:'right'}],margin:[5,4,5,2]}, {text:lines[0]||'—',fontSize:8.5,bold:!!lines[0],color:'#111',margin:[5,0,5,0]}, ...(lines.slice(1).length?[{text:lines.slice(1).join('\n'),fontSize:7.5,color:'#333',margin:[5,2,5,4],lineHeight:1.25}]:[{text:'',margin:[5,0,5,4]}]) ],border:[true,true,true,true],fillColor:opts.fill||'#fff',margin:[0,0,0,0]}; };
-        if(logoDataURL){ content.push({table:{widths:['auto','*','auto'],body:[[ {image:logoDataURL,width:52,height:32,margin:[10,8,6,8],border:[false,false,false,false]}, {stack:[{text:tituloDocumento,fontSize:12,bold:true,color:AC},{text:subtituloLegal,fontSize:6,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7.5,color:'#333'}],border:[false,false,false,false],margin:[0,8,0,8]}, {stack:[{text:cp.lbl,fontSize:10,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:6,color:'#666',alignment:'right'}],border:[false,false,false,false],margin:[0,8,10,8]} ]]},layout:'noBorders',margin:[0,0,0,1]}); } else { content.push({table:{widths:['*','auto'],body:[[ {stack:[{text:tituloDocumento,fontSize:13,bold:true,color:AC},{text:subtituloLegal,fontSize:6,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7.5,color:'#333'}],border:[false,false,false,false],margin:[10,8,0,8]}, {stack:[{text:cp.lbl,fontSize:10,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:6,color:'#666',alignment:'right'}],border:[false,false,false,false],margin:[0,8,10,8]} ]]},layout:'noBorders',margin:[0,0,0,1]}); }
-        content.push({table:{widths:['*','*'],body:[[box(1,'Remitente · Sender',senderBlock),box(2,'Destinatario · Consignee',rcvBlock)]]},layout:lay,margin:[0,0,0,1]});
-        content.push({table:{widths:['*','*','auto'],body:[[box(3,'Lugar de carga',(D.placeLoading||'—')+(D.clientRef?'\nRef: '+D.clientRef:'')),box(4,'Lugar de entrega',(D.placeDelivery||'—')),box(5,'Fecha prev. entrega',delivStr)]]},layout:lay,margin:[0,0,0,1]});
-        content.push({table:{widths:['*','auto','auto'],body:[[box(5,'Docs. anexos / Albarán',D.docsAnexos||'—'),box(19,'Franqueo',D.freightTerms||'—',{fill:LT}),box(14,'Reembolso €',D.codAmount||'—',{fill:LT})]]},layout:lay,margin:[0,0,0,1]});
-        content.push({table:{widths:['*','auto','auto'],body:[[box(16,'Transportista · Carrier',carrierBlock),box('16f','Conductor',[D.driverName||'—',D.driverDNI?'DNI '+D.driverDNI:''].filter(Boolean).join('\n')),box('16b','Matrícula',[D.plateTractor||'—',D.plateTrailer||'—'].filter(Boolean).join('\n'),{fill:LT})]]},layout:lay,margin:[0,0,0,1]});
+        const{AC}=cp; const lay={hLineWidth:()=>1, vLineWidth:()=>1, hLineColor:()=>AC, vLineColor:()=>AC};
+        const box=(cas,title,cnt,opts)=>{ const lines=cnt.split('\n'); const bdy=[]; bdy.push({columns:[{text:String(cas),fontSize:6,bold:true,color:AC,width:'auto'},{text:title,fontSize:6,color:'#555',width:'*',alignment:'right'}],margin:[4,3,4,2]}); if(lines[0]) bdy.push({text:lines[0],fontSize:8.5,bold:true,color:'#111',margin:[4,0,4,0]}); if(lines.length>1) bdy.push({text:lines.slice(1).join('\n'),fontSize:7.5,color:'#333',margin:[4,1,4,3],lineHeight:1.2}); if(!bdy[1]) bdy.push({text:'',margin:[4,3,4,3]}); return {stack:bdy,border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]}; };
+        const boxHdr=(cas,title,cnt)=>{ const lines=cnt.split('\n'); const hdr={table:{widths:['*'],body:[[{text:[{text:String(cas)+' ',bold:true},{text:title}],fontSize:6,color:'#fff',fillColor:AC,margin:[2,3,2,3]}]]},layout:'noBorders'}; const bdy=[]; if(lines[0]) bdy.push({text:lines[0],fontSize:8.5,bold:true,color:'#111',margin:[4,3,4,0]}); if(lines.length>1) bdy.push({text:lines.slice(1).join('\n'),fontSize:7.5,color:'#333',margin:[4,1,4,3],lineHeight:1.2}); if(!bdy.length) bdy.push({text:'',margin:[4,3,4,3]}); return {stack:[hdr,...bdy],border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]}; };
+        if(logoDataURL){ content.push({table:{widths:['auto','*','auto'],body:[[ {image:logoDataURL,width:46,height:28,margin:[8,6,4,6],border:[false,false,false,false]}, {stack:[{text:tituloDocumento,fontSize:11,bold:true,color:AC},{text:subtituloLegal,fontSize:5.5,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7,color:'#333'}],border:[false,false,false,false],margin:[0,6,0,6]}, {stack:[{text:cp.lbl,fontSize:9,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:5.5,color:'#666',alignment:'right'}],border:[false,false,false,false],margin:[0,6,8,6]} ]]},layout:'noBorders',margin:[0,0,0,0]}); } else { content.push({table:{widths:['*','auto'],body:[[ {stack:[{text:tituloDocumento,fontSize:12,bold:true,color:AC},{text:subtituloLegal,fontSize:5.5,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7,color:'#333'}],border:[false,false,false,false],margin:[8,6,0,6]}, {stack:[{text:cp.lbl,fontSize:9,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:5.5,color:'#666',alignment:'right'}],border:[false,false,false,false],margin:[0,6,8,6]} ]]},layout:'noBorders',margin:[0,0,0,0]}); }
+        content.push({table:{widths:['*','*'],body:[[boxHdr(1,'Remitente · Sender',senderBlock),boxHdr(2,'Destinatario · Consignee',rcvBlock)]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths:['*','*','auto'],body:[[box(3,'Lugar de carga',(D.placeLoading||'—')+(D.clientRef?'\nRef: '+D.clientRef:'')),box(4,'Lugar de entrega',(D.placeDelivery||'—')),box(5,'Fecha prev. entrega',delivStr)]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths:['*','auto','auto'],body:[[box(5,'Docs. anexos / Albarán',D.docsAnexos||'—'),box(19,'Franqueo',D.freightTerms||''),box(14,'Reembolso €',D.codAmount||'')]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths:['*','auto','auto'],body:[[box(16,'Transportista · Carrier',carrierBlock),box('16f','Conductor',[D.driverName||'—',D.driverDNI?'DNI '+D.driverDNI:''].filter(Boolean).join('\n')),box('16b','Matrícula',[D.plateTractor||'—',D.plateTrailer||'—'].filter(Boolean).join('\n'))]]},layout:lay,margin:[0,0,0,0]});
         const succCarriers=D.successiveCarriers&&D.successiveCarriers.length?D.successiveCarriers:[];
-        if(succCarriers.length){ const succText=succCarriers.map(s=>`${s.name}\n${s.address}`).join('\n\n'); content.push({table:{widths:['*'],body:[[box(17,'Porteadores Sucesivos',succText)]]},layout:lay,margin:[0,0,0,1]}); } else { content.push({table:{widths:['*'],body:[[box(17,'Porteadores Sucesivos','No designados')]]},layout:lay,margin:[0,0,0,1]}); }
+        if(succCarriers.length){
+            const succText=succCarriers.map(s=>`${s.name}\n${s.address}`).join('\n\n');
+            content.push({table:{widths:['*'],body:[[box(17,'Porteadores Sucesivos',succText)]]},layout:lay,margin:[0,0,0,0]});
+        } else {
+            content.push({table:{widths:['*'],body:[[box(17,'Porteadores Sucesivos','')]]},layout:lay,margin:[0,0,0,0]});
+        }
 
-        // MERCANCÍAS con 10 filas vacías si no hay datos
         const goodsLines = D.goodsLines && D.goodsLines.length ? D.goodsLines : [{desc:'',marks:'',packing:'',qty:'',weight:'',volume:''}];
-        const totalQty = goodsLines.reduce((s,l)=>s+(parseFloat(l.qty)||0),0);
         const totalWeight = goodsLines.reduce((s,l)=>s+(parseFloat(l.weight)||0),0);
         const totalVolume = goodsLines.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
         const allRows = [];
@@ -548,62 +791,64 @@ function buildPDF(D,safetyTimer){
             allRows.push({desc:'', marks:'', packing:'', qty:'', weight:'', volume:'', stat:''});
         }
         const goodsHeader = [
-            {text:'6 Marcas y Núm.',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
-            {text:'7 Núm. Bultos',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
-            {text:'8 Clase Embalaje',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
-            {text:'9 Naturaleza Mercancía',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
-            {text:'11 Peso Bruto kg',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
-            {text:'12 Vol. m³',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'},
-            {text:'N. Estadístico',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],alignment:'center'}
+            {text:'6 Marcas y Núm.',fontSize:5.5,bold:true,color:'#fff',fillColor:AC,margin:[3,2,3,2],alignment:'center'},
+            {text:'7 Núm. Bultos',fontSize:5.5,bold:true,color:'#fff',fillColor:AC,margin:[3,2,3,2],alignment:'center'},
+            {text:'8 Clase Embalaje',fontSize:5.5,bold:true,color:'#fff',fillColor:AC,margin:[3,2,3,2],alignment:'center'},
+            {text:'9 Naturaleza Mercancía',fontSize:5.5,bold:true,color:'#fff',fillColor:AC,margin:[3,2,3,2],alignment:'center'},
+            {text:'11 Peso Bruto kg',fontSize:5.5,bold:true,color:'#fff',fillColor:AC,margin:[3,2,3,2],alignment:'center'},
+            {text:'12 Vol. m³',fontSize:5.5,bold:true,color:'#fff',fillColor:AC,margin:[3,2,3,2],alignment:'center'},
+            {text:'N. Estadístico',fontSize:5.5,bold:true,color:'#fff',fillColor:AC,margin:[3,2,3,2],alignment:'center'}
         ];
         const goodsBody = [goodsHeader];
         allRows.forEach(l => {
             goodsBody.push([
-                {text:l.marks||' ',fontSize:7.5,color:l.marks?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff'},
-                {text:l.qty||' ',fontSize:7.5,color:l.qty?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff',alignment:'center'},
-                {text:l.packing||' ',fontSize:7.5,color:l.packing?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff'},
-                {text:l.desc||' ',fontSize:7.5,bold:!!l.desc,color:l.desc?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff'},
-                {text:l.weight?l.weight+' kg':' ',fontSize:7.5,color:l.weight?'#111':'#fff',margin:[4,3,4,3],fillColor:LT,alignment:'center'},
-                {text:l.volume?l.volume+' m³':' ',fontSize:7.5,color:l.volume?'#111':'#fff',margin:[4,3,4,3],fillColor:LT,alignment:'center'},
-                {text:l.stat||' ',fontSize:7.5,color:l.stat?'#111':'#fff',margin:[4,3,4,3],fillColor:'#fff',alignment:'center'}
+                {text:l.marks||' ',fontSize:7,color:l.marks?'#111':'#fff',margin:[3,2,3,2],fillColor:'#fff'},
+                {text:l.qty||' ',fontSize:7,color:l.qty?'#111':'#fff',margin:[3,2,3,2],fillColor:'#fff',alignment:'center'},
+                {text:l.packing||' ',fontSize:7,color:l.packing?'#111':'#fff',margin:[3,2,3,2],fillColor:'#fff'},
+                {text:l.desc||' ',fontSize:7,bold:!!l.desc,color:l.desc?'#111':'#fff',margin:[3,2,3,2],fillColor:'#fff'},
+                {text:l.weight?l.weight+' kg':' ',fontSize:7,color:l.weight?'#111':'#fff',margin:[3,2,3,2],fillColor:'#fff',alignment:'center'},
+                {text:l.volume?l.volume+' m³':' ',fontSize:7,color:l.volume?'#111':'#fff',margin:[3,2,3,2],fillColor:'#fff',alignment:'center'},
+                {text:l.stat||' ',fontSize:7,color:l.stat?'#111':'#fff',margin:[3,2,3,2],fillColor:'#fff',alignment:'center'}
             ]);
         });
-        // Fila de totales
         goodsBody.push([
-            {text:'TOTALES',fontSize:6.5,bold:true,color:'#fff',fillColor:AC,margin:[4,3,4,3],colSpan:2,alignment:'right'},{},
-            {text:'',fillColor:LT,margin:[4,3,4,3]},{text:'',fillColor:LT,margin:[4,3,4,3]},
-            {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:7.5,bold:true,color:'#111',fillColor:LT,margin:[4,3,4,3],alignment:'center'},
-            {text:totalVolume?totalVolume.toFixed(2)+' m³':'—',fontSize:7.5,bold:true,color:'#111',fillColor:LT,margin:[4,3,4,3],alignment:'center'},
-            {text:'',fillColor:LT,margin:[4,3,4,3]}
+            {text:'TOTALES',fontSize:6,bold:true,color:'#fff',fillColor:AC,margin:[3,2,3,2],colSpan:2,alignment:'right'},{},
+            {text:'',fillColor:'#fff',margin:[3,2,3,2]},{text:'',fillColor:'#fff',margin:[3,2,3,2]},
+            {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:7,bold:true,color:'#111',fillColor:'#fff',margin:[3,2,3,2],alignment:'center'},
+            {text:totalVolume?totalVolume.toFixed(2)+' m³':'—',fontSize:7,bold:true,color:'#111',fillColor:'#fff',margin:[3,2,3,2],alignment:'center'},
+            {text:'',fillColor:'#fff',margin:[3,2,3,2]}
         ]);
-        // Dos líneas libres sin divisiones verticales (texto libre)
         const freeLine1 = (document.getElementById('gl-free-1')||{}).value||'';
         const freeLine2 = (document.getElementById('gl-free-2')||{}).value||'';
-        const freeLayout = { hLineWidth:(i,n)=>i===0||i===n.table.body.length?1:0.5, vLineWidth:()=>0, hLineColor:()=>'#dce1e8', paddingLeft:()=>4, paddingRight:()=>4, paddingTop:()=>3, paddingBottom:()=>3 };
-        goodsBody.push([{text:freeLine1||' ',fontSize:7.5,color:'#111',margin:[4,4,4,4],colSpan:7,fillColor:'#fff',minHeight:16},{},{},{},{},{},{}]);
-        goodsBody.push([{text:freeLine2||' ',fontSize:7.5,color:'#111',margin:[4,4,4,4],colSpan:7,fillColor:'#fff',minHeight:16},{},{},{},{},{},{}]);
+        const eurosCargados = (document.getElementById('eurosCargados')||{}).value||'';
+        const eurosDevueltos = (document.getElementById('eurosDevueltos')||{}).value||'';
+        goodsBody.push([{text:freeLine1||' ',fontSize:7,color:'#111',margin:[3,3,3,3],colSpan:7,fillColor:'#fff',minHeight:14},{},{},{},{},{},{}]);
+        goodsBody.push([{text:freeLine2||' ',fontSize:7,color:'#111',margin:[3,3,3,3],colSpan:7,fillColor:'#fff',minHeight:14},{},{},{},{},{},{}]);
+        goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:6.5},eurosCargados||'—',{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:6.5},eurosDevueltos||'—'],fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:12},{},{},{},{},{},{}]);
 
-        content.push({table:{widths:['auto','auto','auto','*','auto','auto','auto'],body:goodsBody,dontBreakRows:true},layout:lay,margin:[0,0,0,1]});
+        content.push({table:{widths:['auto','auto','auto','*','auto','auto','auto'],body:goodsBody,dontBreakRows:true},layout:lay,margin:[0,0,0,0]});
 
-        content.push({table:{widths:['*','*'],body:[[box(13,'Instrucciones del Remitente',D.senderInstr||'—'),box(18,'Reservas y Observaciones',D.observations||'Sin observaciones')]]},layout:lay,margin:[0,0,0,1]});
+        content.push({table:{widths:['*','*'],body:[[box(13,'Instrucciones del Remitente',D.senderInstr||'—'),box(18,'Reservas y Observaciones',D.observations||'Sin observaciones')]]},layout:lay,margin:[0,0,0,0]});
 
-        // Firmas
-        const sigSenderCell=()=>{ const hasSig=D.sigSender && D.sigSender.startsWith('data:image'); if(hasSig){ return {stack:[ {columns:[{text:'22',fontSize:6,bold:true,color:AC},{text:'Firma Remitente',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,3]}, {image:D.sigSender,width:130,height:65,alignment:'center'}, {text:(D.senderBlock||'').split('\n')[0]||'',fontSize:7,alignment:'center',margin:[0,2,0,0]} ],border:[true,true,true,true],margin:[3,3,3,3]}; } else { return {stack:[ {columns:[{text:'22',fontSize:6,bold:true,color:AC},{text:'Firma Remitente',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,8]}, {canvas:[{type:'rect',x:4,y:0,w:120,h:50,r:2,lineWidth:.5,lineColor:AC}],margin:[0,0,0,4]}, {text:(D.senderBlock||'').split('\n')[0]||'',fontSize:7,alignment:'center',color:'#888'} ],border:[true,true,true,true],margin:[3,3,3,3]}; } };
-        const sigDriverCell=()=>{ const hasSig=D.sigDriver && D.sigDriver.startsWith('data:image'); if(hasSig){ return {stack:[ {columns:[{text:'23',fontSize:6,bold:true,color:AC},{text:'Firma Transportista',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,3]}, {image:D.sigDriver,width:130,height:65,alignment:'center'}, {text:D.driverName||'',fontSize:7,alignment:'center',margin:[0,2,0,0]} ],border:[true,true,true,true],margin:[3,3,3,3]}; } else { return {stack:[ {columns:[{text:'23',fontSize:6,bold:true,color:AC},{text:'Firma Transportista',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,8]}, {canvas:[{type:'rect',x:4,y:0,w:120,h:50,r:2,lineWidth:.5,lineColor:AC}],margin:[0,0,0,4]}, {text:D.driverName||'',fontSize:7,alignment:'center',color:'#888'} ],border:[true,true,true,true],margin:[3,3,3,3]}; } };
-        const sigConsCell=()=>({stack:[ {columns:[{text:'24',fontSize:6,bold:true,color:AC},{text:'Firma Destinatario',fontSize:6,color:'#555',alignment:'right'}],margin:[0,0,0,8]}, {text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:7,alignment:'center',color:'#888'} ],border:[true,true,true,true],margin:[3,3,3,3]});
+        const sigHdr22={table:{widths:['*'],body:[[{text:[{text:'22 ',bold:true},{text:'Firma Remitente'}],fontSize:6,color:'#fff',fillColor:AC,margin:[2,3,2,3]}]]},layout:'noBorders'};
+        const sigHdr23={table:{widths:['*'],body:[[{text:[{text:'23 ',bold:true},{text:'Firma Transportista'}],fontSize:6,color:'#fff',fillColor:AC,margin:[2,3,2,3]}]]},layout:'noBorders'};
+        const sigHdr24={table:{widths:['*'],body:[[{text:[{text:'24 ',bold:true},{text:'Firma Destinatario'}],fontSize:6,color:'#fff',fillColor:AC,margin:[2,3,2,3]}]]},layout:'noBorders'};
+        const sigSenderCell=()=>{ const hasSig=D.sigSender&&D.sigSender.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr22,{image:D.sigSender,width:110,height:55,alignment:'center',margin:[0,6,0,0]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',margin:[0,1,0,3]}],border:[true,true,true,true],margin:[2,2,2,2],fillColor:'#fff'}; } return {stack:[sigHdr22,{canvas:[{type:'rect',x:4,y:4,w:110,h:44,r:2,lineWidth:.5,lineColor:AC}],margin:[0,6,0,3]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,3]}],border:[true,true,true,true],margin:[2,2,2,2],fillColor:'#fff'}; };
+        const sigDriverCell=()=>{ const hasSig=D.sigDriver&&D.sigDriver.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr23,{image:D.sigDriver,width:110,height:55,alignment:'center',margin:[0,6,0,0]},{text:D.driverName||'',fontSize:6.5,alignment:'center',margin:[0,1,0,3]}],border:[true,true,true,true],margin:[2,2,2,2],fillColor:'#fff'}; } return {stack:[sigHdr23,{canvas:[{type:'rect',x:4,y:4,w:110,h:44,r:2,lineWidth:.5,lineColor:AC}],margin:[0,6,0,3]},{text:D.driverName||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,3]}],border:[true,true,true,true],margin:[2,2,2,2],fillColor:'#fff'}; };
+        const sigConsCell=()=>({stack:[sigHdr24,{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,10,0,3]}],border:[true,true,true,true],margin:[2,2,2,2],fillColor:'#fff'});
 
-        content.push({table:{widths:['*','*','*'],body:[[sigSenderCell(),sigDriverCell(),sigConsCell()]]},layout:lay,margin:[0,0,0,1]});
+        content.push({table:{widths:['*','*','*'],body:[[sigSenderCell(),sigDriverCell(),sigConsCell()]]},layout:lay,margin:[0,0,0,0]});
 
         const tituloClausulas = isNacional ? 'CLÁUSULAS LEGALES (Ley 15/2009 y Orden FOM/1882/2012)' : 'CLÁUSULAS DEL CONVENIO CMR';
-        content.push({table:{widths:['*'],body:[[{stack:[{text:tituloClausulas,fontSize:6,bold:true,color:AC,margin:[0,0,0,2]},{text:clausulasTexto,fontSize:5.5,color:'#444',lineHeight:1.2}],border:[true,true,true,true],fillColor:LT,margin:[3,2,3,2]}]]},layout:'noBorders',margin:[0,2,0,1]});
+        content.push({table:{widths:['*'],body:[[{stack:[{text:tituloClausulas,fontSize:5.5,bold:true,color:AC,margin:[2,2,2,2]},{text:clausulasTexto,fontSize:5,color:'#444',lineHeight:1.15,margin:[3,2,3,2]}],border:[true,true,true,true],fillColor:'#fff',margin:[1,1,1,1]}]]},layout:'noBorders',margin:[0,1,0,0]});
         const pieTexto = isNacional
             ? 'Documento generado conforme a la Ley 15/2009 y Orden FOM/1882/2012'
             : 'CMR Manager Pro  ·  Convenio CMR Ginebra 1956';
-        content.push({columns:[{text:(isNacional?'CARTA PORTE NAC. ':'CMR N.º ')+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:5.5,color:'#999'},{text:pieTexto,fontSize:5.5,color:'#bbb',alignment:'right'}],margin:[0,2,0,0]});
+        content.push({columns:[{text:(isNacional?'CARTA PORTE NAC. ':'CMR N.º ')+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:5,color:'#999'},{text:pieTexto,fontSize:5,color:'#bbb',alignment:'right'}],margin:[0,1,0,0]});
         if(ci<copies.length-1) content.push({text:'',pageBreak:'after'});
     });
     try{
-        pdfMake.createPdf({pageSize:'A4',pageMargins:[18,18,18,10],content,defaultStyle:{font:'Roboto',fontSize:9,color:'#111'},info:{title:(isNacional?'Carta Porte Nacional ':'CMR ')+num,author:'CMR Manager Pro',subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
+        pdfMake.createPdf({pageSize:'A4',pageMargins:[10,8,10,6],content,defaultStyle:{font:'Roboto',fontSize:9,color:'#111'},info:{title:(isNacional?'Carta Porte Nacional ':'CMR ')+num,author:'CMR Manager Pro',subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
             clearTimeout(safetyTimer);showOv(false);
             const url=URL.createObjectURL(blob); const win=window.open(url,'_blank');
             if(!win){ const a=document.createElement('a');a.href=url;a.download=(isNacional?'CARTA_PORTE_NAC_':'CMR_')+num.replace(/[^a-z0-9]/gi,'_')+'.pdf'; document.body.appendChild(a);a.click();document.body.removeChild(a); toast('✓ PDF descargado','ok'); } else toast('✓ Documento generado — '+copies.length+' copias','ok');
@@ -649,7 +894,7 @@ function renderPackingQF(){ const arr=getPackingHistory().slice(0,6); const el=d
 // ========== PWA ==========
 if ('serviceWorker' in navigator) {
     const swCode = `
-        const CACHE_NAME = 'cmr-pro-v2';
+        const CACHE_NAME = 'cmr-pro-v8';
         const ASSETS = [
             '/',
             'index.html',
@@ -713,9 +958,27 @@ if ('serviceWorker' in navigator) {
 })();
 
 window._appInit=async function(){
-    initSig();loadDefaults();
+    initSig(); loadDefaults();
     if(!document.querySelector('[id^="gl-desc-"]')) addGoodsLine();
     await updateHistBadge(); renderRcvQF(); renderDrvQF(); renderPackingQF();
+    attachAutosaveListeners();
+    await updateBackupStats();
+
+    // Offer to restore draft if one exists
+    const draft = loadDraft();
+    if (draft && draft.docNum) {
+        const age = Math.round((Date.now() - new Date(draft._draftSavedAt)) / 60000);
+        const ageStr = age < 1 ? 'hace menos de 1 min' : age === 1 ? 'hace 1 min' : `hace ${age} min`;
+        showBS(
+            'Borrador sin guardar',
+            `<p>Se encontró un borrador guardado <b>${ageStr}</b>.</p>
+             <p style="margin-top:8px;color:var(--dim);font-size:.78rem">Documento: <b>${draft.docNum||'Sin número'}</b>${draft.rcvBlock ? ' → ' + draft.rcvBlock.split('\n')[0] : ''}</p>`,
+            [
+                {label: 'Descartar', cls: 'cancel', fn: '_discardDraft()'},
+                {label: 'Restaurar borrador', cls: 'ok', fn: '_restoreDraft()'}
+            ]
+        );
+    }
 };
 setTimeout(()=>{ document.getElementById('load-bar').style.display='none'; document.getElementById('app-body').style.display='block'; if(!sigPad)initSig(); loadDefaults(); if(!document.querySelector('[id^="gl-desc-"]'))addGoodsLine(); updateHistBadge(); renderRcvQF(); renderDrvQF(); renderPackingQF(); },10000);
 </script>
