@@ -43,6 +43,72 @@
             onerror="showLoadErr('Error cargando signature_pad.')"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, doc, addDoc, getDocs, deleteDoc, query, orderBy, onSnapshot, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZ53Jg7p0xjKDogPYF9yDc1YctgZ1oV3I",
+            authDomain: "camarapro-b375b.firebaseapp.com",
+            projectId: "camarapro-b375b",
+            storageBucket: "camarapro-b375b.firebasestorage.app",
+            messagingSenderId: "112172696612",
+            appId: "1:112172696612:web:3acdb7860ba66b2625c4b1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Mapeo de stores locales a colecciones Firestore
+        const COL = { cmr: 'cmr_docs', plantillas: 'cmr_plantillas', agenda: 'cmr_agenda' };
+
+        window._fb = {
+            add: async (store, rec) => {
+                const col = COL[store] || store;
+                rec = { ...rec, _fbUpdated: new Date().toISOString() };
+                const ref = await addDoc(collection(db, col), rec);
+                return ref.id;
+            },
+            all: async (store) => {
+                const col = COL[store] || store;
+                const snap = await getDocs(query(collection(db, col), orderBy('savedAt', 'desc')));
+                return snap.docs.map(d => ({ ...d.data(), id: d.id }));
+            },
+            del: async (store, id) => {
+                const col = COL[store] || store;
+                await deleteDoc(doc(db, col, String(id)));
+            },
+            clear: async (store) => {
+                const col = COL[store] || store;
+                const snap = await getDocs(collection(db, col));
+                const batch = writeBatch(db);
+                snap.docs.forEach(d => batch.delete(d.ref));
+                await batch.commit();
+            }
+        };
+
+        window._fbReady = true;
+
+        // Indicador sync en topbar
+        const syncEl = document.getElementById('syncIndicator');
+        if (syncEl) { syncEl.textContent = '🟢'; syncEl.title = 'Sincronizado con Firebase'; }
+
+        // Escuchar cambios en tiempo real en historial
+        onSnapshot(collection(db, 'cmr_docs'), () => {
+            if (document.querySelector('.tab[data-p="hist"]')?.classList.contains('active')) {
+                if (window.renderHist) window.renderHist();
+            }
+            if (window.updateHistBadge) window.updateHistBadge();
+        });
+        onSnapshot(collection(db, 'cmr_agenda'), () => {
+            if (window.renderRcvQF) window.renderRcvQF();
+            if (window.renderDrvQF) window.renderDrvQF();
+            if (document.querySelector('.tab[data-p="agenda"]')?.classList.contains('active')) {
+                if (window.renderAgenda) window.renderAgenda();
+            }
+        });
+    </script>
+
     <style>
         #load-bar{position:fixed;inset:0;background:#0f1e2e;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
         .lb-mark{width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#1a4fd6,#0f2e8a);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:#fff}
@@ -69,6 +135,7 @@
         .logo-name{font-size:.9rem;font-weight:700;color:var(--snow)}
         .logo-sub{font-size:.55rem;color:var(--dim);font-family:'JetBrains Mono',monospace;letter-spacing:.07em}
         .tb-right{display:flex;gap:7px;align-items:center}
+        #syncIndicator{font-size:.75rem;opacity:.7;cursor:default}
         .ico-btn{width:34px;height:34px;border-radius:var(--r3);border:1px solid var(--line2);background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;color:var(--mid)}
         .ico-btn:active{transform:scale(.93)} .ico-btn svg{width:16px;height:16px}
         .save-btn{height:34px;padding:0 13px;border-radius:var(--r3);border:1px solid var(--line2);background:var(--bg3);color:var(--snow);font-size:.73rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Sora',sans-serif;transition:all .15s}
@@ -210,6 +277,7 @@
             </div>
         </div>
         <div class="tb-right">
+            <span id="syncIndicator" title="Conectando...">⏳</span>
             <button class="ico-btn" aria-label="Nuevo documento CMR" title="Nuevo CMR" onclick="newCMR()">+</button>
             <button class="save-btn" aria-label="Guardar remitente y transportista por defecto" onclick="saveDefaults()">Guardar</button>
             <button class="gen-top" aria-label="Generar documento PDF" onclick="generateCMR()">PDF</button>
@@ -307,10 +375,28 @@ function closeBS(){document.getElementById('bs-bg').classList.remove('on')}
 document.getElementById('bs-bg')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeBS()});
 
 function openDB(){ return new Promise((res,rej)=>{ if(_db){res(_db);return} const r=indexedDB.open(DB_N,3); r.onupgradeneeded=e=>{ const db=e.target.result; if(!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE,{keyPath:'id',autoIncrement:true}); if(!db.objectStoreNames.contains(AG)) db.createObjectStore(AG,{keyPath:'id',autoIncrement:true}); if(!db.objectStoreNames.contains(TPL)) db.createObjectStore(TPL,{keyPath:'id',autoIncrement:true}); }; r.onsuccess=e=>{_db=e.target.result;res(_db)}; r.onerror=rej; }); }
-async function dbAdd(st,rec){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readwrite').objectStore(st).add(rec);r.onsuccess=e=>res(e.target.result);r.onerror=rej})}
-async function dbAll(st){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readonly').objectStore(st).getAll();r.onsuccess=e=>res([...e.target.result].reverse());r.onerror=rej})}
-async function dbDel(st,id){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readwrite').objectStore(st).delete(id);r.onsuccess=res;r.onerror=rej})}
-async function dbClear(st){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readwrite').objectStore(st).clear();r.onsuccess=res;r.onerror=rej})}
+async function _idbAdd(st,rec){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readwrite').objectStore(st).add(rec);r.onsuccess=e=>res(e.target.result);r.onerror=rej})}
+async function _idbAll(st){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readonly').objectStore(st).getAll();r.onsuccess=e=>res([...e.target.result].reverse());r.onerror=rej})}
+async function _idbDel(st,id){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readwrite').objectStore(st).delete(id);r.onsuccess=res;r.onerror=rej})}
+async function _idbClear(st){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(st,'readwrite').objectStore(st).clear();r.onsuccess=res;r.onerror=rej})}
+
+// Funciones públicas — usan Firebase si está listo, sino IndexedDB
+async function dbAdd(st,rec){
+    if(window._fb){try{return await window._fb.add(st,rec)}catch(e){console.warn('FB add error:',e)}}
+    return _idbAdd(st,rec);
+}
+async function dbAll(st){
+    if(window._fb){try{return await window._fb.all(st)}catch(e){console.warn('FB all error:',e)}}
+    return _idbAll(st);
+}
+async function dbDel(st,id){
+    if(window._fb){try{return await window._fb.del(st,id)}catch(e){console.warn('FB del error:',e)}}
+    return _idbDel(st,id);
+}
+async function dbClear(st){
+    if(window._fb){try{return await window._fb.clear(st)}catch(e){console.warn('FB clear error:',e)}}
+    return _idbClear(st);
+}
 
 // ========== AUTOGUARDADO ==========
 const DRAFT_KEY = 'cmr_draft_v1';
@@ -960,6 +1046,12 @@ if ('serviceWorker' in navigator) {
 window._appInit=async function(){
     initSig(); loadDefaults();
     if(!document.querySelector('[id^="gl-desc-"]')) addGoodsLine();
+    // Exponer funciones al scope global para listeners Firebase
+    window.renderHist = renderHist;
+    window.renderAgenda = renderAgenda;
+    window.renderRcvQF = renderRcvQF;
+    window.renderDrvQF = renderDrvQF;
+    window.updateHistBadge = updateHistBadge;
     await updateHistBadge(); renderRcvQF(); renderDrvQF(); renderPackingQF();
     attachAutosaveListeners();
     await updateBackupStats();
