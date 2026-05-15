@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="theme-color" content="#f0f4f8"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+    <meta name="apple-mobile-web-app-title" content="CMR Pro"/>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text x='50' y='60' font-size='40' font-family='sans-serif' fill='white' text-anchor='middle' font-weight='bold'>CMR</text></svg>"/>
+    <title>CMR Manager Pro</title>
+
+    <!-- Librerías externas -->
+    <script>
+        window._pdfReady = false;
+        window._sigReady = false;
+        function _checkReady() {
+            if (window._pdfReady && window._sigReady) {
+                document.getElementById('load-bar').style.display = 'none';
+                if (window._authOk) {
+                    document.getElementById('app-body').style.display = 'block';
+                    if (window._appInit && !window._appInited) {
+                        window._appInited = true;
+                        window._appInit();
+                    }
+                }
+            }
+        }
+        function _tryLoadFonts() {
+            var s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js';
+            s.onload = function() { window._pdfReady = true; _checkReady(); };
+            s.onerror = function() { showLoadErr('Error cargando fuentes PDF. Comprueba conexión y recarga.'); };
+            document.head.appendChild(s);
+        }
+        function showLoadErr(msg) {
+            var el = document.getElementById('load-err');
+            if (el) { el.textContent = msg; el.style.display = 'block'; }
+            var sp = document.querySelector('.lb-spin');
+            if (sp) sp.style.display = 'none';
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"
+            onload="_tryLoadFonts()"
+            onerror="showLoadErr('Error cargando pdfmake. Comprueba tu conexión a Internet.')"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js"
+            onload="window._sigReady=true;_checkReady()"
+            onerror="showLoadErr('Error cargando signature_pad.')"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+    <!-- Firebase (módulo ES) -->
+    <script type="module" src="js/firebase.js"></script>
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/app.css"/>
+</head>
+<body>
+
+<!-- ── Pantalla de carga ── -->
+<div id="load-bar">
+    <div class="lb-mark">CMR</div>
+    <div class="lb-name">CMR MANAGER PRO</div>
+    <div class="lb-spin"></div>
+    <div class="lb-sub">Cargando librerías PDF…</div>
+    <div id="load-err"></div>
+</div>
+
+<!-- ── Pantalla de Login ── -->
+<div id="login-screen">
+    <div class="ls-card">
+        <div class="ls-mark">CMR</div>
+        <div class="ls-title">CMR Manager Pro</div>
+        <div class="ls-sub">Acceso privado</div>
+        <div class="ls-field">
+            <label for="ls-user">Usuario</label>
+            <input id="ls-user" type="text" placeholder="usuario" autocomplete="username" autocapitalize="none" spellcheck="false"/>
+        </div>
+        <div class="ls-field">
+            <label for="ls-pass">Contraseña</label>
+            <input id="ls-pass" type="password" placeholder="••••••••" autocomplete="current-password"
+                   onkeydown="if(event.key==='Enter') window._doLogin()"/>
+        </div>
+        <button id="loginBtn" onclick="window._doLogin()">Entrar</button>
+        <div id="loginErr">Usuario o contraseña incorrectos</div>
+        <div class="ls-attempts" id="ls-attempts"></div>
+    </div>
+</div>
+
+<!-- ── Lock overlay (bloqueo por inactividad) ── -->
+<div id="lock-overlay">
+    <div class="ls-card" style="gap:0">
+        <div class="ls-mark">🔒</div>
+        <div class="ls-title" style="margin-bottom:4px">Sesión bloqueada</div>
+        <div class="ls-sub" style="margin-bottom:24px">Inactividad detectada</div>
+        <div class="ls-field">
+            <label for="lock-pass">Contraseña</label>
+            <input id="lock-pass" type="password" placeholder="••••••••" autocomplete="current-password"
+                   onkeydown="if(event.key==='Enter') window._doUnlock()"/>
+        </div>
+        <button id="unlockBtn" onclick="window._doUnlock()" style="width:100%;height:48px;border-radius:11px;border:none;background:linear-gradient(135deg,#1a4fd6,#0f2e8a);color:#fff;font-size:.9rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;margin-top:6px;box-shadow:0 4px 16px rgba(26,79,214,.4)">Desbloquear</button>
+        <div id="lockErr" style="display:none;margin-top:12px;padding:10px 14px;border-radius:9px;background:rgba(225,29,72,.1);border:1px solid rgba(225,29,72,.3);color:#fb7185;font-size:.75rem;text-align:center;width:100%">Contraseña incorrecta</div>
+    </div>
+</div>
+
+<!-- ── App principal ── -->
+<div id="app-body">
+    <a id="skip-link" href="#panel-form">Saltar al formulario</a>
+    <div id="topbar">
+        <div class="logo">
+            <div class="logo-mark">CMR</div>
+            <div>
+                <div class="logo-name">CMR Manager Pro</div>
+                <div class="logo-sub">CARTA DE PORTE INTERNACIONAL · IRU</div>
+            </div>
+        </div>
+        <div class="tb-right">
+            <span id="syncIndicator" title="Conectando...">⏳</span>
+            <button class="ico-btn" aria-label="Nuevo documento CMR" title="Nuevo CMR" onclick="newCMR()">+</button>
+            <button class="save-btn" aria-label="Guardar remitente y transportista por defecto" onclick="saveDefaults()">Guardar</button>
+            <button class="gen-top" aria-label="Generar documento PDF" onclick="generateCMR()">PDF</button>
+            <button class="ico-btn" aria-label="Cerrar sesión" title="Cerrar sesión" onclick="window._logout()" style="font-size:.8rem">🔒</button>
+        </div>
+    </div>
+
+    <div id="autosave-bar"><div id="autosave-dot"></div><span id="autosave-txt">BORRADOR GUARDADO</span></div>
+
+    <div id="tabs" role="tablist" aria-label="Secciones de la aplicación">
+        <div class="tab active" role="tab" tabindex="0" aria-selected="true"  aria-controls="panel-form"   data-p="form"   onclick="tab('form')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('form')">Documento</div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-hist"   data-p="hist"   onclick="tab('hist')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('hist')">Historial <span class="tbadge" id="histBadge" aria-label="documentos guardados">0</span></div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-agenda" data-p="agenda" onclick="tab('agenda')" onkeydown="if(event.key==='Enter'||event.key===' ')tab('agenda')">Agenda</div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-tmpl"   data-p="tmpl"   onclick="tab('tmpl')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('tmpl')">Plantillas</div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-cfg"    data-p="cfg"    onclick="tab('cfg')"    onkeydown="if(event.key==='Enter'||event.key===' ')tab('cfg')">Config</div>
+    </div>
+
+    <!-- ── Panel: Documento ── -->
+    <div id="panel-form" role="tabpanel" aria-labelledby="tab-form" class="panel active">
+        <div class="block"><div class="bhead"><span class="btag a">DOC</span><span class="btitle">Datos del Documento</span></div><div class="bbody">
+            <div class="fr"><label>Tipo de Documento</label>
+                <select id="tipoDoc" aria-label="Tipo de documento" onchange="onTipoDocChange()">
+                    <option value="cmr">CMR Internacional (Convenio CMR)</option>
+                    <option value="nacional">Carta de Porte Nacional (Ley 15/2009)</option>
+                </select>
+            </div>
+            <div class="fr2">
+                <div class="fr"><label for="docNum" style="display:flex;align-items:center;justify-content:space-between">N.º Documento <span id="docNumLockBtn" onclick="toggleDocNumLock()" style="cursor:pointer;font-size:.65rem;padding:2px 7px;border-radius:4px;background:rgba(26,79,214,.1);border:1px solid rgba(26,79,214,.25);color:var(--blue-l);font-family:'JetBrains Mono',monospace;letter-spacing:.03em">🔒 auto</span></label><input id="docNum" type="text" placeholder="auto" readonly style="background:#f7f9fc;color:var(--dim);cursor:not-allowed"/></div>
+                <div class="fr"><label for="docDate">Fecha de emisión</label><input id="docDate" aria-label="Fecha de emisión" type="date"/></div>
+            </div>
+            <div class="fr2">
+                <div class="fr"><label for="placeEmission">Lugar Emisión</label><input id="placeEmission" type="text" placeholder="Sevilla"/></div>
+                <div class="fr"><label for="docsAnexos">Docs Anexos</label><input id="docsAnexos" type="text" placeholder="Albarán" oninput="updateDocNum()"/></div>
+            </div>
+            <button onclick="saveAsTemplate()" class="save-btn" style="width:100%;justify-content:center;margin-top:10px">Guardar como plantilla</button>
+        </div></div>
+
+        <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" aria-label="Casilla 1: Datos del remitente" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="5"></textarea></div></div></div>
+
+        <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Destinatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" aria-label="Casilla 2: Datos del destinatario" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="5"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
+
+        <div class="block"><div class="bhead"><span class="btag g">3 · 4 · 5</span><span class="btitle">Recogida y Entrega</span></div><div class="bbody">
+            <div class="fr"><label for="placeLoading">Lugar de Carga</label><input id="placeLoading" aria-label="Casilla 4: Lugar de carga" type="text" placeholder="Polígono Industrial Norte, Sevilla"/></div>
+            <div class="fr"><label for="placeDelivery">Lugar de Entrega</label><input id="placeDelivery" aria-label="Casilla 3: Lugar de entrega" type="text" placeholder="Almacén Central, Berlín"/></div>
+            <div class="fr2">
+                <div class="fr"><label for="dateDelivery">Fecha Prevista Entrega</label><input id="dateDelivery" aria-label="Casilla 5: Fecha prevista de entrega" type="date"/></div>
+                <div class="fr"><label for="clientRef">Referencia Cliente</label><input id="clientRef" type="text" placeholder="PO-2024-XXX"/></div>
+            </div>
+        </div></div>
+
+        <div class="block"><div class="bhead"><span class="btag g">16</span><span class="btitle">Transportista</span><span class="bsaved" id="bs-carrier">✓ guardado</span></div><div class="bbody">
+            <div class="fr"><textarea id="carrierBlock" aria-label="Casilla 16: Datos del transportista" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="5"></textarea></div>
+            <div class="divl"></div>
+            <div class="ssep">Vehículo y Conductor</div>
+            <div class="qf-row" id="drv-qf"></div>
+            <div class="fr"><label for="driverName">Conductor</label><input id="driverName" type="text" placeholder="Nombre y apellidos"/></div>
+            <div class="fr"><label for="driverDNI">DNI Conductor</label><input id="driverDNI" type="text" placeholder="12345678X"/></div>
+            <div class="fr2">
+                <div class="fr"><label for="plateTractor">Matrícula Tractora</label><input id="plateTractor" type="text" placeholder="1234 ABC" style="text-transform:uppercase"/></div>
+                <div class="fr"><label for="plateTrailer">Matrícula Semirremolque</label><input id="plateTrailer" type="text" placeholder="R-5678 BC" style="text-transform:uppercase"/></div>
+            </div>
+            <div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveDrvToAgenda()">+ Guardar conductor en agenda</span></div>
+        </div></div>
+
+        <div class="block"><div class="bhead"><span class="btag v">17</span><span class="btitle">Porteadores Sucesivos</span></div><div class="bbody"><div id="successive-list"></div><button onclick="addSuccessiveCarrier()" style="width:100%;margin:8px 0 4px;padding:9px;border-radius:var(--r3);border:1px dashed var(--line2);background:transparent;color:var(--violet-l);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">+ Añadir porteador sucesivo</button></div></div>
+
+        <div class="block"><div class="bhead"><span class="btag a">6 · 7 · 8 · 9</span><span class="btitle">Descripción de la Mercancía</span></div><div class="bbody">
+            <div id="goods-lines"></div>
+            <button onclick="addGoodsLine()" style="width:100%;margin:8px 0 4px;padding:9px;border-radius:var(--r3);border:1px dashed var(--line2);background:transparent;color:var(--blue-l);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">+ Añadir línea de mercancía</button>
+            <div style="display:flex;gap:8px;margin-top:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--r3);border:1px solid var(--line)">
+                <div style="flex:1;text-align:center"><div style="font-size:.6rem;color:var(--dim)">Total Bultos</div><div id="totalQty" style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--snow)">0</div></div>
+                <div style="width:1px;background:var(--line)"></div>
+                <div style="flex:1;text-align:center"><div style="font-size:.6rem;color:var(--dim)">Total Peso kg</div><div id="totalWeight" style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--snow)">0</div></div>
+                <div style="width:1px;background:var(--line)"></div>
+                <div style="flex:1;text-align:center"><div style="font-size:.6rem;color:var(--dim)">Volumen m³</div><div id="totalVolume" style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--snow)">0</div></div>
+            </div>
+            <div style="margin-top:10px;border:1px solid var(--line);border-radius:var(--r3);overflow:hidden">
+                <div style="padding:6px 10px;background:linear-gradient(90deg,#f0f4f8,var(--bg2));border-bottom:1px solid var(--line);font-size:.6rem;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.08em">Líneas libres (texto sin columnas)</div>
+                <textarea id="gl-free-1" aria-label="Línea libre 1" placeholder="Línea libre 1 — texto adicional…" rows="2" style="width:100%;border:none;border-bottom:1px solid var(--line);border-radius:0;background:var(--bg);resize:vertical"></textarea>
+                <textarea id="gl-free-2" aria-label="Línea libre 2" placeholder="Línea libre 2 — texto adicional…" rows="2" style="width:100%;border:none;border-radius:0;background:var(--bg);resize:vertical"></textarea>
+                <div style="display:flex;gap:8px;padding:6px 10px;background:var(--bg);border-top:1px solid var(--line);align-items:center">
+                    <div style="display:flex;align-items:center;gap:4px"><label style="font-size:.6rem;white-space:nowrap">Eurp. Cargados</label><input id="eurosCargados" type="text" placeholder="0" style="width:50px;font-size:.78rem;padding:4px 6px;text-align:center"/></div>
+                    <div style="display:flex;align-items:center;gap:4px"><label style="font-size:.6rem;white-space:nowrap">Eurp. Devueltos</label><input id="eurosDevueltos" type="text" placeholder="0" style="width:50px;font-size:.78rem;padding:4px 6px;text-align:center"/></div>
+                </div>
+            </div>
+            <div class="qf-row" id="packing-qf" style="margin-top:8px"></div>
+        </div></div>
+
+        <div class="block"><div class="bhead"><span class="btag b">13 · 19 · 14</span><span class="btitle">Instrucciones y Condiciones</span></div><div class="bbody">
+            <div class="fr"><label for="senderInstr">Instrucciones del Remitente</label><textarea id="senderInstr" aria-label="Casilla 13: Instrucciones del remitente" rows="2"></textarea></div>
+            <div class="fr2">
+                <div class="fr"><label for="freightTerms">Franqueo</label><select id="freightTerms" aria-label="Casilla 19: Condiciones de franqueo"><option value="PORT PAGADO">Port Pagado</option><option value="PORT DEBIDO">Port Debido</option><option value="CONTRA REEMBOLSO">Contra Reembolso</option></select></div>
+                <div class="fr"><label for="codAmount">Reembolso €</label><input id="codAmount" aria-label="Casilla 14: Importe de reembolso" type="number" placeholder="0.00" step="0.01" min="0"/></div>
+            </div>
+        </div></div>
+
+        <div class="block"><div class="bhead"><span class="btag r">18</span><span class="btitle">Reservas y Observaciones</span></div><div class="bbody"><div class="fr"><textarea id="observations" aria-label="Casilla 18: Reservas y observaciones" rows="3"></textarea></div></div></div>
+
+        <div class="block"><div class="bhead"><span class="btag r">22</span><span class="btitle">Firma del Remitente</span></div><div class="bbody"><div class="sig-box" id="sigWrapSender"><canvas id="sigCanvasSender" role="img" aria-label="Área de firma del remitente"></canvas><div class="sig-hint" id="sigHintSender">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSigSender()">✕ Borrar firma</button></div></div>
+
+        <div class="block"><div class="bhead"><span class="btag g">23</span><span class="btitle">Firma del Conductor</span></div><div class="bbody"><div class="sig-box" id="sigWrap"><canvas id="sigCanvas" role="img" aria-label="Área de firma del conductor"></canvas><div class="sig-hint" id="sigHint">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSig()">✕ Borrar firma</button></div></div>
+    </div>
+
+    <!-- ── Panel: Historial ── -->
+    <div id="panel-hist" role="tabpanel" aria-labelledby="tab-hist" class="panel">
+        <div class="stats">
+            <div class="stat"><div class="stat-n" id="st0">0</div><div class="stat-l">Total Docs</div></div>
+            <div class="stat"><div class="stat-n" id="st1">0</div><div class="stat-l">Este Mes</div></div>
+            <div class="stat"><div class="stat-n" id="st2">—</div><div class="stat-l">Kg Totales</div></div>
+            <div class="stat"><div class="stat-n" id="st3">—</div><div class="stat-l">Kg Mes</div></div>
+        </div>
+        <div class="search-row">
+            <input id="histSearch" type="text" placeholder="Buscar por número, destinatario…" oninput="renderHist()"/>
+            <select class="fsel" id="histFilter" onchange="renderHist()"><option value="">Todos</option><option value="month">Este mes</option><option value="week">Esta semana</option></select>
+            <select class="fsel" id="histGroup" onchange="renderHist()"><option value="">Sin agrupar</option><option value="dest">Por Destino</option><option value="carrier">Por Transportista</option></select>
+        </div>
+        <div id="histList"></div>
+    </div>
+
+    <!-- ── Panel: Agenda ── -->
+    <div id="panel-agenda" role="tabpanel" aria-labelledby="tab-agenda" class="panel">
+        <div class="block"><div class="bhead"><span class="btag b">DEST.</span><span class="btitle">Destinatarios Frecuentes</span></div><div class="bbody" id="agRcvList"><div class="hist-empty" style="padding:20px 0">Sin destinatarios guardados</div></div></div>
+        <div class="block"><div class="bhead"><span class="btag g">COND.</span><span class="btitle">Conductores y Vehículos</span></div><div class="bbody" id="agDrvList"><div class="hist-empty" style="padding:20px 0">Sin conductores guardados</div></div></div>
+    </div>
+
+    <!-- ── Panel: Plantillas ── -->
+    <div id="panel-tmpl" role="tabpanel" aria-labelledby="tab-tmpl" class="panel">
+        <div class="block"><div class="bhead"><span class="btag t">TPL</span><span class="btitle">Plantillas Guardadas</span></div><div class="bbody" id="tmplList"><div class="hist-empty" style="padding:20px 0">Sin plantillas guardadas</div></div></div>
+    </div>
+
+    <!-- ── Panel: Config ── -->
+    <div id="panel-cfg" role="tabpanel" aria-labelledby="tab-cfg" class="panel">
+        <div class="block"><div class="bhead"><span class="btag a">NUM</span><span class="btitle">Numeración Automática</span></div><div class="bbody">
+            <div class="hint">El número se genera como <b>PREFIJO-AAAAMMDD-XXXX</b> donde XXXX son las <b>4 últimas cifras del albarán</b>.</div>
+            <div class="fr"><label>Prefijo</label><input id="cfgPrefix" type="text" placeholder="CMR" maxlength="8" oninput="updateNumPreview()"/></div>
+            <div style="font-size:.7rem;color:var(--dim);margin-top:4px" id="numPreview"></div>
+        </div></div>
+
+        <div class="block"><div class="bhead"><span class="btag v">LOGO</span><span class="btitle">Logo de Empresa en PDF</span></div><div class="bbody">
+            <div style="display:flex;align-items:center;gap:14px">
+                <div class="logo-preview" id="logoPreview" onclick="document.getElementById('logoInput').click()"><span>+ Logo</span></div>
+                <div style="flex:1">
+                    <div style="font-size:.78rem;font-weight:600;margin-bottom:4px">Imagen del logo</div>
+                    <div style="font-size:.7rem;color:var(--dim);line-height:1.6">PNG o JPG. Se incluirá en la cabecera del PDF.</div>
+                    <button style="margin-top:8px;font-size:.7rem;padding:5px 10px;border-radius:6px;border:1px solid var(--rose-l);background:transparent;color:var(--rose-l);cursor:pointer;font-family:'Sora',sans-serif" onclick="removeLogo()">Quitar logo</button>
+                </div>
+                <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="loadLogo(event)"/>
+            </div>
+        </div></div>
+
+        <div class="block"><div class="bhead"><span class="btag t">DEF</span><span class="btitle">Datos por Defecto</span></div><div class="bbody">
+            <div class="ssep">Remitente Habitual</div>
+            <div class="fr"><textarea id="cfgSenderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45&#10;41500 Sevilla&#10;España" rows="5"></textarea></div>
+            <div class="divl"></div>
+            <div class="ssep">Transportista Habitual</div>
+            <div class="fr"><textarea id="cfgCarrierBlock" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="5"></textarea></div>
+            <div class="fr"><label>Lugar Emisión por Defecto</label><input id="cfgEmission" type="text" placeholder="Sevilla, España"/></div>
+            <button onclick="saveCfg()" style="width:100%;height:44px;margin-top:10px;border-radius:var(--r3);border:none;background:var(--blue);color:#fff;font-size:.88rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer">Guardar Configuración</button>
+        </div></div>
+
+        <div class="block"><div class="bhead"><span class="btag r">🔑</span><span class="btitle">Cambiar Credenciales</span></div><div class="bbody">
+            <div class="fr"><label>Nuevo usuario (dejar vacío para no cambiar)</label><input id="cfgNewUser" type="text" placeholder="usuario" autocapitalize="none" spellcheck="false"/></div>
+            <div class="fr"><label>Contraseña actual</label><input id="cfgOldPass" type="password" placeholder="••••••••"/></div>
+            <div class="fr2">
+                <div class="fr"><label>Nueva contraseña</label><input id="cfgNewPass" type="password" placeholder="••••••••"/></div>
+                <div class="fr"><label>Repetir nueva</label><input id="cfgNewPass2" type="password" placeholder="••••••••"/></div>
+            </div>
+            <button onclick="window._changeCredentials()" style="width:100%;height:44px;margin-top:6px;border-radius:var(--r3);border:none;background:var(--blue);color:#fff;font-size:.88rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer">Actualizar credenciales</button>
+        </div></div>
+
+        <div class="block"><div class="bhead"><span class="btag r">BD</span><span class="btitle">Copia de Seguridad</span></div><div class="bbody">
+            <div class="hint">Exporta todos tus documentos, agenda y plantillas a un archivo JSON.</div>
+            <div class="backup-row">
+                <button onclick="exportDB()" class="save-btn" style="border-color:rgba(26,79,214,.3);color:var(--blue-l)">⬇ Exportar JSON</button>
+                <button onclick="importClick()" class="save-btn">⬆ Importar JSON</button>
+                <button onclick="confirmClear()" class="save-btn" style="border-color:rgba(244,63,94,.3);color:var(--rose-l)">🗑 Vaciar BD</button>
+            </div>
+            <div id="backup-stats" style="font-size:.68rem;color:var(--dim);text-align:center;padding:4px 0"></div>
+            <input type="file" id="importInput" accept=".json" style="display:none" onchange="importDB(event)"/>
+        </div></div>
+    </div>
+
+    <!-- FAB: Generar PDF -->
+    <button class="fab" onclick="generateCMR()" aria-label="Generar y descargar documento PDF">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+        GENERAR DOCUMENTO
+    </button>
+</div>
+
+<!-- ── Overlay de carga ── -->
+<div id="ov"><div class="ov-spin"></div><div class="ov-txt" id="ovTxt">GENERANDO PDF…</div></div>
+<div id="toast"></div>
+<div id="bs-bg"><div id="bs"><div class="bs-handle"></div><div class="bs-title" id="bsTitle"></div><div class="bs-body" id="bsBody"></div><div class="bs-acts" id="bsActs"></div></div></div>
+
+<!-- Módulos JS (orden importante) -->
+<script src="js/db.js"></script>
+<script src="js/autosave.js"></script>
+<script src="js/form.js"></script>
+<script src="js/pdf.js"></script>
+<script type="module" src="js/auth.js"></script>
+<script src="js/pwa.js"></script>
+
+</body>
+</html>
