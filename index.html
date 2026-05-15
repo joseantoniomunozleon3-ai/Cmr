@@ -1022,13 +1022,9 @@ window.addGoodsLine = function(data = {}) {
       <div class="fr" style="margin-bottom:0"><label>N. Estadístico</label><input type="text" id="gl-stat-${id}" placeholder="Número estadístico / código aduanero" value="${data.stat || ''}"/></div>
     </div>
     <div id="gl-free-${id}" style="display:${freeMode ? 'block' : 'none'}">
-      <div class="fr" style="margin-bottom:8px">
+      <div class="fr" style="margin-bottom:0">
         <label style="color:var(--violet-l)">Descripción libre de la mercancía</label>
-        <textarea id="gl-freetext-${id}" rows="4" placeholder="Escribe la descripción tal como aparece en el CMR del cliente (marcas, naturaleza, clase, origen, formato...)" style="width:100%;resize:vertical;font-size:.8rem;padding:8px;border-radius:var(--r3);border:1px solid var(--line2);background:var(--bg2);color:var(--snow);font-family:'Sora',sans-serif;line-height:1.5">${data.freeText || ''}</textarea>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="fr" style="margin-bottom:0"><label>7 Bultos <span style="color:var(--dim);font-weight:400">(para totales)</span></label><input type="number" id="gl-qty-${id}" min="0" value="${data.qty || ''}" oninput="updateTotals()"/></div>
-        <div class="fr" style="margin-bottom:0"><label>11 Peso kg <span style="color:var(--dim);font-weight:400">(para totales)</span></label><input type="number" id="gl-weight-${id}" step="0.01" min="0" value="${data.weight || ''}" oninput="updateTotals()"/></div>
+        <textarea id="gl-freetext-${id}" rows="5" placeholder="Escribe la mercancía tal como aparece en el CMR del cliente (marcas, bultos, naturaleza, clase, peso, origen, formato...)" style="width:100%;resize:vertical;font-size:.8rem;padding:8px;border-radius:var(--r3);border:1px solid rgba(124,58,237,.35);background:var(--bg2);color:var(--snow);font-family:'Sora',sans-serif;line-height:1.6">${data.freeText || ''}</textarea>
       </div>
     </div>`;
     container.appendChild(div); updateTotals();
@@ -1080,10 +1076,8 @@ window.collectGoodsLines = function() {
             lines.push({
                 freeMode: true,
                 freeText: (document.getElementById('gl-freetext-' + id) || {}).value?.trim() || '',
-                qty:      (document.getElementById('gl-qty-'      + id) || {}).value?.trim() || '',
-                weight:   (document.getElementById('gl-weight-'   + id) || {}).value?.trim() || '',
-                // campos estándar vacíos para compatibilidad
-                desc: '', marks: '', packing: '', volume: '', stat: ''
+                // campos estándar vacíos para compatibilidad PDF
+                qty: '', weight: '', desc: '', marks: '', packing: '', volume: '', stat: ''
             });
         } else {
             const descEl = document.getElementById('gl-desc-' + id);
@@ -2000,10 +1994,8 @@ function buildPDF(D,safetyTimer){
         allRows.forEach(l => {
             if (l.freeMode && l.freeText) {
                 goodsBody.push([
-                    {text:l.freeText,fontSize:6.5,color:'#111',margin:[2,4,2,4],fillColor:'#fff',colSpan:4},{},{},{},
-                    {text:' ',fontSize:6.5,color:'#fff',margin:[2,4,2,4],fillColor:'#fff'},
-                    {text:l.weight?l.weight+' kg':' ',fontSize:6.5,color:l.weight?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
-                    {text:l.volume?String(l.volume):' ',fontSize:6.5,color:l.volume?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'}
+                    {text:l.freeText,fontSize:7,color:'#111',margin:[4,5,4,5],fillColor:'#fff',colSpan:7,border:[true,false,true,false]},
+                    {},{},{},{},{},{}
                 ]);
             } else {
                 goodsBody.push([
@@ -2263,10 +2255,8 @@ function buildPDF_Classic(D, safetyTimer){
         const gDataRows = rows8.map(l=>{
             if (l.freeMode && l.freeText) {
                 return [
-                    Object.assign(gd(l.freeText),{colSpan:4}),{},{},{},
-                    gd(''),
-                    gd(l.weight?(l.weight+' kg'):'','center'),
-                    gd(l.volume?String(l.volume):'','center'),
+                    {text:l.freeText,fontSize:7,color:'#000',fillColor:WH,margin:[3,3,3,3],border:[true,false,true,false],colSpan:7},
+                    {},{},{},{},{},{}
                 ];
             }
             return [
