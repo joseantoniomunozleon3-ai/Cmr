@@ -318,6 +318,17 @@
 <script src="js/pwa.js"></script>
 <script type="module" src="js/firebase.js"></script>
 <script type="module" src="js/auth.js"></script>
+<!-- Debug temporal -->
+<script>
+window.addEventListener('load', function() {
+    var missing = ['tab','toast','generateCMR','addGoodsLine','renderHist','dbAdd'].filter(function(f){ return typeof window[f] !== 'function'; });
+    if (missing.length) {
+        alert('Faltan funciones: ' + missing.join(', '));
+    } else {
+        alert('OK - todas las funciones cargadas');
+    }
+});
+</script>
 
 </body>
 </html>
