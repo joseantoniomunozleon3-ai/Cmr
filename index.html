@@ -2046,8 +2046,8 @@ function buildPDF(D,safetyTimer){
         content.push({table:{widths:['auto','auto','auto','*','auto','auto','auto'],body:goodsBody,dontBreakRows:true},layout:lay,margin:[0,0,0,0]});
 
         content.push(colorLine());
-        const instr13Text = (D.senderInstr||'—') + (D.placeEmission ? '\n21 '+D.placeEmission+(dateStr?' · '+dateStr:'') : '');
-        content.push({table:{widths:['*','*'],body:[[{...box(13,'Instrucciones del Remitente',instr13Text),minHeight:80},{...box(18,'Reservas y Observaciones',D.observations||''),minHeight:80}]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths:['*','*'],body:[[{...box(13,'Instrucciones del Remitente',D.senderInstr||'—'),minHeight:60},{...box(18,'Reservas y Observaciones',D.observations||''),minHeight:60}]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths:['*','*'],body:[[{...box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')),minHeight:22},{...box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':'')),minHeight:22}]]},layout:lay,margin:[0,0,0,0]});
 
         content.push(colorLine());
 
