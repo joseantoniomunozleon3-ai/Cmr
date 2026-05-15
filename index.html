@@ -996,26 +996,64 @@ window.addGoodsLine = function(data = {}) {
     const id = ++goodsLineId;
     const container = document.getElementById('goods-lines');
     const div = document.createElement('div'); div.id = 'gl-' + id;
+    const freeMode = !!data.freeMode;
     div.style.cssText = 'background:var(--bg);border:1px solid var(--line);border-radius:var(--r3);padding:11px 12px;margin-bottom:8px;position:relative';
     div.innerHTML = `<button onclick="removeGoodsLine(${id})" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:5px;border:1px solid rgba(244,63,94,.3);background:rgba(244,63,94,.08);color:var(--rose-l);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">✕</button>
-    <div style="font-size:.6rem;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:8px">LÍNEA ${id}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-      <div class="fr" style="margin-bottom:0"><label>6 Marca</label><input type="text" id="gl-marks-${id}" value="${data.marks || ''}"/></div>
-      <div class="fr" style="margin-bottom:0"><label>9 Naturaleza</label><input type="text" id="gl-desc-${id}" placeholder="Descripción" value="${data.desc || ''}" oninput="updateTotals()"/></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <div style="font-size:.6rem;color:var(--dim);font-family:'JetBrains Mono',monospace">LÍNEA ${id}</div>
+      <button id="gl-modetoggle-${id}" onclick="toggleGoodsLineMode(${id})" style="height:20px;padding:0 8px;border-radius:4px;border:1px solid var(--line2);background:${freeMode ? 'rgba(124,58,237,.12)' : 'var(--bg3)'};color:${freeMode ? 'var(--violet-l)' : 'var(--dim)'};font-size:.58rem;font-weight:600;cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;transition:all .15s">${freeMode ? '✏️ LIBRE' : '☰ ESTÁNDAR'}</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:8px">
-      <div class="fr" style="margin-bottom:0"><label>7 Bultos</label><input type="number" id="gl-qty-${id}" min="0" value="${data.qty || ''}" oninput="updateTotals()"/></div>
-      <div class="fr" style="margin-bottom:0;position:relative"><label>8 Embalaje</label>
-        <input type="text" id="gl-packing-${id}" value="${data.packing || ''}" autocomplete="off"
-          oninput="filterPackingLine(${id},this.value)"
-          onblur="setTimeout(()=>{const d=document.getElementById('gl-pdrop-${id}');if(d)d.style.display='none'},200)"/>
-        <div id="gl-pdrop-${id}" style="display:none;position:absolute;z-index:50;background:var(--bg3);border:1px solid var(--line2);border-radius:var(--r3);top:100%;left:0;width:100%;max-height:140px;overflow-y:auto"></div>
+    <div id="gl-standard-${id}" style="display:${freeMode ? 'none' : 'block'}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="fr" style="margin-bottom:0"><label>6 Marca</label><input type="text" id="gl-marks-${id}" value="${data.marks || ''}"/></div>
+        <div class="fr" style="margin-bottom:0"><label>9 Naturaleza</label><input type="text" id="gl-desc-${id}" placeholder="Descripción" value="${data.desc || ''}" oninput="updateTotals()"/></div>
       </div>
-      <div class="fr" style="margin-bottom:0"><label>11 Peso kg</label><input type="number" id="gl-weight-${id}" step="0.01" min="0" value="${data.weight || ''}" oninput="updateTotals()"/></div>
-      <div class="fr" style="margin-bottom:0"><label>12 Volumen</label><input type="text" id="gl-volume-${id}" value="${data.volume || ''}" oninput="updateTotals()"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:8px">
+        <div class="fr" style="margin-bottom:0"><label>7 Bultos</label><input type="number" id="gl-qty-${id}" min="0" value="${data.qty || ''}" oninput="updateTotals()"/></div>
+        <div class="fr" style="margin-bottom:0;position:relative"><label>8 Embalaje</label>
+          <input type="text" id="gl-packing-${id}" value="${data.packing || ''}" autocomplete="off"
+            oninput="filterPackingLine(${id},this.value)"
+            onblur="setTimeout(()=>{const d=document.getElementById('gl-pdrop-${id}');if(d)d.style.display='none'},200)"/>
+          <div id="gl-pdrop-${id}" style="display:none;position:absolute;z-index:50;background:var(--bg3);border:1px solid var(--line2);border-radius:var(--r3);top:100%;left:0;width:100%;max-height:140px;overflow-y:auto"></div>
+        </div>
+        <div class="fr" style="margin-bottom:0"><label>11 Peso kg</label><input type="number" id="gl-weight-${id}" step="0.01" min="0" value="${data.weight || ''}" oninput="updateTotals()"/></div>
+        <div class="fr" style="margin-bottom:0"><label>12 Volumen</label><input type="text" id="gl-volume-${id}" value="${data.volume || ''}" oninput="updateTotals()"/></div>
+      </div>
+      <div class="fr" style="margin-bottom:0"><label>N. Estadístico</label><input type="text" id="gl-stat-${id}" placeholder="Número estadístico / código aduanero" value="${data.stat || ''}"/></div>
     </div>
-    <div class="fr" style="margin-bottom:0"><label>N. Estadístico</label><input type="text" id="gl-stat-${id}" placeholder="Número estadístico / código aduanero" value="${data.stat || ''}"/></div>`;
+    <div id="gl-free-${id}" style="display:${freeMode ? 'block' : 'none'}">
+      <div class="fr" style="margin-bottom:8px">
+        <label style="color:var(--violet-l)">Descripción libre de la mercancía</label>
+        <textarea id="gl-freetext-${id}" rows="4" placeholder="Escribe la descripción tal como aparece en el CMR del cliente (marcas, naturaleza, clase, origen, formato...)" style="width:100%;resize:vertical;font-size:.8rem;padding:8px;border-radius:var(--r3);border:1px solid var(--line2);background:var(--bg2);color:var(--snow);font-family:'Sora',sans-serif;line-height:1.5">${data.freeText || ''}</textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="fr" style="margin-bottom:0"><label>7 Bultos <span style="color:var(--dim);font-weight:400">(para totales)</span></label><input type="number" id="gl-qty-${id}" min="0" value="${data.qty || ''}" oninput="updateTotals()"/></div>
+        <div class="fr" style="margin-bottom:0"><label>11 Peso kg <span style="color:var(--dim);font-weight:400">(para totales)</span></label><input type="number" id="gl-weight-${id}" step="0.01" min="0" value="${data.weight || ''}" oninput="updateTotals()"/></div>
+      </div>
+    </div>`;
     container.appendChild(div); updateTotals();
+};
+
+window.toggleGoodsLineMode = function(id) {
+    const stdEl  = document.getElementById('gl-standard-' + id);
+    const freeEl = document.getElementById('gl-free-'     + id);
+    const btnEl  = document.getElementById('gl-modetoggle-' + id);
+    const isFree = freeEl.style.display !== 'none';
+    if (isFree) {
+        // Volver a estándar
+        freeEl.style.display  = 'none';
+        stdEl.style.display   = 'block';
+        btnEl.textContent     = '☰ ESTÁNDAR';
+        btnEl.style.background = 'var(--bg3)';
+        btnEl.style.color      = 'var(--dim)';
+    } else {
+        // Ir a libre
+        stdEl.style.display   = 'none';
+        freeEl.style.display  = 'block';
+        btnEl.textContent     = '✏️ LIBRE';
+        btnEl.style.background = 'rgba(124,58,237,.12)';
+        btnEl.style.color      = 'var(--violet-l)';
+    }
 };
 
 window.removeGoodsLine = id => { const el = document.getElementById('gl-' + id); if (el) el.remove(); updateTotals(); };
@@ -1032,21 +1070,39 @@ window.updateTotals = function() {
 
 window.collectGoodsLines = function() {
     const lines = [];
-    document.querySelectorAll('[id^="gl-desc-"]').forEach(el => {
-        const id = el.id.replace('gl-desc-', '');
-        lines.push({
-            desc:   el.value.trim(),
-            marks:  (document.getElementById('gl-marks-'   + id) || {}).value?.trim() || '',
-            packing:(document.getElementById('gl-packing-' + id) || {}).value?.trim() || '',
-            qty:    (document.getElementById('gl-qty-'     + id) || {}).value?.trim() || '',
-            weight: (document.getElementById('gl-weight-'  + id) || {}).value?.trim() || '',
-            volume: (document.getElementById('gl-volume-'  + id) || {}).value?.trim() || '',
-            stat:   (document.getElementById('gl-stat-'    + id) || {}).value?.trim() || ''
-        });
-        const pv = (document.getElementById('gl-packing-' + id) || {}).value?.trim();
-        if (pv) savePackingValue(pv);
+    // Recorrer todas las líneas existentes por su contenedor
+    document.querySelectorAll('[id^="gl-"]').forEach(el => {
+        if (!el.id.match(/^gl-\d+$/)) return; // solo contenedores raíz
+        const id = el.id.replace('gl-', '');
+        const freeEl = document.getElementById('gl-free-' + id);
+        const isFree = freeEl && freeEl.style.display !== 'none';
+        if (isFree) {
+            lines.push({
+                freeMode: true,
+                freeText: (document.getElementById('gl-freetext-' + id) || {}).value?.trim() || '',
+                qty:      (document.getElementById('gl-qty-'      + id) || {}).value?.trim() || '',
+                weight:   (document.getElementById('gl-weight-'   + id) || {}).value?.trim() || '',
+                // campos estándar vacíos para compatibilidad
+                desc: '', marks: '', packing: '', volume: '', stat: ''
+            });
+        } else {
+            const descEl = document.getElementById('gl-desc-' + id);
+            if (!descEl) return;
+            lines.push({
+                freeMode: false,
+                desc:    descEl.value.trim(),
+                marks:   (document.getElementById('gl-marks-'   + id) || {}).value?.trim() || '',
+                packing: (document.getElementById('gl-packing-' + id) || {}).value?.trim() || '',
+                qty:     (document.getElementById('gl-qty-'     + id) || {}).value?.trim() || '',
+                weight:  (document.getElementById('gl-weight-'  + id) || {}).value?.trim() || '',
+                volume:  (document.getElementById('gl-volume-'  + id) || {}).value?.trim() || '',
+                stat:    (document.getElementById('gl-stat-'    + id) || {}).value?.trim() || ''
+            });
+            const pv = (document.getElementById('gl-packing-' + id) || {}).value?.trim();
+            if (pv) savePackingValue(pv);
+        }
     });
-    if (lines.length === 0) lines.push({ desc: '', marks: '', packing: '', qty: '', weight: '', volume: '', stat: '' });
+    if (lines.length === 0) lines.push({ freeMode: false, desc: '', marks: '', packing: '', qty: '', weight: '', volume: '', stat: '' });
     return lines;
 };
 
@@ -1677,7 +1733,7 @@ window._discardDraft = function() { closeBS(); clearDraft(); toast('Borrador des
 // ── App init ──────────────────────────────────────────────────
 window._appInit = async function() {
     initSig(); loadDefaults();
-    if (!document.querySelector('[id^="gl-desc-"]')) addGoodsLine();
+    if (!document.querySelector('[id^="gl-"]') || (!document.querySelector('[id^="gl-desc-"]') && !document.querySelector('[id^="gl-freetext-"]'))) addGoodsLine();
     window.renderHist       = renderHist;
     window.renderTemplates  = renderTemplates;
     window.renderAgenda     = renderAgenda;
@@ -1778,10 +1834,12 @@ async function generateCMR(){
         { id: 'placeDelivery', label: 'Lugar de Entrega',tag: 'casilla 3', type: 'input' },
     ];
 
-    // Comprobar mercancía: al menos una línea con descripción
+    // Comprobar mercancía: al menos una línea con descripción (estándar o libre)
     const hasGoods = (() => {
         const descs = document.querySelectorAll('[id^="gl-desc-"]');
         for (const el of descs) { if ((el.value||'').trim()) return true; }
+        const frees = document.querySelectorAll('[id^="gl-freetext-"]');
+        for (const el of frees) { if ((el.value||'').trim()) return true; }
         return false;
     })();
 
@@ -1940,15 +1998,24 @@ function buildPDF(D,safetyTimer){
         ];
         const goodsBody = [goodsHeader];
         allRows.forEach(l => {
-            goodsBody.push([
-                {text:l.marks||' ',fontSize:6.5,color:l.marks?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff'},
-                {text:l.qty||' ',fontSize:6.5,color:l.qty?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
-                {text:l.packing||' ',fontSize:6.5,color:l.packing?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff'},
-                {text:l.desc||' ',fontSize:6.5,bold:!!l.desc,color:l.desc?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff'},
-                {text:l.stat||' ',fontSize:6.5,color:l.stat?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
-                {text:l.weight?l.weight+' kg':' ',fontSize:6.5,color:l.weight?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
-                {text:l.volume?String(l.volume):' ',fontSize:6.5,color:l.volume?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'}
-            ]);
+            if (l.freeMode && l.freeText) {
+                goodsBody.push([
+                    {text:l.freeText,fontSize:6.5,color:'#111',margin:[2,4,2,4],fillColor:'#fff',colSpan:4},{},{},{},
+                    {text:' ',fontSize:6.5,color:'#fff',margin:[2,4,2,4],fillColor:'#fff'},
+                    {text:l.weight?l.weight+' kg':' ',fontSize:6.5,color:l.weight?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
+                    {text:l.volume?String(l.volume):' ',fontSize:6.5,color:l.volume?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'}
+                ]);
+            } else {
+                goodsBody.push([
+                    {text:l.marks||' ',fontSize:6.5,color:l.marks?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff'},
+                    {text:l.qty||' ',fontSize:6.5,color:l.qty?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
+                    {text:l.packing||' ',fontSize:6.5,color:l.packing?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff'},
+                    {text:l.desc||' ',fontSize:6.5,bold:!!l.desc,color:l.desc?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff'},
+                    {text:l.stat||' ',fontSize:6.5,color:l.stat?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
+                    {text:l.weight?l.weight+' kg':' ',fontSize:6.5,color:l.weight?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
+                    {text:l.volume?String(l.volume):' ',fontSize:6.5,color:l.volume?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'}
+                ]);
+            }
         });
         goodsBody.push([
             {text:'TOTALES',fontSize:5.5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],colSpan:2,alignment:'right'},{},
@@ -2193,15 +2260,25 @@ function buildPDF_Classic(D, safetyTimer){
             gh('11 Peso Bruto Kg.','center'),
             gh('12 Volumen m3','center'),
         ];
-        const gDataRows = rows8.map(l=>[
-            gd(l.marks),
-            gd(l.qty,'center'),
-            gd(l.packing),
-            gd(l.desc,'left',!!l.desc),
-            gd(l.stat,'center'),
-            gd(l.weight?(l.weight+' kg'):'','center'),
-            gd(l.volume?String(l.volume):'','center'),
-        ]);
+        const gDataRows = rows8.map(l=>{
+            if (l.freeMode && l.freeText) {
+                return [
+                    Object.assign(gd(l.freeText),{colSpan:4}),{},{},{},
+                    gd(''),
+                    gd(l.weight?(l.weight+' kg'):'','center'),
+                    gd(l.volume?String(l.volume):'','center'),
+                ];
+            }
+            return [
+                gd(l.marks),
+                gd(l.qty,'center'),
+                gd(l.packing),
+                gd(l.desc,'left',!!l.desc),
+                gd(l.stat,'center'),
+                gd(l.weight?(l.weight+' kg'):'','center'),
+                gd(l.volume?String(l.volume):'','center'),
+            ];
+        });
         const gTotRow = [
             gt('TOTALES','right',true), gt('','center'), gt('','center'), gt('','center'), gt('','center'),
             gt(totalW?totalW.toFixed(2)+' kg':'','center',true),
