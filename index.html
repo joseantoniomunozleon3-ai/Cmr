@@ -253,6 +253,106 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* ── Lock overlay (sesión expirada) ── */
 #lock-overlay{display:none;position:fixed;inset:0;z-index:99997;background:rgba(10,22,40,.92);backdrop-filter:blur(16px);align-items:center;justify-content:center}
 #lock-overlay.on{display:flex}
+
+/* ══════════════════════════════════════════
+   LAYOUT PC  (≥ 900px)
+   ══════════════════════════════════════════ */
+@media(min-width:900px){
+    /* Topbar más ancho y con más padding */
+    #topbar{padding:0 28px;height:62px}
+    .logo-mark{width:38px;height:38px;font-size:.75rem}
+    .logo-name{font-size:1rem}
+    .tb-right{gap:10px}
+    .save-btn,.gen-top{height:38px;padding:0 18px;font-size:.8rem}
+    .ico-btn{width:38px;height:38px}
+
+    /* Autosave bar se ajusta al nuevo topbar */
+    #autosave-bar{top:62px}
+
+    /* Tabs se ocultan — la navegación la hace el sidebar */
+    #tabs{display:none !important}
+
+    /* Wrapper PC: sidebar fija + área de contenido */
+    #pc-shell{display:flex;min-height:calc(100vh - 62px);margin-top:0}
+
+    /* Sidebar */
+    #pc-sidebar{
+        position:sticky;top:62px;align-self:flex-start;
+        width:200px;flex-shrink:0;
+        height:calc(100vh - 62px);
+        background:var(--bg2);
+        border-right:1px solid var(--line);
+        display:flex;flex-direction:column;
+        padding:18px 10px 24px;
+        gap:4px;
+        overflow-y:auto;
+    }
+    .pc-nav-item{
+        display:flex;align-items:center;gap:10px;
+        padding:10px 14px;border-radius:var(--r3);
+        font-size:.82rem;font-weight:600;color:var(--dim);
+        cursor:pointer;transition:all .15s;
+        border:1px solid transparent;
+        white-space:nowrap;
+    }
+    .pc-nav-item svg{width:15px;height:15px;flex-shrink:0}
+    .pc-nav-item:hover{background:var(--bg3);color:var(--snow)}
+    .pc-nav-item.active{
+        background:rgba(26,79,214,.1);
+        border-color:rgba(26,79,214,.25);
+        color:var(--blue-l);
+    }
+    .pc-nav-badge{
+        margin-left:auto;font-size:.58rem;
+        font-family:'JetBrains Mono',monospace;
+        background:rgba(26,79,214,.12);border:1px solid rgba(26,79,214,.3);
+        color:var(--blue-l);padding:1px 5px;border-radius:4px;
+    }
+    .pc-nav-sep{height:1px;background:var(--line);margin:8px 2px}
+    .pc-nav-gen{
+        margin-top:auto;width:100%;height:44px;
+        border-radius:var(--r3);border:none;
+        background:linear-gradient(135deg,var(--blue),#0f2e8a);
+        color:#fff;font-size:.82rem;font-weight:700;
+        cursor:pointer;display:flex;align-items:center;justify-content:center;
+        gap:8px;font-family:'Sora',sans-serif;
+        box-shadow:0 3px 14px var(--blue-glow);transition:all .15s;
+    }
+    .pc-nav-gen:active{transform:scale(.97)}
+    .pc-nav-gen svg{width:16px;height:16px}
+
+    /* Área de contenido */
+    #pc-content{flex:1;min-width:0;overflow-y:auto}
+    #pc-content .panel{
+        max-width:860px;
+        padding:24px 28px 48px;
+    }
+
+    /* En PC el formulario usa 2 columnas para los bloques */
+    #pc-content #panel-form .fr2{grid-template-columns:1fr 1fr;gap:14px}
+    #pc-content #panel-form .fr3{grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+    /* Bloques con sombra suave en PC */
+    #pc-content .block{box-shadow:0 1px 4px rgba(0,0,0,.06)}
+
+    /* Historial: stats en 4 columnas más grandes */
+    #pc-content .stats{grid-template-columns:repeat(4,1fr);gap:12px}
+    #pc-content .stat{padding:16px 14px}
+    #pc-content .stat-n{font-size:1.7rem}
+
+    /* Ocultar FAB en PC */
+    .fab{display:none !important}
+
+    /* Toast sube un poco sin FAB */
+    #toast{bottom:24px}
+}
+
+/* Mobile (< 900px): pc-shell y sidebar no existen visualmente */
+@media(max-width:899px){
+    #pc-sidebar{display:none}
+    #pc-shell{display:contents}
+    #pc-content{display:contents}
+}
     </style>
 </head>
 <body>
@@ -325,15 +425,50 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
     <div id="autosave-bar"><div id="autosave-dot"></div><span id="autosave-txt">BORRADOR GUARDADO</span></div>
 
-    <div id="tabs" role="tablist" aria-label="Secciones de la aplicación">
+    <div id="tabs" role="tablist" aria-label="Secciones de la aplicación" style="display:flex">
         <div class="tab active" role="tab" tabindex="0" aria-selected="true"  aria-controls="panel-form"   data-p="form"   onclick="tab('form')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('form')">Documento</div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-hist"   data-p="hist"   onclick="tab('hist')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('hist')">Historial <span class="tbadge" id="histBadge" aria-label="documentos guardados">0</span></div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-agenda" data-p="agenda" onclick="tab('agenda')" onkeydown="if(event.key==='Enter'||event.key===' ')tab('agenda')">Agenda</div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-tmpl"   data-p="tmpl"   onclick="tab('tmpl')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('tmpl')">Plantillas</div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-cfg"    data-p="cfg"    onclick="tab('cfg')"    onkeydown="if(event.key==='Enter'||event.key===' ')tab('cfg')">Config</div>
-    </div>
+    </div><!-- /tabs -->
 
-    <!-- ── Panel: Documento ── -->
+    <!-- ══ PC shell: sidebar + contenido ══ -->
+    <div id="pc-shell">
+
+    <!-- Sidebar (solo PC ≥900px) -->
+    <nav id="pc-sidebar" aria-label="Navegación principal">
+        <div class="pc-nav-item active" data-p="form" onclick="tab('form');pcNav(this)">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg>
+            Documento
+        </div>
+        <div class="pc-nav-item" data-p="hist" onclick="tab('hist');pcNav(this)">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+            Historial
+            <span class="pc-nav-badge" id="pcHistBadge" style="display:none">0</span>
+        </div>
+        <div class="pc-nav-item" data-p="agenda" onclick="tab('agenda');pcNav(this)">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            Agenda
+        </div>
+        <div class="pc-nav-item" data-p="tmpl" onclick="tab('tmpl');pcNav(this)">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 0 0-2.25-2.25H6A2.25 2.25 0 0 0 3.75 6v8.25A2.25 2.25 0 0 0 6 16.5h2.25m8.25-8.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-7.5A2.25 2.25 0 0 1 8.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 0 0-2.25 2.25v6"/></svg>
+            Plantillas
+        </div>
+        <div class="pc-nav-sep"></div>
+        <div class="pc-nav-item" data-p="cfg" onclick="tab('cfg');pcNav(this)">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            Config
+        </div>
+        <div class="pc-nav-sep"></div>
+        <button class="pc-nav-gen" onclick="generateCMR()">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+            Generar PDF
+        </button>
+    </nav>
+
+    <!-- Área de contenido -->
+    <div id="pc-content">
     <div id="panel-form" role="tabpanel" class="panel active">
         <div class="block"><div class="bhead"><span class="btag a">DOC</span><span class="btitle">Datos del Documento</span></div><div class="bbody">
             <div class="fr"><label>Tipo de Documento</label>
@@ -509,6 +644,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
         GENERAR DOCUMENTO
     </button>
+
+    </div><!-- /pc-content -->
+    </div><!-- /pc-shell -->
 </div>
 
 <!-- ── Overlays ── -->
@@ -804,11 +942,35 @@ window.tab = function(n) {
         t.setAttribute('aria-selected', active ? 'true' : 'false');
     });
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + n));
+    // Sync PC sidebar active state
+    document.querySelectorAll('.pc-nav-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.p === n);
+    });
     if (n === 'hist')   renderHist();
     if (n === 'agenda') renderAgenda();
     if (n === 'tmpl')   renderTemplates();
     if (n === 'cfg')    syncCfgPanel();
 };
+
+// PC Sidebar: marcar item activo al hacer clic
+window.pcNav = function(el) {
+    document.querySelectorAll('.pc-nav-item').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+};
+
+// Sincronizar badge del sidebar con el de los tabs
+(function syncPcBadge() {
+    const tabBadge = document.getElementById('histBadge');
+    const pcBadge  = document.getElementById('pcHistBadge');
+    if (!tabBadge || !pcBadge) return;
+    const obs = new MutationObserver(() => {
+        const txt = tabBadge.textContent;
+        const show = tabBadge.style.display !== 'none';
+        pcBadge.textContent = txt;
+        pcBadge.style.display = show ? 'inline' : 'none';
+    });
+    obs.observe(tabBadge, { childList: true, attributes: true, attributeFilter: ['style'] });
+})();
 
 // ── Field helpers ─────────────────────────────────────────────
 const gv   = id => (document.getElementById(id) || {}).value?.trim() || '';
