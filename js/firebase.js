@@ -9,12 +9,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBZ53Jg7p0xjKDogPYF9yDc1YctgZ1oV3I",
-    authDomain: "camarapro-b375b.firebaseapp.com",
-    projectId: "camarapro-b375b",
-    storageBucket: "camarapro-b375b.firebasestorage.app",
-    messagingSenderId: "112172696612",
-    appId: "1:112172696612:web:3acdb7860ba66b2625c4b1"
+    apiKey: "AIzaSyCjVZeDvoGdkyFHveyuEz4Y3Uqbb_6hhVo",
+    authDomain: "palets-camara.firebaseapp.com",
+    projectId: "palets-camara",
+    storageBucket: "palets-camara.firebasestorage.app",
+    messagingSenderId: "1098382045283",
+    appId: "1:1098382045283:web:ae2d07e0d92dba35aa4856"
 };
 
 // IMPORTANTE: En console.firebase.google.com → Authentication → Sign-in method → Email/Password → Activar
