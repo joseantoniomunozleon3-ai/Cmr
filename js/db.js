@@ -107,9 +107,19 @@ function _handleFbError(e, op) {
     }
 }
 
+// ── Esperar Firebase si no está listo ────────────────────────
+function _waitFb() {
+    return new Promise(res => {
+        if (window._fbReady) { res(); return; }
+        document.addEventListener('firebase-ready', res, { once: true });
+        setTimeout(res, 3000); // fallback: 3s máximo
+    });
+}
+
 // ── API pública — Firebase con fallback a IndexedDB ──────────
 
 window.dbAdd = async function(st, rec) {
+    await _waitFb();
     if (window._fb) {
         try { const id = await window._fb.add(st, rec); _fbSetSync('ok'); return id; }
         catch (e) { _handleFbError(e, 'add'); }
@@ -118,6 +128,7 @@ window.dbAdd = async function(st, rec) {
 };
 
 window.dbAll = async function(st) {
+    await _waitFb();
     if (window._fb) {
         try { const res = await window._fb.all(st); _fbSetSync('ok'); return res; }
         catch (e) { _handleFbError(e, 'read'); }
@@ -126,6 +137,7 @@ window.dbAll = async function(st) {
 };
 
 window.dbDel = async function(st, id) {
+    await _waitFb();
     if (st === TPL) console.warn('🗑 dbDel en PLANTILLAS id=', id);
     if (window._fb) {
         try { await window._fb.del(st, id); _fbSetSync('ok'); return; }
@@ -135,6 +147,7 @@ window.dbDel = async function(st, id) {
 };
 
 window.dbClear = async function(st) {
+    await _waitFb();
     if (window._fb) {
         try { await window._fb.clear(st); _fbSetSync('ok'); return; }
         catch (e) { _handleFbError(e, 'clear'); }

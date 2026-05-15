@@ -60,6 +60,7 @@ window._fb = {
 };
 
 window._fbReady = true;
+document.dispatchEvent(new Event('firebase-ready'));
 
 // Indicador de sincronización
 const syncEl = document.getElementById('syncIndicator');
