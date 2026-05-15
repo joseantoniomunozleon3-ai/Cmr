@@ -314,6 +314,13 @@
 <script src="js/db.js"></script>
 <script src="js/autosave.js"></script>
 <script src="js/form.js"></script>
+<script>
+if (typeof window.toast !== 'function') {
+    document.write('<h1 style="color:red">form.js NO cargó</h1>');
+} else {
+    document.write('<h1 style="color:green">form.js OK</h1>');
+}
+</script>
 <script src="js/pdf.js"></script>
 <script src="js/pwa.js"></script>
 <script type="module" src="js/firebase.js"></script>
