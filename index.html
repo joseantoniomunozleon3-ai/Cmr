@@ -255,103 +255,208 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 #lock-overlay.on{display:flex}
 
 /* ══════════════════════════════════════════
-   LAYOUT PC  (≥ 900px)
+   LAYOUT PC  (≥ 960px)
    ══════════════════════════════════════════ */
-@media(min-width:900px){
-    /* Topbar más ancho y con más padding */
-    #topbar{padding:0 28px;height:62px}
-    .logo-mark{width:38px;height:38px;font-size:.75rem}
-    .logo-name{font-size:1rem}
+@media(min-width:960px){
+
+    /* ── Topbar ── */
+    #topbar{
+        padding:0 32px;height:64px;
+        background:rgba(255,255,255,.98);
+        border-bottom:1.5px solid var(--line);
+    }
+    .logo-mark{width:40px;height:40px;font-size:.78rem;border-radius:10px}
+    .logo-name{font-size:1.05rem;letter-spacing:-.02em}
+    .logo-sub{font-size:.6rem}
     .tb-right{gap:10px}
-    .save-btn,.gen-top{height:38px;padding:0 18px;font-size:.8rem}
-    .ico-btn{width:38px;height:38px}
+    .save-btn{height:38px;padding:0 20px;font-size:.8rem;font-weight:600}
+    .gen-top{height:38px;padding:0 22px;font-size:.82rem;font-weight:700;letter-spacing:.03em}
+    .ico-btn{width:38px;height:38px;font-size:.85rem}
 
-    /* Autosave bar se ajusta al nuevo topbar */
-    #autosave-bar{top:62px}
+    /* ── Autosave bar ── */
+    #autosave-bar{top:64px}
 
-    /* Tabs se ocultan — la navegación la hace el sidebar */
+    /* ── Ocultar tabs móvil ── */
     #tabs{display:none !important}
 
-    /* Wrapper PC: sidebar fija + área de contenido */
-    #pc-shell{display:flex;min-height:calc(100vh - 62px);margin-top:0}
+    /* ── Shell principal: sidebar + contenido ── */
+    #pc-shell{
+        display:flex;
+        height:calc(100vh - 64px);
+        overflow:hidden;
+    }
 
-    /* Sidebar */
+    /* ── SIDEBAR ── */
     #pc-sidebar{
-        position:sticky;top:62px;align-self:flex-start;
-        width:200px;flex-shrink:0;
-        height:calc(100vh - 62px);
-        background:var(--bg2);
-        border-right:1px solid var(--line);
-        display:flex;flex-direction:column;
-        padding:18px 10px 24px;
-        gap:4px;
+        width:240px;
+        flex-shrink:0;
+        height:100%;
+        background:#fff;
+        border-right:1.5px solid var(--line);
+        display:flex;
+        flex-direction:column;
+        padding:20px 12px 20px;
+        gap:2px;
         overflow-y:auto;
+        overflow-x:hidden;
     }
+
+    /* Label de sección en sidebar */
+    .pc-nav-label{
+        font-size:.58rem;font-weight:700;
+        text-transform:uppercase;letter-spacing:.12em;
+        color:var(--line2);padding:0 12px;
+        margin:14px 0 6px;
+    }
+    .pc-nav-label:first-child{margin-top:0}
+
     .pc-nav-item{
-        display:flex;align-items:center;gap:10px;
-        padding:10px 14px;border-radius:var(--r3);
-        font-size:.82rem;font-weight:600;color:var(--dim);
-        cursor:pointer;transition:all .15s;
-        border:1px solid transparent;
+        display:flex;align-items:center;gap:12px;
+        padding:11px 14px;border-radius:10px;
+        font-size:.88rem;font-weight:500;color:var(--dim);
+        cursor:pointer;transition:all .12s;
+        border:none;
         white-space:nowrap;
+        position:relative;
     }
-    .pc-nav-item svg{width:15px;height:15px;flex-shrink:0}
+    .pc-nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.7;transition:opacity .12s}
     .pc-nav-item:hover{background:var(--bg3);color:var(--snow)}
+    .pc-nav-item:hover svg{opacity:1}
     .pc-nav-item.active{
         background:rgba(26,79,214,.1);
-        border-color:rgba(26,79,214,.25);
         color:var(--blue-l);
+        font-weight:600;
+    }
+    .pc-nav-item.active svg{opacity:1;color:var(--blue-l)}
+    .pc-nav-item.active::before{
+        content:'';position:absolute;left:0;top:20%;bottom:20%;
+        width:3px;border-radius:2px;background:var(--blue-l);
     }
     .pc-nav-badge{
-        margin-left:auto;font-size:.58rem;
+        margin-left:auto;
+        font-size:.6rem;
         font-family:'JetBrains Mono',monospace;
-        background:rgba(26,79,214,.12);border:1px solid rgba(26,79,214,.3);
-        color:var(--blue-l);padding:1px 5px;border-radius:4px;
+        background:var(--blue);
+        color:#fff;
+        padding:2px 7px;border-radius:12px;
+        font-weight:600;
     }
-    .pc-nav-sep{height:1px;background:var(--line);margin:8px 2px}
+    .pc-nav-sep{height:1px;background:var(--line);margin:10px 4px}
+
+    /* Botón generar al fondo del sidebar */
     .pc-nav-gen{
-        margin-top:auto;width:100%;height:44px;
-        border-radius:var(--r3);border:none;
-        background:linear-gradient(135deg,var(--blue),#0f2e8a);
-        color:#fff;font-size:.82rem;font-weight:700;
-        cursor:pointer;display:flex;align-items:center;justify-content:center;
-        gap:8px;font-family:'Sora',sans-serif;
-        box-shadow:0 3px 14px var(--blue-glow);transition:all .15s;
+        margin-top:auto;
+        width:100%;height:48px;
+        border-radius:12px;border:none;
+        background:linear-gradient(135deg,#1a4fd6 0%,#0f2e8a 100%);
+        color:#fff;font-size:.9rem;font-weight:700;
+        cursor:pointer;
+        display:flex;align-items:center;justify-content:center;gap:10px;
+        font-family:'Sora',sans-serif;
+        box-shadow:0 4px 20px rgba(26,79,214,.35);
+        transition:all .15s;
+        letter-spacing:.02em;
     }
+    .pc-nav-gen:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(26,79,214,.45)}
     .pc-nav-gen:active{transform:scale(.97)}
-    .pc-nav-gen svg{width:16px;height:16px}
+    .pc-nav-gen svg{width:18px;height:18px}
 
-    /* Área de contenido */
-    #pc-content{flex:1;min-width:0;overflow-y:auto}
-    #pc-content .panel{
-        max-width:860px;
-        padding:24px 28px 48px;
+    /* ── CONTENIDO ── */
+    #pc-content{
+        flex:1;
+        min-width:0;
+        height:100%;
+        overflow-y:auto;
+        background:var(--bg);
     }
 
-    /* En PC el formulario usa 2 columnas para los bloques */
+    /* Panels: sin max-width artificial, padding generoso */
+    #pc-content .panel{
+        max-width:none;
+        padding:28px 36px 60px;
+    }
+
+    /* ── PAGE HEADER (título de sección) ── */
+    #pc-content .panel::before{
+        display:none; /* se añade por JS si se quiere */
+    }
+
+    /* ── Bloques con sombra y hover ── */
+    #pc-content .block{
+        box-shadow:0 1px 6px rgba(0,0,0,.07);
+        transition:box-shadow .15s,border-color .15s;
+    }
+    #pc-content .block:hover{
+        box-shadow:0 3px 14px rgba(0,0,0,.1);
+        border-color:var(--line2);
+    }
+
+    /* ── FORMULARIO: 2 columnas de bloques ── */
+    #panel-form-grid{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:14px;
+        align-items:start;
+    }
+    /* Bloques que deben ocupar el ancho completo */
+    .block-full{grid-column:1/-1}
+
+    /* Inputs internos también más anchos */
     #pc-content #panel-form .fr2{grid-template-columns:1fr 1fr;gap:14px}
     #pc-content #panel-form .fr3{grid-template-columns:1fr 1fr 1fr;gap:10px}
 
-    /* Bloques con sombra suave en PC */
-    #pc-content .block{box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    /* ── HISTORIAL: stats grandes ── */
+    #pc-content .stats{
+        grid-template-columns:repeat(4,1fr);
+        gap:16px;
+        margin-bottom:20px;
+    }
+    #pc-content .stat{
+        padding:20px 18px;
+        border-radius:var(--r);
+        box-shadow:0 1px 6px rgba(0,0,0,.07);
+    }
+    #pc-content .stat-n{
+        font-size:2.2rem;
+        line-height:1.1;
+        margin-bottom:4px;
+    }
+    #pc-content .stat-l{font-size:.68rem}
 
-    /* Historial: stats en 4 columnas más grandes */
-    #pc-content .stats{grid-template-columns:repeat(4,1fr);gap:12px}
-    #pc-content .stat{padding:16px 14px}
-    #pc-content .stat-n{font-size:1.7rem}
+    /* Historial: tabla en lugar de lista estrecha */
+    .hitem{
+        display:grid;
+        grid-template-columns:40px 1fr auto auto 120px;
+        align-items:center;
+        gap:0 16px;
+        padding:12px 18px;
+        border-radius:var(--r2);
+        margin-bottom:6px;
+    }
+    .hitem .hico{margin:0}
+    .hitem .hinfo{overflow:hidden}
+    .hitem .hnum{font-size:.9rem}
+    .hitem .hsub{font-size:.76rem}
+    .hitem .hdate{font-size:.68rem;white-space:nowrap}
+    .hitem .hacts{gap:6px}
+    .hb{width:34px;height:34px;border-radius:8px}
 
-    /* Ocultar FAB en PC */
+    /* Search row historial */
+    .search-row{gap:12px;margin-bottom:16px}
+    .search-row input{font-size:.88rem}
+    .fsel{font-size:.84rem;padding:9px 32px 9px 13px}
+
+    /* ── FAB oculto ── */
     .fab{display:none !important}
-
-    /* Toast sube un poco sin FAB */
     #toast{bottom:24px}
 }
 
-/* Mobile (< 900px): pc-shell y sidebar no existen visualmente */
-@media(max-width:899px){
+/* ── Mobile (< 960px): pc-shell y sidebar no actúan ── */
+@media(max-width:959px){
     #pc-sidebar{display:none}
     #pc-shell{display:contents}
     #pc-content{display:contents}
+    .pc-nav-label{display:none}
 }
     </style>
 </head>
@@ -438,6 +543,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
     <!-- Sidebar (solo PC ≥900px) -->
     <nav id="pc-sidebar" aria-label="Navegación principal">
+        <div class="pc-nav-label">Principal</div>
         <div class="pc-nav-item active" data-p="form" onclick="tab('form');pcNav(this)">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg>
             Documento
@@ -447,6 +553,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
             Historial
             <span class="pc-nav-badge" id="pcHistBadge" style="display:none">0</span>
         </div>
+        <div class="pc-nav-label">Datos</div>
         <div class="pc-nav-item" data-p="agenda" onclick="tab('agenda');pcNav(this)">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
             Agenda
@@ -458,7 +565,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <div class="pc-nav-sep"></div>
         <div class="pc-nav-item" data-p="cfg" onclick="tab('cfg');pcNav(this)">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-            Config
+            Configuración
         </div>
         <div class="pc-nav-sep"></div>
         <button class="pc-nav-gen" onclick="generateCMR()">
@@ -957,6 +1064,28 @@ window.pcNav = function(el) {
     document.querySelectorAll('.pc-nav-item').forEach(e => e.classList.remove('active'));
     el.classList.add('active');
 };
+
+// ── PC: reorganizar formulario en 2 columnas de bloques ──────
+(function initPcFormGrid() {
+    if (window.innerWidth < 960) return;
+    const panel = document.getElementById('panel-form');
+    if (!panel) return;
+
+    // Crear grid wrapper
+    const grid = document.createElement('div');
+    grid.id = 'panel-form-grid';
+
+    // Mover todos los bloques dentro del grid
+    const blocks = Array.from(panel.querySelectorAll(':scope > .block'));
+    blocks.forEach((b, i) => {
+        // Bloques a ancho completo: DOC (0), Mercancía (5), Instrucciones (6), Observaciones (7), Firmas (8,9)
+        const fullCols = [0, 5, 6, 7, 8, 9];
+        if (fullCols.includes(i)) b.classList.add('block-full');
+        grid.appendChild(b);
+    });
+    // También mover el botón "Guardar como plantilla" si está suelto
+    panel.insertBefore(grid, panel.firstChild);
+})();
 
 // Sincronizar badge del sidebar con el de los tabs
 (function syncPcBadge() {
