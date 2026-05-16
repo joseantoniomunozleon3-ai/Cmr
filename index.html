@@ -606,11 +606,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
             <button onclick="saveAsTemplate()" class="save-btn" style="width:100%;justify-content:center;margin-top:10px">Guardar como plantilla</button>
         </div></div>
 
-        <!-- Fila 1: Remitente | Destinatario -->
+        <!-- Fila 1: Remitente | Consignatario -->
         <div class="form-row-2">
             <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="6"></textarea></div></div></div>
 
-            <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Destinatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="6"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
+            <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Consignatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="6"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
         </div>
 
         <!-- Fila 2: Recogida/Entrega | Transportista -->
@@ -698,7 +698,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
             <div class="stat"><div class="stat-n" id="st3">—</div><div class="stat-l">Kg Mes</div></div>
         </div>
         <div class="search-row">
-            <input id="histSearch" type="text" placeholder="Buscar por número, destinatario…" oninput="renderHist()"/>
+            <input id="histSearch" type="text" placeholder="Buscar por número, consignatario…" oninput="renderHist()"/>
             <select class="fsel" id="histFilter" onchange="renderHist()"><option value="">Todos</option><option value="month">Este mes</option><option value="week">Esta semana</option></select>
             <select class="fsel" id="histGroup" onchange="renderHist()"><option value="">Sin agrupar</option><option value="dest">Por Destino</option><option value="carrier">Por Transportista</option></select>
         </div>
@@ -707,7 +707,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
     <!-- ── Panel: Agenda ── -->
     <div id="panel-agenda" role="tabpanel" class="panel">
-        <div class="block"><div class="bhead"><span class="btag b">DEST.</span><span class="btitle">Destinatarios Frecuentes</span></div><div class="bbody" id="agRcvList"><div class="hist-empty" style="padding:20px 0">Sin destinatarios guardados</div></div></div>
+        <div class="block"><div class="bhead"><span class="btag b">DEST.</span><span class="btitle">Consignatarios Frecuentes</span></div><div class="bbody" id="agRcvList"><div class="hist-empty" style="padding:20px 0">Sin consignatarios guardados</div></div></div>
         <div class="block"><div class="bhead"><span class="btag g">COND.</span><span class="btitle">Conductores y Vehículos</span></div><div class="bbody" id="agDrvList"><div class="hist-empty" style="padding:20px 0">Sin conductores guardados</div></div></div>
         <div class="block"><div class="bhead"><span class="btag a">TRANS.</span><span class="btitle">Transportistas</span></div><div class="bbody" id="agCarList"><div class="hist-empty" style="padding:20px 0">Sin transportistas guardados</div></div></div>
     </div>
@@ -1484,10 +1484,10 @@ window.fillSuccessiveCarriers = function(list) {
 
 // ── Agenda ────────────────────────────────────────────────────
 window.saveRcvToAgenda = async function() {
-    const val = gv('rcvBlock'); if (!val) { toast('Rellena el destinatario primero', 'err'); return; }
+    const val = gv('rcvBlock'); if (!val) { toast('Rellena el consignatario primero', 'err'); return; }
     const name = val.split('\n')[0].trim();
     await dbAdd(AG, { type: 'rcv', name, block: val, savedAt: new Date().toISOString() });
-    toast('✓ Destinatario guardado', 'ok'); renderRcvQF();
+    toast('✓ Consignatario guardado', 'ok'); renderRcvQF();
 };
 
 window.saveDrvToAgenda = async function() {
@@ -1496,7 +1496,7 @@ window.saveDrvToAgenda = async function() {
     toast('✓ Conductor guardado', 'ok'); renderDrvQF();
 };
 
-window.fillRcv = async id => { const all = await dbAll(AG); const r = all.find(x => x.id == id); if (!r) return; sv('rcvBlock', r.block); tab('form'); toast('✓ Destinatario cargado', 'ok'); };
+window.fillRcv = async id => { const all = await dbAll(AG); const r = all.find(x => x.id == id); if (!r) return; sv('rcvBlock', r.block); tab('form'); toast('✓ Consignatario cargado', 'ok'); };
 window.fillDrv = async id => { const all = await dbAll(AG); const d = all.find(x => x.id == id); if (!d) return; sv('driverName', d.name); sv('plateTractor', d.tractor); sv('plateTrailer', d.trailer); tab('form'); toast('✓ Conductor cargado', 'ok'); };
 window.fillCar = async id => { const all = await dbAll(AG); const c = all.find(x => x.id == id); if (!c) return; sv('carrierBlock', c.block); tab('form'); renderCarQF(); toast('✓ Transportista cargado', 'ok'); };
 
@@ -1512,7 +1512,7 @@ window.editRcv = async function(id) {
     const all = await dbAll(AG); const r = all.find(x => x.id == id); if (!r) return;
     const iid = '_editRcvTxt';
     const safeVal = (r.block || '').replace(/&/g, '&amp;');
-    showBS('Editar destinatario',
+    showBS('Editar consignatario',
         `<textarea id="${iid}" rows="5" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid rgba(100,130,255,.4);border-radius:8px;font-size:.88rem;background:rgba(255,255,255,.07);color:inherit;outline:none;resize:vertical;font-family:inherit">${safeVal}</textarea>`,
         [
             { label: 'Cancelar', cls: 'cancel', fn: closeBS },
@@ -1521,7 +1521,7 @@ window.editRcv = async function(id) {
                 const val = (ta ? ta.value : '').trim(); if (!val) return;
                 const name = val.split('\n')[0].trim();
                 await dbDel(AG, id); await dbAdd(AG, { type: 'rcv', name, block: val, savedAt: new Date().toISOString() });
-                closeBS(); renderAgenda(); renderRcvQF(); toast('✓ Destinatario actualizado', 'ok');
+                closeBS(); renderAgenda(); renderRcvQF(); toast('✓ Consignatario actualizado', 'ok');
             }}
         ]
     );
@@ -1565,7 +1565,7 @@ window.renderAgenda = async function() {
 
     // Destinatarios
     const rcvEl = document.getElementById('agRcvList');
-    if (!rcvs.length) { rcvEl.innerHTML = '<div class="hist-empty" style="padding:20px 0">Sin destinatarios</div>'; }
+    if (!rcvs.length) { rcvEl.innerHTML = '<div class="hist-empty" style="padding:20px 0">Sin consignatarios</div>'; }
     else {
         rcvEl.innerHTML = rcvs.map(r => `<div class="ag-item" data-id="${r.id}" data-act="rcv"><div class="ag-ico rcv">${r.name.slice(0, 2).toUpperCase()}</div><div class="ag-info"><div class="ag-name">${r.name}</div><div class="ag-sub">Toca para ver opciones</div></div><div class="hacts"><div class="hb" data-id="${r.id}" data-act="loadrcv" title="Cargar en formulario">${loadIco}</div><div class="hb" data-id="${r.id}" data-act="editrcv" title="Editar">${editIco}</div><div class="hb de" data-id="${r.id}" data-act="delrcv" title="Eliminar">${xi}</div></div></div>`).join('');
         rcvEl.querySelectorAll('[data-act="rcv"]').forEach(el => el.addEventListener('click', e => {
@@ -2141,7 +2141,7 @@ async function _sharePDF(blob, fname, docNum, safetyTimer) {
 async function generateCMR(){
     // ── Validación de campos obligatorios ──────────────────────
     const REQUIRED = [
-        { id: 'rcvBlock',      label: 'Destinatario',    tag: 'casilla 2', type: 'textarea' },
+        { id: 'rcvBlock',      label: 'Consignatario',    tag: 'casilla 2', type: 'textarea' },
         { id: 'placeLoading',  label: 'Lugar de Carga',  tag: 'casilla 4', type: 'input' },
         { id: 'placeDelivery', label: 'Lugar de Entrega',tag: 'casilla 3', type: 'input' },
     ];
@@ -2263,7 +2263,7 @@ function buildPDF(D,safetyTimer){
         // Cabecera del documento
         if(logoDataURL){ content.push({table:{widths:['auto','*','auto'],body:[[ {image:logoDataURL,width:40,height:24,margin:[6,3,3,3],border:[false,false,false,false]}, {stack:[{text:tituloDocumento,fontSize:10,bold:true,color:'#000'},{text:subtituloLegal,fontSize:5,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:6.5,color:'#333'}],border:[false,false,false,false],margin:[0,3,0,3]}, {stack:[{text:cp.lbl,fontSize:8,bold:true,color:STRIPE,alignment:'right'},{text:cp.sub,fontSize:5,color:'#555',alignment:'right'},...refLine],border:[false,false,false,false],margin:[0,3,4,3]} ]]},layout:'noBorders',margin:[0,0,0,1]}); } else { content.push({table:{widths:['*','auto'],body:[[ {stack:[{text:tituloDocumento,fontSize:11,bold:true,color:'#000'},{text:subtituloLegal,fontSize:5,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:6.5,color:'#333'}],border:[false,false,false,false],margin:[4,3,0,3]}, {stack:[{text:cp.lbl,fontSize:8,bold:true,color:STRIPE,alignment:'right'},{text:cp.sub,fontSize:5,color:'#555',alignment:'right'},...refLine],border:[false,false,false,false],margin:[0,3,4,3]} ]]},layout:'noBorders',margin:[0,0,0,1]}); }
         content.push(colorLine());
-        content.push({table:{widths:['*','*'],body:[[boxHdr(1,'Remitente · Sender',senderBlock),boxHdr(2,'Destinatario · Consignee',rcvBlock)]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths:['*','*'],body:[[boxHdr(1,'Remitente · Sender',senderBlock),boxHdr(2,'Consignatario · Consignee',rcvBlock)]]},layout:lay,margin:[0,0,0,0]});
         content.push(colorLine());
         content.push({table:{widths:['*','*','auto'],body:[[box(4,'Lugar de carga',D.placeLoading||'—'),{...box(3,'Lugar de entrega',D.placeDelivery||'—'),minHeight:55},box('','Fecha prev. entrega',delivStr)]]},layout:lay,margin:[0,0,0,0]});
         content.push(colorLine());
@@ -2355,7 +2355,7 @@ function buildPDF(D,safetyTimer){
 
         const sigHdr22={table:{widths:['*'],body:[[{text:[{text:'22 ',bold:true},{text:'Firma Remitente'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
         const sigHdr23={table:{widths:['*'],body:[[{text:[{text:'23 ',bold:true},{text:'Firma Transportista'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
-        const sigHdr24={table:{widths:['*'],body:[[{text:[{text:'24 ',bold:true},{text:'Firma Destinatario'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
+        const sigHdr24={table:{widths:['*'],body:[[{text:[{text:'24 ',bold:true},{text:'Firma Consignatario'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
         const sigSenderCell=()=>{ const hasSig=D.sigSender&&D.sigSender.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr22,{image:D.sigSender,width:100,height:65,alignment:'center',margin:[0,6,0,0]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:5.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; } return {stack:[sigHdr22,{canvas:[{type:'rect',x:4,y:4,w:100,h:55,r:2,lineWidth:.5,lineColor:AC}],margin:[0,6,0,2]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:5.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; };
         const sigDriverCell=()=>{ const hasSig=D.sigDriver&&D.sigDriver.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr23,{image:D.sigDriver,width:100,height:65,alignment:'center',margin:[0,6,0,0]},{text:D.driverName||'',fontSize:5.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; } return {stack:[sigHdr23,{canvas:[{type:'rect',x:4,y:4,w:100,h:55,r:2,lineWidth:.5,lineColor:AC}],margin:[0,6,0,2]},{text:D.driverName||'',fontSize:5.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; };
         const sigConsCell=()=>({stack:[sigHdr24,{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:5.5,alignment:'center',color:'#888',margin:[0,20,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'});
@@ -2412,8 +2412,8 @@ function buildPDF_Classic(D, safetyTimer){
     const BL='#e3f2fd';
 
     const copies = isNac
-        ? [{lbl:'ORIGINAL',sub:'1 Remitente'},{lbl:'DUPLICADO',sub:'2 Destinatario'},{lbl:'TRIPLICADO',sub:'3 Transportista'}]
-        : [{lbl:'ORIGINAL',sub:'1 Remitente'},{lbl:'DUPLICADO',sub:'2 Destinatario'},{lbl:'TRIPLICADO',sub:'3 Transportista'},{lbl:'CUADRUPLICADO',sub:'4 Transportista'}];
+        ? [{lbl:'ORIGINAL',sub:'1 Remitente'},{lbl:'DUPLICADO',sub:'2 Consignatario'},{lbl:'TRIPLICADO',sub:'3 Transportista'}]
+        : [{lbl:'ORIGINAL',sub:'1 Remitente'},{lbl:'DUPLICADO',sub:'2 Consignatario'},{lbl:'TRIPLICADO',sub:'3 Transportista'},{lbl:'CUADRUPLICADO',sub:'4 Transportista'}];
 
     // Row heights (pt) — measured directly from reference CMR PDF
     // Total ~796pt matching real CMR layout
@@ -2699,8 +2699,8 @@ function buildPDF_Classic(D, safetyTimer){
         // ── Footer ──
         const footer = {
             text:isNac
-                ?'1 Remitente          2 Destinatario          3 Transportista'
-                :'1 Remitente          2 Destinatario          3 Transportista          4 Transportista',
+                ?'1 Remitente          2 Consignatario          3 Transportista'
+                :'1 Remitente          2 Consignatario          3 Transportista          4 Transportista',
             fontSize:6.5,color:'#444',margin:[4,2,4,0],alignment:'center'
         };
 
