@@ -1089,27 +1089,7 @@ window.pcNav = function(el) {
     el.classList.add('active');
 };
 
-// ── PC: reorganizar formulario en 2 columnas de bloques ──────
-(function initPcFormGrid() {
-    if (window.innerWidth < 960) return;
-    const panel = document.getElementById('panel-form');
-    if (!panel) return;
 
-    // Crear grid wrapper
-    const grid = document.createElement('div');
-    grid.id = 'panel-form-grid';
-
-    // Mover todos los bloques dentro del grid
-    const blocks = Array.from(panel.querySelectorAll(':scope > .block'));
-    blocks.forEach((b, i) => {
-        // Bloques a ancho completo: DOC (0), Mercancía (5), Instrucciones (6), Observaciones (7), Firmas (8,9)
-        const fullCols = [0, 5, 6, 7, 8, 9];
-        if (fullCols.includes(i)) b.classList.add('block-full');
-        grid.appendChild(b);
-    });
-    // También mover el botón "Guardar como plantilla" si está suelto
-    panel.insertBefore(grid, panel.firstChild);
-})();
 
 // Sincronizar badge del sidebar con el de los tabs
 (function syncPcBadge() {
