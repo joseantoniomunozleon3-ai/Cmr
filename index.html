@@ -367,7 +367,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         min-width:0;
         height:100%;
         overflow-y:auto;
+        overflow-x:hidden;
         background:var(--bg);
+        scroll-behavior:smooth;
     }
 
     /* Panels: anular base panel constraints */
@@ -1077,6 +1079,9 @@ window.tab = function(n) {
     document.querySelectorAll('.pc-nav-item').forEach(el => {
         el.classList.toggle('active', el.dataset.p === n);
     });
+    // En PC, volver al top del área de contenido
+    const pc = document.getElementById('pc-content');
+    if (pc) pc.scrollTop = 0;
     if (n === 'hist')   renderHist();
     if (n === 'agenda') renderAgenda();
     if (n === 'tmpl')   renderTemplates();
