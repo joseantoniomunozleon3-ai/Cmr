@@ -370,15 +370,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         background:var(--bg);
     }
 
-    /* Panels: sin max-width artificial, padding generoso */
+    /* Panels: anular base panel constraints */
     #pc-content .panel{
-        max-width:none;
+        max-width:none !important;
+        width:100% !important;
+        margin:0 !important;
+        box-sizing:border-box;
         padding:28px 36px 60px;
-    }
-
-    /* ── PAGE HEADER (título de sección) ── */
-    #pc-content .panel::before{
-        display:none; /* se añade por JS si se quiere */
     }
 
     /* ── Bloques con sombra y hover ── */
