@@ -398,6 +398,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         gap:14px;
         align-items:start;
     }
+    /* Grid de fila de 2 bloques en PC */
+    .form-row-2{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:14px;
+        align-items:start;
+    }
     /* Bloques que deben ocupar el ancho completo */
     .block-full{grid-column:1/-1}
 
@@ -457,6 +464,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     #pc-shell{display:contents}
     #pc-content{display:contents}
     .pc-nav-label{display:none}
+    .form-row-2{display:block}
+    .form-row-2 > .block{margin-bottom:10px}
 }
     </style>
 </head>
@@ -577,7 +586,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <!-- Área de contenido -->
     <div id="pc-content">
     <div id="panel-form" role="tabpanel" class="panel active">
-        <div class="block"><div class="bhead"><span class="btag a">DOC</span><span class="btitle">Datos del Documento</span></div><div class="bbody">
+
+        <!-- Fila 0: DOC – ancho completo -->
+        <div class="block block-full"><div class="bhead"><span class="btag a">DOC</span><span class="btitle">Datos del Documento</span></div><div class="bbody">
             <div class="fr"><label>Tipo de Documento</label>
                 <select id="tipoDoc" onchange="onTipoDocChange()">
                     <option value="cmr">CMR Internacional (Convenio CMR)</option>
@@ -595,38 +606,46 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
             <button onclick="saveAsTemplate()" class="save-btn" style="width:100%;justify-content:center;margin-top:10px">Guardar como plantilla</button>
         </div></div>
 
-        <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="5"></textarea></div></div></div>
+        <!-- Fila 1: Remitente | Destinatario -->
+        <div class="form-row-2">
+            <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="6"></textarea></div></div></div>
 
-        <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Destinatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="5"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
+            <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Destinatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="6"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
+        </div>
 
-        <div class="block"><div class="bhead"><span class="btag g">3 · 4 · 5</span><span class="btitle">Recogida y Entrega</span></div><div class="bbody">
-            <div class="fr"><label for="placeLoading">Lugar de Carga</label><input id="placeLoading" type="text" placeholder="Polígono Industrial Norte, Sevilla"/></div>
-            <div class="fr"><label for="placeDelivery">Lugar de Entrega</label><input id="placeDelivery" type="text" placeholder="Almacén Central, Berlín"/></div>
-            <div class="fr2">
-                <div class="fr"><label for="dateDelivery">Fecha Prevista Entrega</label><input id="dateDelivery" type="date"/></div>
-                <div class="fr"><label for="clientRef">Referencia Cliente</label><input id="clientRef" type="text" placeholder="PO-2024-XXX"/></div>
-            </div>
-        </div></div>
+        <!-- Fila 2: Recogida/Entrega | Transportista -->
+        <div class="form-row-2">
+            <div class="block"><div class="bhead"><span class="btag g">3 · 4 · 5</span><span class="btitle">Recogida y Entrega</span></div><div class="bbody">
+                <div class="fr"><label for="placeLoading">Lugar de Carga</label><input id="placeLoading" type="text" placeholder="Polígono Industrial Norte, Sevilla"/></div>
+                <div class="fr"><label for="placeDelivery">Lugar de Entrega</label><input id="placeDelivery" type="text" placeholder="Almacén Central, Berlín"/></div>
+                <div class="fr2">
+                    <div class="fr"><label for="dateDelivery">Fecha Prevista Entrega</label><input id="dateDelivery" type="date"/></div>
+                    <div class="fr"><label for="clientRef">Referencia Cliente</label><input id="clientRef" type="text" placeholder="PO-2024-XXX"/></div>
+                </div>
+            </div></div>
 
-        <div class="block"><div class="bhead"><span class="btag g">16</span><span class="btitle">Transportista</span><span class="bsaved" id="bs-carrier">✓ guardado</span></div><div class="bbody">
-            <div class="qf-row" id="car-qf"></div>
-            <div class="fr"><textarea id="carrierBlock" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="5"></textarea></div>
-            <div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveCarToAgenda()">+ Guardar transportista en agenda</span></div>
-            <div class="divl"></div>
-            <div class="ssep">Vehículo y Conductor</div>
-            <div class="qf-row" id="drv-qf"></div>
-            <div class="fr"><label for="driverName">Conductor</label><input id="driverName" type="text" placeholder="Nombre y apellidos"/></div>
-            <div class="fr"><label for="driverDNI">DNI Conductor</label><input id="driverDNI" type="text" placeholder="12345678X"/></div>
-            <div class="fr2">
-                <div class="fr"><label for="plateTractor">Matrícula Tractora</label><input id="plateTractor" type="text" placeholder="1234 ABC" style="text-transform:uppercase"/></div>
-                <div class="fr"><label for="plateTrailer">Matrícula Semirremolque</label><input id="plateTrailer" type="text" placeholder="R-5678 BC" style="text-transform:uppercase"/></div>
-            </div>
-            <div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveDrvToAgenda()">+ Guardar conductor en agenda</span></div>
-        </div></div>
+            <div class="block"><div class="bhead"><span class="btag g">16</span><span class="btitle">Transportista</span><span class="bsaved" id="bs-carrier">✓ guardado</span></div><div class="bbody">
+                <div class="qf-row" id="car-qf"></div>
+                <div class="fr"><textarea id="carrierBlock" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="4"></textarea></div>
+                <div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveCarToAgenda()">+ Guardar transportista en agenda</span></div>
+                <div class="divl"></div>
+                <div class="ssep">Vehículo y Conductor</div>
+                <div class="qf-row" id="drv-qf"></div>
+                <div class="fr"><label for="driverName">Conductor</label><input id="driverName" type="text" placeholder="Nombre y apellidos"/></div>
+                <div class="fr"><label for="driverDNI">DNI Conductor</label><input id="driverDNI" type="text" placeholder="12345678X"/></div>
+                <div class="fr2">
+                    <div class="fr"><label for="plateTractor">Matrícula Tractora</label><input id="plateTractor" type="text" placeholder="1234 ABC" style="text-transform:uppercase"/></div>
+                    <div class="fr"><label for="plateTrailer">Matrícula Semirremolque</label><input id="plateTrailer" type="text" placeholder="R-5678 BC" style="text-transform:uppercase"/></div>
+                </div>
+                <div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveDrvToAgenda()">+ Guardar conductor en agenda</span></div>
+            </div></div>
+        </div>
 
-        <div class="block"><div class="bhead"><span class="btag v">17</span><span class="btitle">Porteadores Sucesivos</span></div><div class="bbody"><div id="successive-list"></div><button onclick="addSuccessiveCarrier()" style="width:100%;margin:8px 0 4px;padding:9px;border-radius:var(--r3);border:1px dashed var(--line2);background:transparent;color:var(--violet-l);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">+ Añadir porteador sucesivo</button></div></div>
+        <!-- Fila 3: Porteadores Sucesivos – ancho completo -->
+        <div class="block block-full"><div class="bhead"><span class="btag v">17</span><span class="btitle">Porteadores Sucesivos</span></div><div class="bbody"><div id="successive-list"></div><button onclick="addSuccessiveCarrier()" style="width:100%;margin:8px 0 4px;padding:9px;border-radius:var(--r3);border:1px dashed var(--line2);background:transparent;color:var(--violet-l);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">+ Añadir porteador sucesivo</button></div></div>
 
-        <div class="block"><div class="bhead"><span class="btag a">6 · 7 · 8 · 9</span><span class="btitle">Descripción de la Mercancía</span></div><div class="bbody">
+        <!-- Fila 4: Mercancía – ancho completo -->
+        <div class="block block-full"><div class="bhead"><span class="btag a">6 · 7 · 8 · 9</span><span class="btitle">Descripción de la Mercancía</span></div><div class="bbody">
             <div id="goods-lines"></div>
             <button onclick="addGoodsLine()" style="width:100%;margin:8px 0 4px;padding:9px;border-radius:var(--r3);border:1px dashed var(--line2);background:transparent;color:var(--blue-l);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">+ Añadir línea de mercancía</button>
             <div style="display:flex;gap:8px;margin-top:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--r3);border:1px solid var(--line)">
@@ -648,19 +667,26 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
             <div class="qf-row" id="packing-qf" style="margin-top:8px"></div>
         </div></div>
 
-        <div class="block"><div class="bhead"><span class="btag b">13 · 19 · 14</span><span class="btitle">Instrucciones y Condiciones</span></div><div class="bbody">
-            <div class="fr"><label for="senderInstr">Instrucciones del Remitente</label><textarea id="senderInstr" rows="2"></textarea></div>
-            <div class="fr2">
-                <div class="fr"><label for="freightTerms">Franqueo</label><select id="freightTerms"><option value="PORT PAGADO">Port Pagado</option><option value="PORT DEBIDO">Port Debido</option><option value="CONTRA REEMBOLSO">Contra Reembolso</option></select></div>
-                <div class="fr"><label for="codAmount">Reembolso €</label><input id="codAmount" type="number" placeholder="0.00" step="0.01" min="0"/></div>
-            </div>
-        </div></div>
+        <!-- Fila 5: Instrucciones | Observaciones -->
+        <div class="form-row-2">
+            <div class="block"><div class="bhead"><span class="btag b">13 · 19 · 14</span><span class="btitle">Instrucciones y Condiciones</span></div><div class="bbody">
+                <div class="fr"><label for="senderInstr">Instrucciones del Remitente</label><textarea id="senderInstr" rows="3"></textarea></div>
+                <div class="fr2">
+                    <div class="fr"><label for="freightTerms">Franqueo</label><select id="freightTerms"><option value="PORT PAGADO">Port Pagado</option><option value="PORT DEBIDO">Port Debido</option><option value="CONTRA REEMBOLSO">Contra Reembolso</option></select></div>
+                    <div class="fr"><label for="codAmount">Reembolso €</label><input id="codAmount" type="number" placeholder="0.00" step="0.01" min="0"/></div>
+                </div>
+            </div></div>
 
-        <div class="block"><div class="bhead"><span class="btag r">18</span><span class="btitle">Reservas y Observaciones</span></div><div class="bbody"><div class="fr"><textarea id="observations" rows="3"></textarea></div></div></div>
+            <div class="block"><div class="bhead"><span class="btag r">18</span><span class="btitle">Reservas y Observaciones</span></div><div class="bbody"><div class="fr"><textarea id="observations" rows="5"></textarea></div></div></div>
+        </div>
 
-        <div class="block"><div class="bhead"><span class="btag r">22</span><span class="btitle">Firma del Remitente</span></div><div class="bbody"><div class="sig-box" id="sigWrapSender"><canvas id="sigCanvasSender" role="img" aria-label="Área de firma del remitente"></canvas><div class="sig-hint" id="sigHintSender">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSigSender()">✕ Borrar firma</button></div></div>
+        <!-- Fila 6: Firmas lado a lado -->
+        <div class="form-row-2">
+            <div class="block"><div class="bhead"><span class="btag r">22</span><span class="btitle">Firma del Remitente</span></div><div class="bbody"><div class="sig-box" id="sigWrapSender"><canvas id="sigCanvasSender" role="img" aria-label="Área de firma del remitente"></canvas><div class="sig-hint" id="sigHintSender">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSigSender()">✕ Borrar firma</button></div></div>
 
-        <div class="block"><div class="bhead"><span class="btag g">23</span><span class="btitle">Firma del Conductor</span></div><div class="bbody"><div class="sig-box" id="sigWrap"><canvas id="sigCanvas" role="img" aria-label="Área de firma del conductor"></canvas><div class="sig-hint" id="sigHint">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSig()">✕ Borrar firma</button></div></div>
+            <div class="block"><div class="bhead"><span class="btag g">23</span><span class="btitle">Firma del Conductor</span></div><div class="bbody"><div class="sig-box" id="sigWrap"><canvas id="sigCanvas" role="img" aria-label="Área de firma del conductor"></canvas><div class="sig-hint" id="sigHint">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSig()">✕ Borrar firma</button></div></div>
+        </div>
+
     </div>
 
     <!-- ── Panel: Historial ── -->
