@@ -2340,7 +2340,9 @@ function buildPDF(D,safetyTimer){
         const eurosDevueltos = (document.getElementById('eurosDevueltos')||{}).value||'';
         goodsBody.push([{text:freeLine1||' ',fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
         goodsBody.push([{text:freeLine2||' ',fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
-        goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:eurosCargados||'—'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:eurosDevueltos||'—'}],fontSize:8,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
+        if (eurosCargados || eurosDevueltos) {
+            goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:eurosCargados||'—'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:eurosDevueltos||'—'}],fontSize:8,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
+        }
 
         content.push(colorLine());
         content.push({table:{widths:['auto','auto','auto','*','auto','auto','auto'],body:goodsBody,dontBreakRows:true},layout:lay,margin:[0,0,0,0]});
