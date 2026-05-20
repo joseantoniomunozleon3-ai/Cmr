@@ -2088,13 +2088,13 @@ function buildPDF(D,safetyTimer){
             {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'},
             {text:totalVolume?totalVolume.toFixed(2):'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'}
         ]);
-        const freeLine1 = (document.getElementById('gl-free-1')||{}).value||'';
-        const freeLine2 = (document.getElementById('gl-free-2')||{}).value||'';
-        const eurosCargados = (document.getElementById('eurosCargados')||{}).value||'';
-        const eurosDevueltos = (document.getElementById('eurosDevueltos')||{}).value||'';
-        goodsBody.push([{text:freeLine1||' ',fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
-        goodsBody.push([{text:freeLine2||' ',fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
-        goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:eurosCargados||'—'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:eurosDevueltos||'—'}],fontSize:8,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
+        const freeLine1 = D['gl-free-1'] || '';
+        const freeLine2 = D['gl-free-2'] || '';
+        const eurosCargados = D['eurosCargados'] || '';
+        const eurosDevueltos = D['eurosDevueltos'] || '';
+        if(freeLine1) goodsBody.push([{text:freeLine1,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
+        if(freeLine2) goodsBody.push([{text:freeLine2,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
+        if(eurosCargados || eurosDevueltos) goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:eurosCargados||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:eurosDevueltos||'0'}],fontSize:8,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
 
         content.push(colorLine());
         content.push({table:{widths:['auto','auto','auto','*','auto','auto','auto'],body:goodsBody,dontBreakRows:true},layout:lay,margin:[0,0,0,0]});
@@ -2218,7 +2218,7 @@ function buildPDF_Classic(D, safetyTimer){
         const gl    = D.goodsLines&&D.goodsLines.length?D.goodsLines:[{}];
         const totalW= gl.reduce((s,l)=>s+(parseFloat(l.weight)||0),0);
         const totalV= gl.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
-        const rows8 = gl.slice(0,8);
+        const rows8 = gl.slice(0, 20); // procesa todas las líneas reales (máx 20)
         while(rows8.length<8) rows8.push({});
 
         // ── SINGLE FLAT TABLE covering the whole page ──
@@ -2361,6 +2361,12 @@ function buildPDF_Classic(D, safetyTimer){
             },
             layout:layG, margin:[0,0,0,0]
         };
+        // Fila eurps — solo si hay valor
+        const _eurC = D['eurosCargados']||''; const _eurD = D['eurosDevueltos']||'';
+        if(_eurC||_eurD){
+            r5.table.body.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:7},{text:_eurC||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:7},{text:_eurD||'0'}],fontSize:7,color:'#000',margin:[3,2,3,2],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]);
+            r5.table.heights.push(12);
+        }
 
         // ── ROW 6: Instrucciones/Pago + Emisión ──
         // Left col spans all: instrucciones(13) + forma de pago(14) + lugar emisión(21)
@@ -2564,7 +2570,11 @@ function buildPDF_IncoDocs(D, safetyTimer){
             ?[{text:l.freeText,fontSize:7,color:BLK,fillColor:WH,margin:[4,5,4,5],border:[true,false,true,false],colSpan:7},...Array(6).fill({})]
             :[gd(l.marks),gd(l.qty,'center'),gd(l.packing),gd(l.desc,'left',!!l.desc),gd(l.stat,'center'),gd(l.weight?(l.weight+' kg'):'','center'),gd(l.volume?String(l.volume):'','center')]);
         const gTot=[{text:'TOTALES',fontSize:6.5,bold:true,color:BLK,fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:'right',colSpan:5},{},{},{},{},gt(totalW?totalW.toFixed(2)+' kg':'','center',true),gt(totalV?totalV.toFixed(2):'','center',true)];
-        content.push({table:{widths:gW,body:[[gh('6 Marcas'),gh('7 Bultos'),gh('8 Embalaje'),gh('9 Mercancía'),gh('10 N.Est.'),gh('11 Peso kg'),gh('12 Vol m³')],...gRows,gTot]},layout:{hLineWidth:(i,n)=>i===0||i===1||i===n.table.body.length?0.5:0.3,vLineWidth:()=>0.5,hLineColor:()=>BDR,vLineColor:()=>BDR},margin:[0,0,0,2]});
+        const gTableBody=[[gh('6 Marcas'),gh('7 Bultos'),gh('8 Embalaje'),gh('9 Mercancía'),gh('10 N.Est.'),gh('11 Peso kg'),gh('12 Vol m³')],...gRows,gTot];
+        // Eurps — solo si tienen valor
+        const _eC=D['eurosCargados']||''; const _eD=D['eurosDevueltos']||'';
+        if(_eC||_eD) gTableBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:7},{text:_eC||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:7},{text:_eD||'0'}],fontSize:7,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
+        content.push({table:{widths:gW,body:gTableBody},layout:{hLineWidth:(i,n)=>i===0||i===1||i===n.table.body.length?0.5:0.3,vLineWidth:()=>0.5,hLineColor:()=>BDR,vLineColor:()=>BDR},margin:[0,0,0,2]});
 
         // Instrucciones / Estipulaciones / Emisión — anclado al fondo
         const cl = isNac
