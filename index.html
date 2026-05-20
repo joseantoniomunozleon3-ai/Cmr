@@ -2548,36 +2548,60 @@ function buildPDF_IncoDocs(D, safetyTimer){
         const carrierVal=(D.carrierBlock||'')+(platesStr?'\n'+platesStr:'')+(D.driverName?'\nConductor: '+D.driverName+(D.driverDNI?' — DNI: '+D.driverDNI:''):'');
         content.push({table:{widths:['50%','50%'],body:[[field('16  Transportista / Carrier',carrierVal,{fs:8}),field('17  Porteadores sucesivos',D.successiveCarriers&&D.successiveCarriers.length?D.successiveCarriers.map(s=>s.name+(s.address?'\n'+s.address:'')).join('\n\n'):'')]]},layout:lay,margin:[0,0,0,2]});
 
-        // Tabla mercancías
+        // Tabla mercancías — altura fija para llenar la página
         const gl=D.goodsLines&&D.goodsLines.length?D.goodsLines:[{}];
         const totalW=gl.reduce((s,l)=>s+(parseFloat(l.weight)||0),0);
         const totalV=gl.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
-        const rows8=gl.slice(0,8); while(rows8.length<8) rows8.push({});
+        // Usamos 12 filas fijas para que el bloque ocupe toda la página
+        const rows12=gl.slice(0,12); while(rows12.length<12) rows12.push({});
         const gW=['18%','9%','13%','30%','10%','12%','8%'];
         const gh=t=>({text:t,fontSize:5.5,bold:true,color:'#4a3828',fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:'center'});
-        const gd=(t,a,b)=>({text:t||'',fontSize:7,bold:!!b,color:BLK,fillColor:WH,margin:[3,3,3,3],border:[true,false,true,false],alignment:a||'left'});
+        const gd=(t,a,b)=>({text:t||'',fontSize:7,bold:!!b,color:BLK,fillColor:WH,margin:[3,5,3,5],border:[true,false,true,false],alignment:a||'left'});
         const gt=(t,a,b)=>({text:t||'',fontSize:7,bold:!!b,color:BLK,fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:a||'left'});
-        const gRows=rows8.map(l=>l.freeMode&&l.freeText?[{text:l.freeText,fontSize:7,color:BLK,fillColor:WH,margin:[4,3,4,3],border:[true,false,true,false],colSpan:7},...Array(6).fill({})]:[gd(l.marks),gd(l.qty,'center'),gd(l.packing),gd(l.desc,'left',!!l.desc),gd(l.stat,'center'),gd(l.weight?(l.weight+' kg'):'','center'),gd(l.volume?String(l.volume):'','center')]);
+        const gRows=rows12.map(l=>l.freeMode&&l.freeText?[{text:l.freeText,fontSize:7,color:BLK,fillColor:WH,margin:[4,5,4,5],border:[true,false,true,false],colSpan:7},...Array(6).fill({})]:[gd(l.marks),gd(l.qty,'center'),gd(l.packing),gd(l.desc,'left',!!l.desc),gd(l.stat,'center'),gd(l.weight?(l.weight+' kg'):'','center'),gd(l.volume?String(l.volume):'','center')]);
         const gTot=[{text:'TOTALES',fontSize:6.5,bold:true,color:BLK,fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:'right',colSpan:5},{},{},{},{},gt(totalW?totalW.toFixed(2)+' kg':'','center',true),gt(totalV?totalV.toFixed(2):'','center',true)];
         content.push({table:{widths:gW,body:[[gh('6 Marcas'),gh('7 Bultos'),gh('8 Embalaje'),gh('9 Mercancía'),gh('10 N.Est.'),gh('11 Peso kg'),gh('12 Vol m³')],...gRows,gTot]},layout:{hLineWidth:(i,n)=>i===0||i===1||i===n.table.body.length?0.5:0.3,vLineWidth:()=>0.5,hLineColor:()=>BDR,vLineColor:()=>BDR},margin:[0,0,0,2]});
 
-        // Instrucciones / Estipulaciones / Emisión
-        content.push({table:{widths:['33%','34%','33%'],body:[[field('13  Instrucciones remitente',D.senderInstr||''),field('19  Estipulaciones especiales',D.specialStipulations||''),{stack:[{text:'21  Lugar y fecha de emisión',fontSize:5.5,color:'#7a6a58',margin:[4,3,4,1]},{text:(D.placeEmission||'')+(dateS?'\n'+dateS:''),fontSize:8,color:BLK,margin:[4,0,4,2]},{canvas:[{type:'line',x1:4,y1:0,x2:120,y2:0,lineWidth:0.4,lineColor:BDR}],margin:[0,2,0,2]},{text:'18  Reservas / Observations',fontSize:5.5,color:'#7a6a58',margin:[4,0,4,1]},{text:D.observations||'',fontSize:7,color:BLK,margin:[4,0,4,3]}],fillColor:WH,border:[true,true,true,true]}]]},layout:lay,margin:[0,0,0,2]});
+        // Instrucciones / Estipulaciones / Emisión — anclado al fondo
+        const cl = isNac
+            ? `Este contrato se rige por la Ley 15/2009 del contrato de transporte terrestre de mercancías y la Orden FOM/1882/2012. 1. El porteador responde de la pérdida total o parcial y de las averías desde la recepción hasta la entrega. 2. La indemnización por pérdida o avería no excederá del valor de mercado de la mercancía o 1/3 del IPREM por kilogramo. 3. El retraso en la entrega dará lugar a indemnización si se ha formulado reserva en el momento de la entrega. 4. Las reclamaciones prescribirán al año, salvo dolo o culpa grave (3 años). 5. El destinatario deberá manifestar las reservas en el momento de la entrega o dentro de los siete días siguientes. 6. La carta de porte deberá ser firmada por remitente, transportista y destinatario.`
+            : `Este contrato se rige por el Convenio CMR (Ginebra, 19 mayo 1956) y el Protocolo de 5 julio 1978. 1. El transportista responde de la pérdida total o parcial y de las averías desde la recepción hasta la entrega. 2. La indemnización no excederá de 8,33 DEG por kilogramo de peso bruto faltante. 3. El retraso sólo dará lugar a indemnización si se ha formulado reserva por escrito. 4. Las reclamaciones deberán dirigirse al transportista en el plazo de 1 año (3 años en caso de dolo o culpa grave). 5. Los daños no derivados de pérdida o avería se limitan al importe del porte. 6. El destinatario deberá manifestar reservas por escrito en el momento de la entrega o a más tardar en los 7 días siguientes.`;
+        const sigH=68;
 
-        // Firmas
-        const sigH=70;
-        const mkSig=(label,sub,imgData)=>{
-            const st=[{text:label,fontSize:6,bold:true,color:cp.color,margin:[4,4,4,1]},{text:sub,fontSize:5,color:'#b0a090',margin:[4,0,4,6]}];
-            if(imgData&&imgData.startsWith('data:image')) st.push({image:imgData,width:110,height:45,alignment:'center',margin:[0,2,0,2]});
-            else st.push({text:'',margin:[4,sigH-28,4,4]});
-            return {stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};
+        const bottomBlock = {
+            absolutePosition:{x:16, y:618},
+            stack:[
+                // Instrucciones / Estipulaciones / Emisión
+                {table:{widths:['33%','34%','33%'],body:[[
+                    field('13  Instrucciones remitente',D.senderInstr||''),
+                    field('19  Estipulaciones especiales',D.specialStipulations||''),
+                    {stack:[
+                        {text:'21  Lugar y fecha de emisión',fontSize:5.5,color:'#7a6a58',margin:[4,3,4,1]},
+                        {text:(D.placeEmission||'')+(dateS?'\n'+dateS:''),fontSize:8,color:BLK,margin:[4,0,4,2]},
+                        {canvas:[{type:'line',x1:4,y1:0,x2:120,y2:0,lineWidth:0.4,lineColor:BDR}],margin:[0,2,0,2]},
+                        {text:'18  Reservas / Observations',fontSize:5.5,color:'#7a6a58',margin:[4,0,4,1]},
+                        {text:D.observations||'',fontSize:7,color:BLK,margin:[4,0,4,3]}
+                    ],fillColor:WH,border:[true,true,true,true]}
+                ]]},layout:lay,margin:[0,0,0,2]},
+                // Firmas
+                {table:{widths:['33%','34%','33%'],body:[[
+                    (()=>{const st=[{text:'22  Remitente / Sender',fontSize:6,bold:true,color:cp.color,margin:[4,4,4,1]},{text:'Firma y sello',fontSize:5,color:'#b0a090',margin:[4,0,4,6]}];if(D.sigSender&&D.sigSender.startsWith('data:image'))st.push({image:D.sigSender,width:110,height:40,alignment:'center',margin:[0,2,0,2]});else st.push({text:'',margin:[4,sigH-28,4,4]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
+                    (()=>{const st=[{text:'23  Transportista / Carrier',fontSize:6,bold:true,color:cp.color,margin:[4,4,4,1]},{text:'Firma y sello',fontSize:5,color:'#b0a090',margin:[4,0,4,6]}];if(D.sigDriver&&D.sigDriver.startsWith('data:image'))st.push({image:D.sigDriver,width:110,height:40,alignment:'center',margin:[0,2,0,2]});else st.push({text:'',margin:[4,sigH-28,4,4]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
+                    {stack:[{text:'24  Destinatario / Consignee',fontSize:6,bold:true,color:cp.color,margin:[4,4,4,1]},{text:'Firma y sello (en entrega)',fontSize:5,color:'#b0a090',margin:[4,0,4,6]},{text:'',margin:[4,sigH-28,4,4]}],fillColor:WH,border:[true,true,true,true],minHeight:sigH}
+                ]]},layout:lay,margin:[0,0,0,2]},
+                // Cláusulas
+                {table:{widths:['*'],body:[[{stack:[
+                    {text:isNac?'CLÁUSULAS LEGALES (Ley 15/2009)':'CMR CONVENTION CONDITIONS',fontSize:5,bold:true,color:'#4a3828',margin:[4,3,4,1]},
+                    {text:cl,fontSize:4.5,color:'#7a6a58',lineHeight:1.3,margin:[4,0,4,3]}
+                ],fillColor:LBL,border:[false,false,false,false]}]]},layout:layN,margin:[0,0,0,2]},
+                // Pie
+                {columns:[
+                    {text:(isNac?'CARTA PORTE ':'CMR N.º ')+num+(dateS?'  ·  '+dateS:'')+(D.placeEmission?'  ·  '+D.placeEmission:''),fontSize:5,color:'#b0a090'},
+                    {text:'CMR Manager Pro  ·  Generado digitalmente',fontSize:5,color:'#d4cfc3',alignment:'right'}
+                ],margin:[0,0,0,0]}
+            ]
         };
-        content.push({table:{widths:['33%','34%','33%'],body:[[mkSig('22  Remitente / Sender','Firma y sello',D.sigSender),mkSig('23  Transportista / Carrier','Firma y sello',D.sigDriver),mkSig('24  Destinatario / Consignee','Firma y sello (en entrega)',null)]]},layout:lay,margin:[0,0,0,4]});
-
-        // Cláusulas
-        const cl=isNac?'Rige la Ley 15/2009. Indemnización máx: 1/3 IPREM/kg. Reclamaciones: 1 año (3 en dolo). Reservas en 7 días.':'Subject to CMR Convention (Geneva 1956). Max compensation: 8.33 SDR/kg. Claims: 1 year (3 in fraud). Reservations: 7 days from delivery.';
-        content.push({table:{widths:['*'],body:[[{stack:[{text:isNac?'CLÁUSULAS LEGALES (Ley 15/2009)':'CMR CONVENTION CONDITIONS',fontSize:5,bold:true,color:'#4a3828',margin:[4,3,4,1]},{text:cl,fontSize:4.5,color:'#7a6a58',lineHeight:1.3,margin:[4,0,4,3]}],fillColor:LBL,border:[false,false,false,false]}]]},layout:layN,margin:[0,0,0,2]});
-        content.push({columns:[{text:(isNac?'CARTA PORTE ':'CMR N.º ')+num+(dateS?'  ·  '+dateS:'')+(D.placeEmission?'  ·  '+D.placeEmission:''),fontSize:5,color:'#b0a090'},{text:'CMR Manager Pro  ·  Generado digitalmente',fontSize:5,color:'#d4cfc3',alignment:'right'}],margin:[0,0,0,0]});
+        content.push(bottomBlock);
 
         allContent.push({stack:content,margin:[0,0,0,0]});
         if(ci<copies.length-1) allContent.push({text:'',pageBreak:'after'});
