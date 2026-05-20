@@ -2548,17 +2548,21 @@ function buildPDF_IncoDocs(D, safetyTimer){
         const carrierVal=(D.carrierBlock||'')+(platesStr?'\n'+platesStr:'')+(D.driverName?'\nConductor: '+D.driverName+(D.driverDNI?' — DNI: '+D.driverDNI:''):'');
         content.push({table:{widths:['50%','50%'],body:[[field('16  Transportista / Carrier',carrierVal,{fs:8}),field('17  Porteadores sucesivos',D.successiveCarriers&&D.successiveCarriers.length?D.successiveCarriers.map(s=>s.name+(s.address?'\n'+s.address:'')).join('\n\n'):'')]]},layout:lay,margin:[0,0,0,2]});
 
-        // Tabla mercancías — altura fija para llenar la página
+        // Tabla mercancías — procesa TODAS las líneas reales, luego rellena hasta mínimo 12
         const gl=D.goodsLines&&D.goodsLines.length?D.goodsLines:[{}];
         const totalW=gl.reduce((s,l)=>s+(parseFloat(l.weight)||0),0);
         const totalV=gl.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
-        // Usamos 12 filas fijas para que el bloque ocupe toda la página
-        const rows12=gl.slice(0,12); while(rows12.length<12) rows12.push({});
+        // Filas reales primero, luego vacías hasta completar al menos 12
+        const realRows = gl.slice(0, 20); // máx 20 líneas reales
+        const padCount = Math.max(0, 12 - realRows.length);
+        const allRows = [...realRows, ...Array(padCount).fill({})];
         const gW=['18%','9%','13%','30%','10%','12%','8%'];
         const gh=t=>({text:t,fontSize:5.5,bold:true,color:'#4a3828',fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:'center'});
         const gd=(t,a,b)=>({text:t||'',fontSize:7,bold:!!b,color:BLK,fillColor:WH,margin:[3,5,3,5],border:[true,false,true,false],alignment:a||'left'});
         const gt=(t,a,b)=>({text:t||'',fontSize:7,bold:!!b,color:BLK,fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:a||'left'});
-        const gRows=rows12.map(l=>l.freeMode&&l.freeText?[{text:l.freeText,fontSize:7,color:BLK,fillColor:WH,margin:[4,5,4,5],border:[true,false,true,false],colSpan:7},...Array(6).fill({})]:[gd(l.marks),gd(l.qty,'center'),gd(l.packing),gd(l.desc,'left',!!l.desc),gd(l.stat,'center'),gd(l.weight?(l.weight+' kg'):'','center'),gd(l.volume?String(l.volume):'','center')]);
+        const gRows=allRows.map(l=>l.freeMode&&l.freeText
+            ?[{text:l.freeText,fontSize:7,color:BLK,fillColor:WH,margin:[4,5,4,5],border:[true,false,true,false],colSpan:7},...Array(6).fill({})]
+            :[gd(l.marks),gd(l.qty,'center'),gd(l.packing),gd(l.desc,'left',!!l.desc),gd(l.stat,'center'),gd(l.weight?(l.weight+' kg'):'','center'),gd(l.volume?String(l.volume):'','center')]);
         const gTot=[{text:'TOTALES',fontSize:6.5,bold:true,color:BLK,fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:'right',colSpan:5},{},{},{},{},gt(totalW?totalW.toFixed(2)+' kg':'','center',true),gt(totalV?totalV.toFixed(2):'','center',true)];
         content.push({table:{widths:gW,body:[[gh('6 Marcas'),gh('7 Bultos'),gh('8 Embalaje'),gh('9 Mercancía'),gh('10 N.Est.'),gh('11 Peso kg'),gh('12 Vol m³')],...gRows,gTot]},layout:{hLineWidth:(i,n)=>i===0||i===1||i===n.table.body.length?0.5:0.3,vLineWidth:()=>0.5,hLineColor:()=>BDR,vLineColor:()=>BDR},margin:[0,0,0,2]});
 
