@@ -1990,233 +1990,6 @@ function buildPDF(D,safetyTimer){
         ? 'Ley 15/2009 del Contrato de Transporte Terrestre de Mercancías — Orden FOM/1882/2012'
         : 'Convenio CMR Ginebra 1956 — Protocolo 5 julio 1978';
 
-    const clausulasTexto = isNacional ?
-        `Este contrato de transporte se rige por la Ley 15/2009, de 11 de noviembre, del contrato de transporte terrestre de mercancías, y la Orden FOM/1882/2012.\n1. El porteador responde de la pérdida total o parcial y de las averías desde la recepción hasta la entrega.\n2. La indemnización por pérdida o avería no excederá del valor de mercado de la mercancía o 1/3 del IPREM por kilogramo.\n3. El retraso en la entrega dará lugar a indemnización si se ha formulado reserva en el momento de la entrega.\n4. Las reclamaciones prescribirán al año, salvo dolo o culpa grave (3 años).\n5. El destinatario deberá manifestar las reservas en el momento de la entrega o dentro de los siete días siguientes.\n6. La carta de porte deberá ser firmada por remitente, transportista y destinatario.`
-        : `Este contrato de transporte se rige por el Convenio relativo al contrato de transporte internacional de mercancías por carretera (CMR), Ginebra, 19 de mayo de 1956, y el Protocolo de 5 de julio de 1978.\n1. El transportista responde de la pérdida total o parcial y de las averías que se produzcan desde el momento de la recepción de la mercancía hasta el de su entrega.\n2. La indemnización no excederá de 8,33 DEG por kilogramo de peso bruto faltante.\n3. El retraso en la entrega sólo dará lugar a indemnización si se ha formulado reserva por escrito.\n4. Las reclamaciones deberán dirigirse al transportista dentro del plazo de un año, o de tres años en caso de dolo o culpa grave.\n5. Los daños y perjuicios que no resulten de la pérdida o avería de la mercancía se limitan al importe del porte.\n6. El destinatario deberá manifestar por escrito al transportista las reservas por pérdidas o averías en el momento de la entrega, o a más tardar en los siete días siguientes.`;
-
-    // ── Alturas fijas (pt) que suman exactamente A4 = 841pt - márgenes (8+6=14) = 827pt ──
-    // Cabecera: 22, franja: 2, remitente/dest: 52, franja: 2, carga/entrega: 38, franja: 2,
-    // docs/reimb: 22, franja: 2, transportista: 48, franja: 2, porteadores: 18, franja: 2,
-    // mercancía(hdr+14filas+tot): 16+14*17+14=16+238+14=268, franja:2,
-    // instrucciones: 60, franja:2, emisión/franqueo:20, franja:2, firmas:72, cláusulas:32, pie:8
-    // Total: 22+2+52+2+38+2+22+2+48+2+18+2+268+2+60+2+20+2+72+32+8 = 728... ajustar mercancía
-    // Fórmula: ajustar H.goods para que todo sume 827
-    const H = {
-        hdr: 22, stripe: 2,
-        sender: 54, load: 38, docs: 22, carrier: 50, succ: 18,
-        gHdr: 14, gRow: 17, gTot: 12,
-        instr: 58, emit: 20, sig: 70,
-        clausulas: 30, foot: 7
-    };
-    // Calcular filas de mercancía disponibles
-    const fixedH = H.hdr + H.stripe*9 + H.sender + H.load + H.docs + H.carrier + H.succ +
-                   H.gHdr + H.gTot + H.instr + H.emit + H.sig + H.clausulas + H.foot;
-    const pageH = 827; // A4 - márgenes
-    const availGoods = pageH - fixedH;
-    const numGoodsRows = Math.max(8, Math.floor(availGoods / H.gRow));
-
-    const content=[];
-    copies.forEach((cp,ci)=>{
-        const{AC}=cp;
-        const lay={hLineWidth:()=>0.5, vLineWidth:()=>0.5, hLineColor:()=>'#ccc', vLineColor:()=>'#ccc'};
-        const colorLine=()=>({canvas:[{type:'rect',x:0,y:0,w:559,h:H.stripe,color:AC}],margin:[0,0,0,0]});
-        const box=(cas,title,cnt,h)=>{
-            const lines=(cnt||'').split('\n');
-            const bdy=[{columns:[{text:String(cas),fontSize:5,bold:true,color:'#999',width:'auto'},{text:title,fontSize:4.5,color:'#aaa',width:'*',alignment:'right'}],margin:[3,2,3,0]}];
-            if(lines[0]) bdy.push({text:lines[0],fontSize:8,bold:true,color:'#000',margin:[3,0,3,0]});
-            if(lines.length>1) bdy.push({text:lines.slice(1).join('\n'),fontSize:7,color:'#222',margin:[3,0,3,1],lineHeight:1.15});
-            return {stack:bdy,border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]};
-        };
-        const refLine = D.clientRef ? [{text:'Ref: '+D.clientRef,fontSize:7.5,bold:true,color:'#000',alignment:'right',margin:[0,1,4,0]}] : [];
-
-        // ── CABECERA ──
-        const hdrContent = logoDataURL
-            ? {table:{widths:['auto','*','auto'],heights:[H.hdr],body:[[
-                {image:logoDataURL,width:36,height:22,margin:[4,0,2,0],border:[false,false,false,false]},
-                {stack:[{text:tituloDocumento,fontSize:9,bold:true,color:'#000'},{text:subtituloLegal,fontSize:4.5,color:'#666'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:6,color:'#444'}],border:[false,false,false,false],margin:[0,2,0,2]},
-                {stack:[{text:cp.lbl,fontSize:7.5,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:4.5,color:'#666',alignment:'right'},...refLine],border:[false,false,false,false],margin:[0,2,4,2]}
-              ]]},layout:'noBorders',margin:[0,0,0,0]}
-            : {table:{widths:['*','auto'],heights:[H.hdr],body:[[
-                {stack:[{text:tituloDocumento,fontSize:9.5,bold:true,color:'#000'},{text:subtituloLegal,fontSize:4.5,color:'#666'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:6,color:'#444'}],border:[false,false,false,false],margin:[4,2,0,2]},
-                {stack:[{text:cp.lbl,fontSize:7.5,bold:true,color:AC,alignment:'right'},{text:cp.sub,fontSize:4.5,color:'#666',alignment:'right'},...refLine],border:[false,false,false,false],margin:[0,2,4,2]}
-              ]]},layout:'noBorders',margin:[0,0,0,0]};
-
-        content.push(hdrContent);
-        content.push(colorLine());
-
-        // ── REMITENTE | CONSIGNATARIO ──
-        content.push({table:{widths:['*','*'],heights:[H.sender],body:[[
-            {stack:[{columns:[{text:'1',fontSize:5,bold:true,color:'#999',width:'auto'},{text:'Remitente · Sender',fontSize:4.5,color:'#aaa',width:'*',alignment:'right'}],margin:[3,2,3,0]},{text:(senderBlock.split('\n')[0]||''),fontSize:9,bold:true,color:'#000',margin:[3,0,3,0]},{text:senderBlock.split('\n').slice(1).join('\n'),fontSize:7.5,color:'#222',margin:[3,0,3,2],lineHeight:1.2}],border:[true,true,true,true],fillColor:'#fff'},
-            {stack:[{columns:[{text:'2',fontSize:5,bold:true,color:'#999',width:'auto'},{text:'Consignatario · Consignee',fontSize:4.5,color:'#aaa',width:'*',alignment:'right'}],margin:[3,2,3,0]},{text:(rcvBlock.split('\n')[0]||''),fontSize:9,bold:true,color:'#000',margin:[3,0,3,0]},{text:rcvBlock.split('\n').slice(1).join('\n'),fontSize:7.5,color:'#222',margin:[3,0,3,2],lineHeight:1.2}],border:[true,true,true,true],fillColor:'#fff'}
-        ]]},layout:lay,margin:[0,0,0,0]});
-        content.push(colorLine());
-
-        // ── LUGAR CARGA | LUGAR ENTREGA | FECHA ──
-        content.push({table:{widths:['*','*','auto'],heights:[H.load],body:[[
-            box(4,'Lugar de carga · Place of Loading',D.placeLoading||'—'),
-            box(3,'Lugar de entrega · Place of Delivery',D.placeDelivery||'—'),
-            box('','Fecha entrega',delivStr)
-        ]]},layout:lay,margin:[0,0,0,0]});
-        content.push(colorLine());
-
-        // ── DOCS ANEXOS | REEMBOLSO ──
-        content.push({table:{widths:['*','auto'],heights:[H.docs],body:[[
-            box(5,'Docs. anexos / Albarán',D.docsAnexos||'—'),
-            box(14,'Reembolso €',D.codAmount||'')
-        ]]},layout:lay,margin:[0,0,0,0]});
-        content.push(colorLine());
-
-        // ── TRANSPORTISTA | CONDUCTOR/VEHÍCULO ──
-        const platesStr=[D.plateTractor,D.plateTrailer].filter(Boolean).join('  /  ')||'—';
-        const box16f={stack:[
-            {columns:[{text:'16f',fontSize:5,bold:true,color:'#999',width:'auto'},{text:'Conductor · Vehículo',fontSize:4.5,color:'#aaa',width:'*',alignment:'right'}],margin:[3,2,3,0]},
-            ...(D.driverName?[{text:D.driverName,fontSize:8.5,bold:true,color:'#000',margin:[3,0,3,0]}]:[]),
-            ...(D.driverDNI?[{text:'DNI: '+D.driverDNI,fontSize:6.5,color:'#444',margin:[3,0,3,0]}]:[]),
-            {text:platesStr,fontSize:11,bold:true,color:'#000',characterSpacing:1,margin:[3,2,3,2]}
-        ],border:[true,true,true,true],fillColor:'#fff'};
-        content.push({table:{widths:['35%','65%'],heights:[H.carrier],body:[[
-            box(16,'Transportista · Carrier',carrierBlock),
-            box16f
-        ]]},layout:lay,margin:[0,0,0,0]});
-        content.push(colorLine());
-
-        // ── PORTEADORES SUCESIVOS ──
-        const succCarriers=D.successiveCarriers&&D.successiveCarriers.length?D.successiveCarriers:[];
-        const succText=succCarriers.length?succCarriers.map(s=>`${s.name}${s.address?'\n'+s.address:''}`).join('  |  '):'—';
-        content.push({table:{widths:['*'],heights:[H.succ],body:[[box(17,'Porteadores Sucesivos',succText)]]},layout:lay,margin:[0,0,0,0]});
-        content.push(colorLine());
-
-        // ── MERCANCÍA ──
-        const goodsLines=D.goodsLines&&D.goodsLines.length?D.goodsLines:[{}];
-        const totalWeight=goodsLines.reduce((s,l)=>s+(parseFloat(l.weight)||0),0);
-        const totalVolume=goodsLines.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
-
-        const gHdr=[
-            {text:'6 Marcas y Núm.',fontSize:5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],alignment:'center',border:[true,true,true,true]},
-            {text:'7 Núm. Bultos',fontSize:5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],alignment:'center',border:[true,true,true,true]},
-            {text:'8 Clase Embalaje',fontSize:5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],alignment:'center',border:[true,true,true,true]},
-            {text:'9 Naturaleza Mercancía',fontSize:5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],alignment:'center',border:[true,true,true,true]},
-            {text:'10 N.Est.',fontSize:5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],alignment:'center',border:[true,true,true,true]},
-            {text:'11 Peso kg',fontSize:5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],alignment:'center',border:[true,true,true,true]},
-            {text:'12 Vol m³',fontSize:5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],alignment:'center',border:[true,true,true,true]},
-        ];
-
-        const gBody=[gHdr];
-        // Filas de datos
-        for(let i=0;i<numGoodsRows;i++){
-            const l=goodsLines[i]||{};
-            if(l.freeMode&&l.freeText){
-                gBody.push([{text:l.freeText,fontSize:7,color:'#000',fillColor:'#fff',margin:[3,3,3,3],border:[true,false,true,false],colSpan:7},{},{},{},{},{},{}]);
-            } else {
-                gBody.push([
-                    {text:l.marks||'',fontSize:6.5,color:'#000',fillColor:'#fff',margin:[2,2,2,2],border:[true,false,true,false]},
-                    {text:l.qty||'',fontSize:6.5,color:'#000',fillColor:'#fff',margin:[2,2,2,2],border:[true,false,true,false],alignment:'center'},
-                    {text:l.packing||'',fontSize:6.5,color:'#000',fillColor:'#fff',margin:[2,2,2,2],border:[true,false,true,false]},
-                    {text:l.desc||'',fontSize:6.5,bold:!!(l.desc),color:'#000',fillColor:'#fff',margin:[2,2,2,2],border:[true,false,true,false]},
-                    {text:l.stat||'',fontSize:6.5,color:'#000',fillColor:'#fff',margin:[2,2,2,2],border:[true,false,true,false],alignment:'center'},
-                    {text:l.weight?(l.weight+' kg'):'',fontSize:6.5,color:'#000',fillColor:'#fff',margin:[2,2,2,2],border:[true,false,true,false],alignment:'center'},
-                    {text:l.volume?String(l.volume):'',fontSize:6.5,color:'#000',fillColor:'#fff',margin:[2,2,2,2],border:[true,false,true,false],alignment:'center'},
-                ]);
-            }
-        }
-        // Líneas libres y europalets
-        const freeLine1 = D['freeline-1'] || '';
-        const freeLine2 = D['freeline-2'] || '';
-        const eurosCargados = D['eurosCargados'] || '';
-        const eurosDevueltos = D['eurosDevueltos'] || '';
-        if(freeLine1) gBody.push([{text:freeLine1,fontSize:6.5,color:'#000',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',border:[true,false,true,false]},{},{},{},{},{},{}]);
-        if(freeLine2) gBody.push([{text:freeLine2,fontSize:6.5,color:'#000',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',border:[true,false,true,false]},{},{},{},{},{},{}]);
-        if(eurosCargados||eurosDevueltos) gBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:7},{text:eurosCargados||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:7},{text:eurosDevueltos||'0'}],fontSize:7,color:'#000',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',border:[true,false,true,false]},{},{},{},{},{},{}]);
-        // Fila totales
-        gBody.push([
-            {text:'TOTALES',fontSize:5.5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],colSpan:2,alignment:'right',border:[true,true,true,true]},{},
-            {text:'',fillColor:'#fff',border:[true,true,true,true],margin:[2,2,2,2]},
-            {text:'',fillColor:'#fff',border:[true,true,true,true],margin:[2,2,2,2]},
-            {text:'',fillColor:'#fff',border:[true,true,true,true],margin:[2,2,2,2]},
-            {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:6.5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],alignment:'center',border:[true,true,true,true]},
-            {text:totalVolume?totalVolume.toFixed(2):'—',fontSize:6.5,bold:true,color:'#fff',fillColor:AC,margin:[2,2,2,2],alignment:'center',border:[true,true,true,true]},
-        ]);
-
-        const gHeights=[H.gHdr,...Array(numGoodsRows).fill(H.gRow),H.gTot];
-        content.push({table:{widths:['18%','10%','14%','28%','9%','12%','9%'],heights:gHeights,body:gBody},layout:{hLineWidth:()=>0.4,vLineWidth:()=>0.4,hLineColor:()=>'#ddd',vLineColor:()=>'#ddd'},margin:[0,0,0,0]});
-        content.push(colorLine());
-
-        // ── INSTRUCCIONES | OBSERVACIONES ──
-        content.push({table:{widths:['*','*'],heights:[H.instr],body:[[
-            box(13,'Instrucciones del Remitente',D.senderInstr||''),
-            box(18,'Reservas y Observaciones',D.observations||'')
-        ]]},layout:lay,margin:[0,0,0,0]});
-        content.push(colorLine());
-
-        // ── LUGAR EMISIÓN | FRANQUEO ──
-        content.push({table:{widths:['*','*'],heights:[H.emit],body:[[
-            box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')),
-            box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':''))
-        ]]},layout:lay,margin:[0,0,0,0]});
-        content.push(colorLine());
-
-        // ── FIRMAS ──
-        const sigCell=(num,title,imgData,name,color)=>{
-            const bdy=[{columns:[{text:num,fontSize:5,bold:true,color:'#999',width:'auto'},{text:title,fontSize:4.5,color:'#aaa',width:'*',alignment:'right'}],margin:[3,2,3,1]}];
-            if(imgData&&imgData.startsWith('data:image')){
-                bdy.push({image:imgData,width:90,height:H.sig-28,alignment:'center',margin:[0,2,0,0]});
-            } else {
-                bdy.push({canvas:[{type:'rect',x:6,y:2,w:130,h:H.sig-30,r:2,lineWidth:0.5,lineColor:color||AC}],margin:[0,2,0,0]});
-            }
-            if(name) bdy.push({text:name,fontSize:5.5,alignment:'center',color:'#777',margin:[0,1,0,2]});
-            return {stack:bdy,border:[true,true,true,true],fillColor:'#fff'};
-        };
-        content.push({table:{widths:['*','*','*'],heights:[H.sig],body:[[
-            sigCell('22','Firma Remitente · Sender',D.sigSender,(senderBlock.split('\n')[0]||''),AC),
-            sigCell('23','Firma Transportista · Carrier',D.sigDriver,D.driverName||'',AC),
-            sigCell('24','Firma Consignatario · Consignee',null,(rcvBlock.split('\n')[0]||''),AC),
-        ]]},layout:lay,margin:[0,0,0,0]});
-
-        // ── CLÁUSULAS ──
-        const tituloClausulas = isNacional ? 'CLÁUSULAS LEGALES (Ley 15/2009 y Orden FOM/1882/2012)' : 'CLÁUSULAS DEL CONVENIO CMR';
-        content.push({table:{widths:['*'],heights:[H.clausulas],body:[[
-            {stack:[{text:tituloClausulas,fontSize:5,bold:true,color:'#000',margin:[3,2,3,1]},{text:clausulasTexto,fontSize:4.2,color:'#444',lineHeight:1.1,margin:[3,0,3,2]}],border:[true,true,true,true],fillColor:'#f9f9f9'}
-        ]]},layout:'noBorders',margin:[0,0,0,0]});
-
-        // ── PIE ──
-        const pieTexto = isNacional ? 'Documento generado conforme a la Ley 15/2009 y Orden FOM/1882/2012' : 'CMR Manager Pro  ·  Convenio CMR Ginebra 1956';
-        content.push({columns:[
-            {text:(isNacional?'CARTA PORTE NAC. ':'CMR N.º ')+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:4.5,color:'#999'},
-            {text:pieTexto,fontSize:4.5,color:'#bbb',alignment:'right'}
-        ],margin:[0,1,0,0]});
-
-        if(ci<copies.length-1) content.push({text:'',pageBreak:'after'});
-    });
-    try{
-        pdfMake.createPdf({pageSize:'A4',pageMargins:[18,8,18,6],content,defaultStyle:{font:'Roboto',fontSize:9,color:'#111'},info:{title:(isNacional?'Carta Porte Nacional ':'CMR ')+num,author:'CMR Manager Pro',subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
-            clearTimeout(safetyTimer);showOv(false);
-            const fname=(isNacional?'CARTA_PORTE_NAC_':'CMR_')+num.replace(/[^a-z0-9]/gi,'_')+'.pdf';
-            _sharePDF(blob, fname, num, safetyTimer);
-            setTimeout(()=>URL.revokeObjectURL(URL.createObjectURL(blob)),30000);
-        });
-    }catch(pdfErr){ clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+pdfErr.message,'err',6000); }
-}
-    const isNacional = D.tipoDoc === 'nacional';
-    const num=D.docNum||'CMR-'+Date.now();
-    const dateStr=fmtD(D.docDate); const delivStr=fmtD(D.dateDelivery);
-    const senderBlock=D.senderBlock||'—'; const rcvBlock=D.rcvBlock||'—'; const carrierBlock=D.carrierBlock||'—';
-
-    const copies = isNacional ? [
-        {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#0f766e'},
-        {lbl:'COPIA 2',sub:'DESTINATARIO / CONSIGNEE',AC:'#1e40af'},
-        {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#7c3aed'}
-    ] : [
-        {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#b91c1c'},
-        {lbl:'COPIA 2',sub:'DESTINATARIO / CONSIGNEE',AC:'#1e3a8a'},
-        {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#065f46'},
-        {lbl:'COPIA 4',sub:'ADMINISTRACIÓN / ADMIN', AC:'#1f2937'}
-    ];
-
-    const tituloDocumento = isNacional ? 'CARTA DE PORTE NACIONAL' : 'CARTA DE PORTE INTERNACIONAL (CMR)';
-    const subtituloLegal = isNacional
-        ? 'Ley 15/2009 del Contrato de Transporte Terrestre de Mercancías — Orden FOM/1882/2012'
-        : 'Convenio CMR Ginebra 1956 — Protocolo 5 julio 1978';
-
     const clausulasTexto = isNacional ? 
         `Este contrato de transporte se rige por la Ley 15/2009, de 11 de noviembre, del contrato de transporte terrestre de mercancías, y la Orden FOM/1882/2012.
 1. El porteador responde de la pérdida total o parcial y de las averías desde la recepción hasta la entrega.
@@ -2312,6 +2085,20 @@ function buildPDF(D,safetyTimer){
         const freeLine2 = D['freeline-2'] || '';
         const eurosCargados = D['eurosCargados'] || '';
         const eurosDevueltos = D['eurosDevueltos'] || '';
+
+        // Rellenar con filas vacías hasta mínimo 12 filas de datos (excluye cabecera y totales)
+        const emptyRow = () => [{text:' ',fontSize:6.5,margin:[2,8,2,8],fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'}];
+        const dataRows = goodsBody.length - 1; // sin cabecera
+        const minRows = 12;
+        for (let i = dataRows; i < minRows; i++) goodsBody.push(emptyRow());
+
+        goodsBody.push([
+            {text:'TOTALES',fontSize:5.5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],colSpan:2,alignment:'right'},{},
+            {text:'',fillColor:'#fff',margin:[2,1,2,1]},{text:'',fillColor:'#fff',margin:[2,1,2,1]},
+            {text:'',fillColor:'#fff',margin:[2,1,2,1]},
+            {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'},
+            {text:totalVolume?totalVolume.toFixed(2):'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'}
+        ]);
         if(freeLine1) goodsBody.push([{text:freeLine1,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
         if(freeLine2) goodsBody.push([{text:freeLine2,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
         if(eurosCargados || eurosDevueltos) goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:eurosCargados||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:eurosDevueltos||'0'}],fontSize:8,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
@@ -2324,6 +2111,30 @@ function buildPDF(D,safetyTimer){
 
         content.push(colorLine());
 
+        const sigHdr22={table:{widths:['*'],body:[[{text:[{text:'22 ',bold:true},{text:'Firma Remitente'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
+        const sigHdr23={table:{widths:['*'],body:[[{text:[{text:'23 ',bold:true},{text:'Firma Transportista'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
+        const sigHdr24={table:{widths:['*'],body:[[{text:[{text:'24 ',bold:true},{text:'Firma Consignatario'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
+        const sigSenderCell=()=>{ const hasSig=D.sigSender&&D.sigSender.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr22,{image:D.sigSender,width:100,height:65,alignment:'center',margin:[0,6,0,0]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:5.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; } return {stack:[sigHdr22,{canvas:[{type:'rect',x:4,y:4,w:100,h:55,r:2,lineWidth:.5,lineColor:AC}],margin:[0,6,0,2]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:5.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; };
+        const sigDriverCell=()=>{ const hasSig=D.sigDriver&&D.sigDriver.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr23,{image:D.sigDriver,width:100,height:65,alignment:'center',margin:[0,6,0,0]},{text:D.driverName||'',fontSize:5.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; } return {stack:[sigHdr23,{canvas:[{type:'rect',x:4,y:4,w:100,h:55,r:2,lineWidth:.5,lineColor:AC}],margin:[0,6,0,2]},{text:D.driverName||'',fontSize:5.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; };
+        const sigConsCell=()=>({stack:[sigHdr24,{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:5.5,alignment:'center',color:'#888',margin:[0,20,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'});
+
+        content.push({table:{widths:['*','*','*'],body:[[sigSenderCell(),sigDriverCell(),sigConsCell()]]},layout:lay,margin:[0,0,0,0]});
+
+        const tituloClausulas = isNacional ? 'CLÁUSULAS LEGALES (Ley 15/2009 y Orden FOM/1882/2012)' : 'CLÁUSULAS DEL CONVENIO CMR';
+        const pieTexto = isNacional ? 'Documento generado conforme a la Ley 15/2009 y Orden FOM/1882/2012' : 'CMR Manager Pro  ·  Convenio CMR Ginebra 1956';
+        content.push({table:{widths:['*'],body:[[{stack:[{text:tituloClausulas,fontSize:5,bold:true,color:'#000',margin:[2,1,2,1]},{text:clausulasTexto,fontSize:4.5,color:'#444',lineHeight:1.1,margin:[3,1,3,1]}],border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]}]]},layout:'noBorders',margin:[0,1,0,0]});
+        content.push({columns:[{text:(isNacional?'CARTA PORTE NAC. ':'CMR N.º ')+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:4.5,color:'#999'},{text:pieTexto,fontSize:4.5,color:'#bbb',alignment:'right'}],margin:[0,1,0,0]});
+        if(ci<copies.length-1) content.push({text:'',pageBreak:'after'});
+    });
+    try{
+        pdfMake.createPdf({pageSize:'A4',pageMargins:[18,8,18,6],content,defaultStyle:{font:'Roboto',fontSize:9,color:'#111'},info:{title:(isNacional?'Carta Porte Nacional ':'CMR ')+num,author:'CMR Manager Pro',subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
+            clearTimeout(safetyTimer);showOv(false);
+            const fname=(isNacional?'CARTA_PORTE_NAC_':'CMR_')+num.replace(/[^a-z0-9]/gi,'_')+'.pdf';
+            _sharePDF(blob, fname, num, safetyTimer);
+            setTimeout(()=>URL.revokeObjectURL(URL.createObjectURL(blob)),30000);
+        });
+    }catch(pdfErr){ clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+pdfErr.message,'err',6000); }
+}
 
 // ---- Layout selector helper ----
 function _askPDFLayout(){
