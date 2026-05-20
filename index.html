@@ -450,8 +450,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
             </div>
             <div style="margin-top:10px;border:1px solid var(--line);border-radius:var(--r3);overflow:hidden">
                 <div style="padding:6px 10px;background:linear-gradient(90deg,#f0f4f8,var(--bg2));border-bottom:1px solid var(--line);font-size:.6rem;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.08em">Líneas libres (texto sin columnas)</div>
-                <textarea id="gl-free-1" placeholder="Línea libre 1 — texto adicional…" rows="2" style="width:100%;border:none;border-bottom:1px solid var(--line);border-radius:0;background:var(--bg);resize:vertical"></textarea>
-                <textarea id="gl-free-2" placeholder="Línea libre 2 — texto adicional…" rows="2" style="width:100%;border:none;border-radius:0;background:var(--bg);resize:vertical"></textarea>
+                <textarea id="freeline-1" placeholder="Línea libre 1 — texto adicional…" rows="2" style="width:100%;border:none;border-bottom:1px solid var(--line);border-radius:0;background:var(--bg);resize:vertical"></textarea>
+                <textarea id="freeline-2" placeholder="Línea libre 2 — texto adicional…" rows="2" style="width:100%;border:none;border-radius:0;background:var(--bg);resize:vertical"></textarea>
                 <div style="display:flex;gap:8px;padding:6px 10px;background:var(--bg);border-top:1px solid var(--line);align-items:center">
                     <div style="display:flex;align-items:center;gap:4px"><label style="font-size:.6rem;white-space:nowrap">Eurp. Cargados</label><input id="eurosCargados" type="text" placeholder="0" style="width:50px;font-size:.78rem;padding:4px 6px;text-align:center"/></div>
                     <div style="display:flex;align-items:center;gap:4px"><label style="font-size:.6rem;white-space:nowrap">Eurp. Devueltos</label><input id="eurosDevueltos" type="text" placeholder="0" style="width:50px;font-size:.78rem;padding:4px 6px;text-align:center"/></div>
@@ -872,7 +872,7 @@ const sv   = (id, v) => { const e = document.getElementById(id); if (e) e.value 
 const FIELDS = ['docNum','docDate','placeEmission','docsAnexos','senderBlock','rcvBlock',
     'placeLoading','placeDelivery','dateDelivery','clientRef','carrierBlock','driverName',
     'driverDNI','plateTractor','plateTrailer','senderInstr','freightTerms','codAmount',
-    'observations','tipoDoc','gl-free-1','gl-free-2','eurosCargados','eurosDevueltos'];
+    'observations','tipoDoc','freeline-1','freeline-2','eurosCargados','eurosDevueltos'];
 
 window.collect = function() {
     const d = { savedAt: new Date().toISOString() };
@@ -2088,8 +2088,8 @@ function buildPDF(D,safetyTimer){
             {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'},
             {text:totalVolume?totalVolume.toFixed(2):'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'}
         ]);
-        const freeLine1 = D['gl-free-1'] || '';
-        const freeLine2 = D['gl-free-2'] || '';
+        const freeLine1 = D['freeline-1'] || '';
+        const freeLine2 = D['freeline-2'] || '';
         const eurosCargados = D['eurosCargados'] || '';
         const eurosDevueltos = D['eurosDevueltos'] || '';
         if(freeLine1) goodsBody.push([{text:freeLine1,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
@@ -2364,7 +2364,7 @@ function buildPDF_Classic(D, safetyTimer){
         // Fila eurps — solo si hay valor
         const _eurC = D['eurosCargados']||''; const _eurD = D['eurosDevueltos']||'';
         // Líneas libres modelo 2
-        const _fl1 = D['gl-free-1']||''; const _fl2 = D['gl-free-2']||'';
+        const _fl1 = D['freeline-1']||''; const _fl2 = D['freeline-2']||'';
         if(_fl1) { r5.table.body.push([{text:_fl1,fontSize:6.5,color:'#000',margin:[3,2,3,2],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]); r5.table.heights.push(12); }
         if(_fl2) { r5.table.body.push([{text:_fl2,fontSize:6.5,color:'#000',margin:[3,2,3,2],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]); r5.table.heights.push(12); }
         if(_eurC||_eurD){
@@ -2577,7 +2577,7 @@ function buildPDF_IncoDocs(D, safetyTimer){
         const gTableBody=[[gh('6 Marcas'),gh('7 Bultos'),gh('8 Embalaje'),gh('9 Mercancía'),gh('10 N.Est.'),gh('11 Peso kg'),gh('12 Vol m³')],...gRows,gTot];
         // Eurps — solo si tienen valor
         const _eC=D['eurosCargados']||''; const _eD=D['eurosDevueltos']||'';
-        const _f1=D['gl-free-1']||''; const _f2=D['gl-free-2']||'';
+        const _f1=D['freeline-1']||''; const _f2=D['freeline-2']||'';
         if(_f1) gTableBody.push([{text:_f1,fontSize:6.5,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
         if(_f2) gTableBody.push([{text:_f2,fontSize:6.5,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
         if(_eC||_eD) gTableBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:7},{text:_eC||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:7},{text:_eD||'0'}],fontSize:7,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
