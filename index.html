@@ -2092,7 +2092,7 @@ function buildPDF(D,safetyTimer){
         const freeLine2 = D['freeline-2'] || '';
         const eurosCargados = D['eurosCargados'] || '';
         const eurosDevueltos = D['eurosDevueltos'] || '';
-        console.log('[buildPDF] freeline-1:', JSON.stringify(freeLine1), 'freeline-2:', JSON.stringify(freeLine2), 'eurC:', eurosCargados, 'eurD:', eurosDevueltos);
+        alert('DEBUG - Línea libre 1: [' + freeLine1 + ']\nLínea libre 2: [' + freeLine2 + ']\nEurops C: [' + eurosCargados + '] D: [' + eurosDevueltos + ']');
         if(freeLine1) goodsBody.push([{text:freeLine1,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
         if(freeLine2) goodsBody.push([{text:freeLine2,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
         if(eurosCargados || eurosDevueltos) goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:eurosCargados||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:eurosDevueltos||'0'}],fontSize:8,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
