@@ -2081,6 +2081,17 @@ function buildPDF(D,safetyTimer){
                 ]);
             }
         });
+        const freeLine1 = D['freeline-1'] || '';
+        const freeLine2 = D['freeline-2'] || '';
+        const eurosCargados = D['eurosCargados'] || '';
+        const eurosDevueltos = D['eurosDevueltos'] || '';
+
+        // Rellenar con filas vacías hasta mínimo 12 filas de datos (excluye cabecera y totales)
+        const emptyRow = () => [{text:' ',fontSize:6.5,margin:[2,8,2,8],fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'}];
+        const dataRows = goodsBody.length - 1; // sin cabecera
+        const minRows = 12;
+        for (let i = dataRows; i < minRows; i++) goodsBody.push(emptyRow());
+
         goodsBody.push([
             {text:'TOTALES',fontSize:5.5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],colSpan:2,alignment:'right'},{},
             {text:'',fillColor:'#fff',margin:[2,1,2,1]},{text:'',fillColor:'#fff',margin:[2,1,2,1]},
@@ -2088,15 +2099,9 @@ function buildPDF(D,safetyTimer){
             {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'},
             {text:totalVolume?totalVolume.toFixed(2):'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'}
         ]);
-        const freeLine1 = D['freeline-1'] || '';
-        const freeLine2 = D['freeline-2'] || '';
-        const eurosCargados = D['eurosCargados'] || '';
-        const eurosDevueltos = D['eurosDevueltos'] || '';
-        alert('DEBUG - Línea libre 1: [' + freeLine1 + ']\nLínea libre 2: [' + freeLine2 + ']\nEurops C: [' + eurosCargados + '] D: [' + eurosDevueltos + ']');
         if(freeLine1) goodsBody.push([{text:freeLine1,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
         if(freeLine2) goodsBody.push([{text:freeLine2,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
         if(eurosCargados || eurosDevueltos) goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:eurosCargados||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:eurosDevueltos||'0'}],fontSize:8,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
-
         content.push(colorLine());
         content.push({table:{widths:['auto','auto','auto','*','auto','auto','auto'],body:goodsBody,dontBreakRows:true},layout:lay,margin:[0,0,0,0]});
 
@@ -2366,7 +2371,6 @@ function buildPDF_Classic(D, safetyTimer){
         const _eurC = D['eurosCargados']||''; const _eurD = D['eurosDevueltos']||'';
         // Líneas libres modelo 2
         const _fl1 = D['freeline-1']||''; const _fl2 = D['freeline-2']||'';
-        console.log('[buildPDF_Classic] freeline-1:', JSON.stringify(_fl1), 'freeline-2:', JSON.stringify(_fl2));
         if(_fl1) { r5.table.body.push([{text:_fl1,fontSize:6.5,color:'#000',margin:[3,2,3,2],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]); r5.table.heights.push(12); }
         if(_fl2) { r5.table.body.push([{text:_fl2,fontSize:6.5,color:'#000',margin:[3,2,3,2],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]); r5.table.heights.push(12); }
         if(_eurC||_eurD){
@@ -2580,7 +2584,6 @@ function buildPDF_IncoDocs(D, safetyTimer){
         // Eurps — solo si tienen valor
         const _eC=D['eurosCargados']||''; const _eD=D['eurosDevueltos']||'';
         const _f1=D['freeline-1']||''; const _f2=D['freeline-2']||'';
-        console.log('[buildPDF_IncoDocs] freeline-1:', JSON.stringify(_f1), 'freeline-2:', JSON.stringify(_f2));
         if(_f1) gTableBody.push([{text:_f1,fontSize:6.5,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
         if(_f2) gTableBody.push([{text:_f2,fontSize:6.5,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
         if(_eC||_eD) gTableBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:7},{text:_eC||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:7},{text:_eD||'0'}],fontSize:7,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
