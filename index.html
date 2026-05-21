@@ -2447,16 +2447,20 @@ function buildPDF_Classic(D, safetyTimer){
         ];
         if(D.sigSender&&D.sigSender.startsWith('data:image')){
             sigSndStack.push({image:D.sigSender,width:120,height:55,alignment:'center',margin:[0,4,0,4]});
+        } else {
+            sigSndStack.push({text:'',margin:[0,30,0,0]});
         }
-        sigSndStack.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,4,0,2]});
+        sigSndStack.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]});
         const sigDrvStack = [
             {text:'23',fontSize:6.5,color:LC,margin:[4,4,4,3]},
             {text:'Firma y sello del transportista',fontSize:6,color:'#aaa',margin:[4,0,4,5]},
         ];
         if(D.sigDriver&&D.sigDriver.startsWith('data:image')){
             sigDrvStack.push({image:D.sigDriver,width:120,height:55,alignment:'center',margin:[0,4,0,4]});
+        } else {
+            sigDrvStack.push({text:'',margin:[0,30,0,0]});
         }
-        sigDrvStack.push({text:D.driverName||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,4,0,2]});
+        sigDrvStack.push({text:D.driverName||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]});
         const r7 = {
             table:{
                 widths:['33%','34%','33%'],
@@ -2464,7 +2468,7 @@ function buildPDF_Classic(D, safetyTimer){
                 body:[[
                     {stack:sigSndStack,fillColor:WH,border:bA},
                     {stack:sigDrvStack,fillColor:WH,border:bA},
-                    {stack:[{text:'24 Recibo de la mercancia',fontSize:6.5,color:LC,margin:[4,4,4,5]},{text:'Firma y sello del consignatario',fontSize:6,color:'#aaa',margin:[4,0,4,0]},{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,4,0,2]}],fillColor:BL,border:bA},
+                    {stack:[{text:'24 Recibo de la mercancia',fontSize:6.5,color:LC,margin:[4,4,4,5]},{text:'Firma y sello del consignatario',fontSize:6,color:'#aaa',margin:[4,0,4,0]},{text:'',margin:[0,30,0,0]},{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],fillColor:BL,border:bA},
                 ]]
             },
             layout:layR, margin:[0,0,0,0]
@@ -2620,9 +2624,9 @@ function buildPDF_IncoDocs(D, safetyTimer){
                 ]]},layout:lay,margin:[0,0,0,2]},
                 // Firmas
                 {table:{widths:['33%','34%','33%'],body:[[
-                    (()=>{const st=[{text:'22  Remitente / Sender',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,8]}];if(D.sigSender&&D.sigSender.startsWith('data:image'))st.push({image:D.sigSender,width:120,height:45,alignment:'center',margin:[0,4,0,4]});else st.push({text:'',margin:[4,sigH-32,4,4]});st.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,2,0,2]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
-                    (()=>{const st=[{text:'23  Transportista / Carrier',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,8]}];if(D.sigDriver&&D.sigDriver.startsWith('data:image'))st.push({image:D.sigDriver,width:120,height:45,alignment:'center',margin:[0,4,0,4]});else st.push({text:'',margin:[4,sigH-32,4,4]});st.push({text:D.driverName||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,2,0,2]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
-                    {stack:[{text:'24  Destinatario / Consignee',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello (en entrega)',fontSize:6,color:'#b0a090',margin:[4,0,4,8]},{text:'',margin:[4,sigH-32,4,4]},{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,2,0,2]}],fillColor:WH,border:[true,true,true,true],minHeight:sigH}
+                    (()=>{const st=[{text:'22  Remitente / Sender',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,8]}];if(D.sigSender&&D.sigSender.startsWith('data:image')){st.push({image:D.sigSender,width:120,height:45,alignment:'center',margin:[0,4,0,4]});}else{st.push({text:'',margin:[4,sigH-32,4,0]});}st.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
+                    (()=>{const st=[{text:'23  Transportista / Carrier',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,8]}];if(D.sigDriver&&D.sigDriver.startsWith('data:image')){st.push({image:D.sigDriver,width:120,height:45,alignment:'center',margin:[0,4,0,4]});}else{st.push({text:'',margin:[4,sigH-32,4,0]});}st.push({text:D.driverName||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
+                    {stack:[{text:'24  Destinatario / Consignee',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello (en entrega)',fontSize:6,color:'#b0a090',margin:[4,0,4,8]},{text:'',margin:[4,sigH-32,4,0]},{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],fillColor:WH,border:[true,true,true,true],minHeight:sigH}
                 ]]},layout:lay,margin:[0,0,0,2]},
                 // Cláusulas
                 {table:{widths:['*'],body:[[{stack:[
