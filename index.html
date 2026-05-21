@@ -2549,11 +2549,12 @@ function buildPDF_IncoDocs(D, safetyTimer){
             {text:cp.lbl, fontSize:7.5, color:'rgba(255,255,255,.8)', alignment:'right', margin:[0,4,0,0], bold:true},
         ], border:[false,false,false,false], margin:[0,6,8,8]};
 
+        const senderFirstLine = (D.senderBlock||'').split('\n')[0]||'';
         const hdrLeft = window.logoDataURL
             ? {image:window.logoDataURL, width:68, height:40, margin:[8,8,8,8], border:[false,false,false,false]}
-            : {stack:[{text:'CMR',fontSize:20,bold:true,color:WH,characterSpacing:3},{text:'Manager Pro',fontSize:6,color:'rgba(255,255,255,.6)'}], border:[false,false,false,false], margin:[10,10,10,10]};
+            : {stack:[{text:senderFirstLine,fontSize:9,bold:true,color:WH,margin:[0,0,0,2]},{text:isNac?'Carta de Porte Nacional':'CMR · International Transport',fontSize:6,color:'rgba(255,255,255,.6)'}], border:[false,false,false,false], margin:[10,10,10,10]};
 
-        content.push({table:{widths:['auto','*'],body:[[hdrLeft,hdrRight]]}, layout:layN, fillColor:ACC, margin:[0,0,0,0]});
+        content.push({table:{widths:['auto','*'],body:[[hdrLeft,hdrRight]]}, layout:layN, fillColor:cp.color, margin:[0,0,0,0]});
         content.push({canvas:[{type:'rect',x:0,y:0,w:537,h:2.5,color:cp.color}], margin:[0,0,0,5]});
 
         // Remitente / Destinatario
