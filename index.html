@@ -2008,76 +2008,77 @@ function buildPDF(D,safetyTimer){
         // Franja de color lateral por copia (solo el borde izquierdo de la página)
         const STRIPE=AC;
         // Línea de color CMR: barra horizontal de color encima de cada fila de casillas
-        const colorLine=()=>({table:{widths:['*'],body:[[{text:'',border:[false,false,false,false],fillColor:AC,margin:[0,0.8,0,0.8]}]]},layout:'noBorders',margin:[0,0,0,0]});
+        const colorLine=()=>({table:{widths:['*'],body:[[{text:'',border:[false,false,false,false],fillColor:AC,margin:[0,1.5,0,1.5]}]]},layout:'noBorders',margin:[0,0,0,0]});
         // box: casilla estándar — número pequeño arriba-izq, título arriba-der, contenido negro
-        const box=(cas,title,cnt)=>{ const lines=cnt.split('\n'); const bdy=[]; bdy.push({columns:[{text:String(cas),fontSize:5.5,bold:true,color:'#888',width:'auto'},{text:title,fontSize:5,color:'#888',width:'*',alignment:'right'}],margin:[2,1,2,0]}); if(lines[0]) bdy.push({text:lines[0],fontSize:8,bold:true,color:'#000',margin:[2,0,2,0]}); if(lines.length>1) bdy.push({text:lines.slice(1).join('\n'),fontSize:7,color:'#111',margin:[2,0,2,1],lineHeight:1.2}); if(!bdy[1]) bdy.push({text:'',margin:[2,2,2,2]}); return {stack:bdy,border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]}; };
+        const box=(cas,title,cnt)=>{ const lines=cnt.split('\n'); const bdy=[]; bdy.push({columns:[{text:String(cas),fontSize:6,bold:true,color:'#888',width:'auto'},{text:title,fontSize:5.5,color:'#888',width:'*',alignment:'right'}],margin:[2,1,2,0]}); if(lines[0]) bdy.push({text:lines[0],fontSize:8.5,bold:true,color:'#000',margin:[2,0,2,0]}); if(lines.length>1) bdy.push({text:lines.slice(1).join('\n'),fontSize:7.5,color:'#111',margin:[2,0,2,1],lineHeight:1.2}); if(!bdy[1]) bdy.push({text:'',margin:[2,2,2,2]}); return {stack:bdy,border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]}; };
         // boxHdr: casilla grande
-        const boxHdr=(cas,title,cnt)=>{ const lines=cnt.split('\n'); const hdr={columns:[{text:String(cas),fontSize:5.5,bold:true,color:STRIPE,width:'auto'},{text:title,fontSize:5,color:'#888',width:'*',alignment:'right'}],margin:[2,1,2,0]}; const bdy=[hdr]; if(lines[0]) bdy.push({text:lines[0],fontSize:9,bold:true,color:'#000',margin:[2,0,2,0]}); if(lines.length>1) bdy.push({text:lines.slice(1).join('\n'),fontSize:7.5,color:'#111',margin:[2,0,2,2],lineHeight:1.2}); if(bdy.length===1) bdy.push({text:'',margin:[2,2,2,2]}); return {stack:bdy,border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]}; };
+        const boxHdr=(cas,title,cnt)=>{ const lines=cnt.split('\n'); const hdr={columns:[{text:String(cas),fontSize:6,bold:true,color:STRIPE,width:'auto'},{text:title,fontSize:5.5,color:'#888',width:'*',alignment:'right'}],margin:[2,1,2,0]}; const bdy=[hdr]; if(lines[0]) bdy.push({text:lines[0],fontSize:9.5,bold:true,color:'#000',margin:[2,0,2,0]}); if(lines.length>1) bdy.push({text:lines.slice(1).join('\n'),fontSize:8,color:'#111',margin:[2,0,2,2],lineHeight:1.2}); if(bdy.length===1) bdy.push({text:'',margin:[2,2,2,2]}); return {stack:bdy,border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]}; };
         const refLine = D.clientRef ? [{text:'Ref: '+D.clientRef,fontSize:8,bold:true,color:'#000',alignment:'right'}] : [];
         // Cabecera del documento
-        if(logoDataURL){ content.push({table:{widths:['auto','*','auto'],body:[[ {image:logoDataURL,width:40,height:24,margin:[6,3,3,3],border:[false,false,false,false]}, {stack:[{text:tituloDocumento,fontSize:10,bold:true,color:'#000'},{text:subtituloLegal,fontSize:5,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:6.5,color:'#333'}],border:[false,false,false,false],margin:[0,3,0,3]}, {stack:[{text:cp.lbl,fontSize:8,bold:true,color:STRIPE,alignment:'right'},{text:cp.sub,fontSize:5,color:'#555',alignment:'right'},...refLine],border:[false,false,false,false],margin:[0,3,4,3]} ]]},layout:'noBorders',margin:[0,0,0,1]}); } else { content.push({table:{widths:['*','auto'],body:[[ {stack:[{text:tituloDocumento,fontSize:11,bold:true,color:'#000'},{text:subtituloLegal,fontSize:5,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:6.5,color:'#333'}],border:[false,false,false,false],margin:[4,3,0,3]}, {stack:[{text:cp.lbl,fontSize:8,bold:true,color:STRIPE,alignment:'right'},{text:cp.sub,fontSize:5,color:'#555',alignment:'right'},...refLine],border:[false,false,false,false],margin:[0,3,4,3]} ]]},layout:'noBorders',margin:[0,0,0,1]}); }
+        if(logoDataURL){ content.push({table:{widths:['auto','*','auto'],body:[[ {image:logoDataURL,width:40,height:24,margin:[6,3,3,3],border:[false,false,false,false]}, {stack:[{text:tituloDocumento,fontSize:10,bold:true,color:'#000'},{text:subtituloLegal,fontSize:5.5,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7,color:'#333'}],border:[false,false,false,false],margin:[0,3,0,3]}, {stack:[{text:cp.lbl,fontSize:8.5,bold:true,color:STRIPE,alignment:'right'},{text:cp.sub,fontSize:5.5,color:'#555',alignment:'right'},...refLine],border:[false,false,false,false],margin:[0,3,4,3]} ]]},layout:'noBorders',margin:[0,0,0,1]}); } else { content.push({table:{widths:['*','auto'],body:[[ {stack:[{text:tituloDocumento,fontSize:11,bold:true,color:'#000'},{text:subtituloLegal,fontSize:5.5,color:'#555'},{text:'N.º '+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:7,color:'#333'}],border:[false,false,false,false],margin:[4,3,0,3]}, {stack:[{text:cp.lbl,fontSize:8.5,bold:true,color:STRIPE,alignment:'right'},{text:cp.sub,fontSize:5.5,color:'#555',alignment:'right'},...refLine],border:[false,false,false,false],margin:[0,3,4,3]} ]]},layout:'noBorders',margin:[0,0,0,1]}); }
         content.push(colorLine());
         content.push({table:{widths:['*','*'],body:[[boxHdr(1,'Remitente · Sender',senderBlock),boxHdr(2,'Destinatario · Consignee',rcvBlock)]]},layout:lay,margin:[0,0,0,0]});
         content.push(colorLine());
-        content.push({table:{widths:['*','*','auto'],body:[[box(4,'Lugar de carga',D.placeLoading||'—'),{...box(3,'Lugar de entrega',D.placeDelivery||'—'),minHeight:55},box('','Fecha prev. entrega',delivStr)]]},layout:lay,margin:[0,0,0,0]});
+        const spacer=(h)=>({text:'',margin:[0,h,0,0]});
+        content.push({table:{widths:['*','*','auto'],body:[[box(4,'Lugar de carga',D.placeLoading||'—'),(function(){const b=box(3,'Lugar de entrega',D.placeDelivery||'—'); b.stack.push(spacer(30)); return b;})(),box('','Fecha prev. entrega',delivStr)]]},layout:lay,margin:[0,0,0,0]});
         content.push(colorLine());
         content.push({table:{widths:['*','auto'],body:[[box(5,'Docs. anexos / Albarán',D.docsAnexos||'—'),box(14,'Reembolso €',D.codAmount||'')]]},layout:lay,margin:[0,0,0,0]});
         const platesStr = [D.plateTractor,D.plateTrailer].filter(Boolean).join('  /  ') || '—';
         const box16f = (()=>{
             const bdy=[];
-            bdy.push({columns:[{text:'16f',fontSize:6,bold:true,color:'#888',width:'auto'},{text:'Conductor · Vehículo',fontSize:5.5,color:'#888',width:'*',alignment:'right'}],margin:[3,2,3,1]});
-            if(D.driverName) bdy.push({text:D.driverName,fontSize:9,bold:true,color:'#000',margin:[3,0,3,0]});
-            if(D.driverDNI)  bdy.push({text:'DNI: '+D.driverDNI,fontSize:7,color:'#444',margin:[3,0,3,0]});
-            bdy.push({text:platesStr,fontSize:12,bold:true,color:'#000',characterSpacing:1.5,margin:[3,D.driverName?3:1,3,3]});
+            bdy.push({columns:[{text:'16f',fontSize:7,bold:true,color:'#888',width:'auto'},{text:'Conductor · Vehículo',fontSize:6.5,color:'#888',width:'*',alignment:'right'}],margin:[3,2,3,1]});
+            if(D.driverName) bdy.push({text:D.driverName,fontSize:10,bold:true,color:'#000',margin:[3,1,3,1]});
+            if(D.driverDNI)  bdy.push({text:'DNI: '+D.driverDNI,fontSize:8,color:'#444',margin:[3,0,3,1]});
+            bdy.push({text:platesStr,fontSize:13,bold:true,color:'#000',characterSpacing:1.5,margin:[3,D.driverName?4:2,3,4]});
             return {stack:bdy,border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]};
         })();
         content.push(colorLine());
-        content.push({table:{widths:['35%','65%'],body:[[box(16,'Transportista · Carrier',carrierBlock),box16f]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths:['35%','65%'],body:[[(function(){const b=box(16,'Transportista · Carrier',carrierBlock); b.stack.push(spacer(18)); return b;})(),box16f]]},layout:lay,margin:[0,0,0,0]});
         const succCarriers=D.successiveCarriers&&D.successiveCarriers.length?D.successiveCarriers:[];
         if(succCarriers.length){
             const succText=succCarriers.map(s=>`${s.name}\n${s.address}`).join('\n\n');
             content.push(colorLine());
-            content.push({table:{widths:['*'],body:[[box(17,'Porteadores Sucesivos',succText)]]},layout:lay,margin:[0,0,0,0]});
+            content.push({table:{widths:['*'],body:[[(function(){const b=box(17,'Porteadores Sucesivos',succText); b.stack.push(spacer(20)); return b;})()]]},layout:lay,margin:[0,0,0,0]});
         } else {
             content.push(colorLine());
-            content.push({table:{widths:['*'],body:[[box(17,'Porteadores Sucesivos','')]]},layout:lay,margin:[0,0,0,0]});
+            content.push({table:{widths:['*'],body:[[(function(){const b=box(17,'Porteadores Sucesivos',''); b.stack.push(spacer(20)); return b;})()]]},layout:lay,margin:[0,0,0,0]});
         }
 
         const goodsLines = D.goodsLines && D.goodsLines.length ? D.goodsLines : [{desc:'',marks:'',packing:'',qty:'',weight:'',volume:''}];
         const totalWeight = goodsLines.reduce((s,l)=>s+(parseFloat(l.weight)||0),0);
         const totalVolume = goodsLines.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
         const allRows = [];
-        for (let i = 0; i < Math.min(goodsLines.length, 10); i++) {
+        for (let i = 0; i < Math.min(goodsLines.length, 7); i++) {
             allRows.push(goodsLines[i]);
         }
-        while (allRows.length < 10) {
+        while (allRows.length < 7) {
             allRows.push({desc:'', marks:'', packing:'', qty:'', weight:'', volume:'', stat:''});
         }
         const goodsHeader = [
-            {text:'6 Marcas y Núm.',fontSize:5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],alignment:'center'},
-            {text:'7 Núm. Bultos',fontSize:5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],alignment:'center'},
-            {text:'8 Clase Embalaje',fontSize:5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],alignment:'center'},
-            {text:'9 Naturaleza Mercancía',fontSize:5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],alignment:'center'},
-            {text:'10 N. Estadístico',fontSize:5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],alignment:'center'},
-            {text:'11 Peso Bruto kg',fontSize:5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],alignment:'center'},
-            {text:'12 Volumen',fontSize:5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],alignment:'center'}
+            {text:'6 Marcas y Núm.',fontSize:6,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[3,2,3,2],alignment:'center'},
+            {text:'7 Núm. Bultos',fontSize:6,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[3,2,3,2],alignment:'center'},
+            {text:'8 Clase Embalaje',fontSize:6,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[3,2,3,2],alignment:'center'},
+            {text:'9 Naturaleza Mercancía',fontSize:6,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[3,2,3,2],alignment:'center'},
+            {text:'10 N. Estadístico',fontSize:6,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[3,2,3,2],alignment:'center'},
+            {text:'11 Peso Bruto kg',fontSize:6,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[3,2,3,2],alignment:'center'},
+            {text:'12 Volumen',fontSize:6,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[3,2,3,2],alignment:'center'}
         ];
         const goodsBody = [goodsHeader];
         allRows.forEach(l => {
             if (l.freeMode && l.freeText) {
                 goodsBody.push([
-                    {text:l.freeText,fontSize:7,color:'#111',margin:[4,5,4,5],fillColor:'#fff',colSpan:7,border:[true,false,true,false]},
+                    {text:l.freeText,fontSize:8,color:'#111',margin:[4,6,4,6],fillColor:'#fff',colSpan:7,border:[true,false,true,false]},
                     {},{},{},{},{},{}
                 ]);
             } else {
                 goodsBody.push([
-                    {text:l.marks||' ',fontSize:6.5,color:l.marks?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff'},
-                    {text:l.qty||' ',fontSize:6.5,color:l.qty?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
-                    {text:l.packing||' ',fontSize:6.5,color:l.packing?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff'},
-                    {text:l.desc||' ',fontSize:6.5,bold:!!l.desc,color:l.desc?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff'},
-                    {text:l.stat||' ',fontSize:6.5,color:l.stat?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
-                    {text:l.weight?l.weight+' kg':' ',fontSize:6.5,color:l.weight?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'},
-                    {text:l.volume?String(l.volume):' ',fontSize:6.5,color:l.volume?'#111':'#fff',margin:[2,4,2,4],fillColor:'#fff',alignment:'center'}
+                    {text:l.marks||' ',fontSize:7.5,color:l.marks?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff'},
+                    {text:l.qty||' ',fontSize:7.5,color:l.qty?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff',alignment:'center'},
+                    {text:l.packing||' ',fontSize:7.5,color:l.packing?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff'},
+                    {text:l.desc||' ',fontSize:7.5,bold:!!l.desc,color:l.desc?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff'},
+                    {text:l.stat||' ',fontSize:7.5,color:l.stat?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff',alignment:'center'},
+                    {text:l.weight?l.weight+' kg':' ',fontSize:7.5,color:l.weight?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff',alignment:'center'},
+                    {text:l.volume?String(l.volume):' ',fontSize:7.5,color:l.volume?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff',alignment:'center'}
                 ]);
             }
         });
@@ -2086,48 +2087,46 @@ function buildPDF(D,safetyTimer){
         const eurosCargados = D['eurosCargados'] || '';
         const eurosDevueltos = D['eurosDevueltos'] || '';
 
-        // Rellenar con filas vacías hasta mínimo 12 filas de datos (excluye cabecera y totales)
-        const emptyRow = () => [{text:' ',fontSize:6.5,margin:[2,8,2,8],fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'}];
+        // Rellenar con filas vacías hasta mínimo 7 filas de datos (excluye cabecera y totales)
+        const emptyRow = () => [{text:' ',fontSize:7.5,margin:[2,3,2,3],fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'},{text:' ',fillColor:'#fff'}];
         const dataRows = goodsBody.length - 1; // sin cabecera
-        const minRows = 12;
+        const minRows = 7;
         for (let i = dataRows; i < minRows; i++) goodsBody.push(emptyRow());
 
         goodsBody.push([
-            {text:'TOTALES',fontSize:5.5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],colSpan:2,alignment:'right'},{},
+            {text:'TOTALES',fontSize:6.5,bold:true,color:'#000',fillColor:'#e8e8e8',margin:[2,1,2,1],colSpan:2,alignment:'right'},{},
             {text:'',fillColor:'#fff',margin:[2,1,2,1]},{text:'',fillColor:'#fff',margin:[2,1,2,1]},
             {text:'',fillColor:'#fff',margin:[2,1,2,1]},
-            {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'},
-            {text:totalVolume?totalVolume.toFixed(2):'—',fontSize:6.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'}
+            {text:totalWeight?totalWeight.toFixed(2)+' kg':'—',fontSize:7.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'},
+            {text:totalVolume?totalVolume.toFixed(2):'—',fontSize:7.5,bold:true,color:'#111',fillColor:'#fff',margin:[2,1,2,1],alignment:'center'}
         ]);
-        if(freeLine1) goodsBody.push([{text:freeLine1,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
-        if(freeLine2) goodsBody.push([{text:freeLine2,fontSize:6.5,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
-        if(eurosCargados || eurosDevueltos) goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:eurosCargados||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:eurosDevueltos||'0'}],fontSize:8,color:'#111',margin:[2,2,2,2],colSpan:7,fillColor:'#fff',minHeight:10},{},{},{},{},{},{}]);
+        if(freeLine1) goodsBody.push([{text:freeLine1,fontSize:7.5,color:'#111',margin:[3,2,3,2],colSpan:7,fillColor:'#fff',minHeight:12},{},{},{},{},{},{}]);
+        if(freeLine2) goodsBody.push([{text:freeLine2,fontSize:7.5,color:'#111',margin:[3,2,3,2],colSpan:7,fillColor:'#fff',minHeight:12},{},{},{},{},{},{}]);
+        if(eurosCargados || eurosDevueltos) goodsBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8.5},{text:eurosCargados||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8.5},{text:eurosDevueltos||'0'}],fontSize:8.5,color:'#111',margin:[3,2,3,2],colSpan:7,fillColor:'#fff',minHeight:12},{},{},{},{},{},{}]);
         content.push(colorLine());
         content.push({table:{widths:['auto','auto','auto','*','auto','auto','auto'],body:goodsBody,dontBreakRows:true},layout:lay,margin:[0,0,0,0]});
 
         content.push(colorLine());
-        content.push({table:{widths:['*','*'],body:[[{...box(13,'Instrucciones del Remitente',D.senderInstr||'—'),minHeight:60},{...box(18,'Reservas y Observaciones',D.observations||''),minHeight:60}]]},layout:lay,margin:[0,0,0,0]});
-        content.push({table:{widths:['*','*'],body:[[{...box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')),minHeight:22},{...box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':'')),minHeight:22}]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths:['*','*'],body:[[(function(){const b=box(13,'Instrucciones del Remitente',D.senderInstr||'—'); b.stack.push(spacer(15)); return b;})(),(function(){const b=box(18,'Reservas y Observaciones',D.observations||''); b.stack.push(spacer(15)); return b;})()]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths:['*','*'],body:[[(function(){const b=box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')); b.stack.push(spacer(5)); return b;})(),(function(){const b=box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':'')); b.stack.push(spacer(5)); return b;})()]]},layout:lay,margin:[0,0,0,0]});
 
         content.push(colorLine());
 
-        const sigHdr22={table:{widths:['*'],body:[[{text:[{text:'22 ',bold:true},{text:'Firma Remitente'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
-        const sigHdr23={table:{widths:['*'],body:[[{text:[{text:'23 ',bold:true},{text:'Firma Transportista'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
-        const sigHdr24={table:{widths:['*'],body:[[{text:[{text:'24 ',bold:true},{text:'Firma Consignatario'}],fontSize:5.5,color:'#000',fillColor:'#e8e8e8',margin:[2,2,2,2]}]]},layout:'noBorders'};
-        const sigSenderCell=()=>{ const hasSig=D.sigSender&&D.sigSender.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr22,{image:D.sigSender,width:100,height:65,alignment:'center',margin:[0,6,0,0]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:5.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; } return {stack:[sigHdr22,{canvas:[{type:'rect',x:4,y:4,w:100,h:55,r:2,lineWidth:.5,lineColor:AC}],margin:[0,6,0,2]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:5.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; };
-        const sigDriverCell=()=>{ const hasSig=D.sigDriver&&D.sigDriver.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr23,{image:D.sigDriver,width:100,height:65,alignment:'center',margin:[0,6,0,0]},{text:D.driverName||'',fontSize:5.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; } return {stack:[sigHdr23,{canvas:[{type:'rect',x:4,y:4,w:100,h:55,r:2,lineWidth:.5,lineColor:AC}],margin:[0,6,0,2]},{text:D.driverName||'',fontSize:5.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; };
-        const sigConsCell=()=>({stack:[sigHdr24,{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:5.5,alignment:'center',color:'#888',margin:[0,20,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'});
-
-        content.push({table:{widths:['*','*','*'],body:[[sigSenderCell(),sigDriverCell(),sigConsCell()]]},layout:lay,margin:[0,0,0,0]});
+        const sigHdr22={table:{widths:['*'],body:[[{text:[{text:'22 ',bold:true},{text:'Firma Remitente'}],fontSize:6.5,color:'#000',fillColor:'#e8e8e8',margin:[3,3,3,3]}]]},layout:'noBorders'};
+        const sigHdr23={table:{widths:['*'],body:[[{text:[{text:'23 ',bold:true},{text:'Firma Transportista'}],fontSize:6.5,color:'#000',fillColor:'#e8e8e8',margin:[3,3,3,3]}]]},layout:'noBorders'};
+        const sigHdr24={table:{widths:['*'],body:[[{text:[{text:'24 ',bold:true},{text:'Firma Consignatario'}],fontSize:6.5,color:'#000',fillColor:'#e8e8e8',margin:[3,3,3,3]}]]},layout:'noBorders'};
+        const sigSenderCell=()=>{ const hasSig=D.sigSender&&D.sigSender.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr22,{image:D.sigSender,width:110,height:70,alignment:'center',margin:[0,6,0,0]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; } return {stack:[sigHdr22,{text:'',margin:[0,50,0,0]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; };
+        const sigDriverCell=()=>{ const hasSig=D.sigDriver&&D.sigDriver.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr23,{image:D.sigDriver,width:110,height:70,alignment:'center',margin:[0,6,0,0]},{text:D.driverName||'',fontSize:6.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; } return {stack:[sigHdr23,{text:'',margin:[0,50,0,0]},{text:D.driverName||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'}; };
+        const sigConsCell=()=>({stack:[sigHdr24,{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,50,0,2]}],border:[true,true,true,true],margin:[1,1,1,1],fillColor:'#fff'});
 
         const tituloClausulas = isNacional ? 'CLÁUSULAS LEGALES (Ley 15/2009 y Orden FOM/1882/2012)' : 'CLÁUSULAS DEL CONVENIO CMR';
         const pieTexto = isNacional ? 'Documento generado conforme a la Ley 15/2009 y Orden FOM/1882/2012' : 'CMR Manager Pro  ·  Convenio CMR Ginebra 1956';
-        content.push({table:{widths:['*'],body:[[{stack:[{text:tituloClausulas,fontSize:5,bold:true,color:'#000',margin:[2,1,2,1]},{text:clausulasTexto,fontSize:4.5,color:'#444',lineHeight:1.1,margin:[3,1,3,1]}],border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]}]]},layout:'noBorders',margin:[0,1,0,0]});
-        content.push({columns:[{text:(isNacional?'CARTA PORTE NAC. ':'CMR N.º ')+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:4.5,color:'#999'},{text:pieTexto,fontSize:4.5,color:'#bbb',alignment:'right'}],margin:[0,1,0,0]});
+        content.push({table:{widths:['*'],body:[[{stack:[{text:tituloClausulas,fontSize:6,bold:true,color:'#000',margin:[4,3,4,2]},{text:clausulasTexto,fontSize:5.5,color:'#444',lineHeight:1.2,margin:[4,2,4,4]}],border:[true,true,true,true],fillColor:'#fff',margin:[0,0,0,0]}]]},layout:'noBorders',margin:[0,4,0,0]});
+        content.push({columns:[{text:(isNacional?'CARTA PORTE NAC. ':'CMR N.º ')+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:5.5,color:'#999'},{text:pieTexto,fontSize:5.5,color:'#bbb',alignment:'right'}],margin:[0,3,0,2]});
         if(ci<copies.length-1) content.push({text:'',pageBreak:'after'});
     });
     try{
-        pdfMake.createPdf({pageSize:'A4',pageMargins:[18,8,18,6],content,defaultStyle:{font:'Roboto',fontSize:9,color:'#111'},info:{title:(isNacional?'Carta Porte Nacional ':'CMR ')+num,author:'CMR Manager Pro',subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
+        pdfMake.createPdf({pageSize:'A4',pageMargins:[18,8,18,6],content,defaultStyle:{font:'Roboto',fontSize:10,color:'#111'},info:{title:(isNacional?'Carta Porte Nacional ':'CMR ')+num,author:'CMR Manager Pro',subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
             clearTimeout(safetyTimer);showOv(false);
             const fname=(isNacional?'CARTA_PORTE_NAC_':'CMR_')+num.replace(/[^a-z0-9]/gi,'_')+'.pdf';
             _sharePDF(blob, fname, num, safetyTimer);
@@ -2179,9 +2178,9 @@ function buildPDF_Classic(D, safetyTimer){
     // Row heights (pt) — measured directly from reference CMR PDF
     // Total ~796pt matching real CMR layout
     const H = {
-        hdr:75, cons:108, ent:43, crg:43, doc:32,
-        ghdr:16, grow:19, gtot:13,
-        ins:85, sig:108, foot:14
+        hdr:65, cons:90, ent:36, crg:32, doc:22,
+        ghdr:13, grow:20, gtot:11,
+        ins:70, sig:88, foot:12
     };
 
     // All section borders are RED; goods borders GRAY
@@ -2200,8 +2199,8 @@ function buildPDF_Classic(D, safetyTimer){
         const YE = COPY_COLORS[ci % COPY_COLORS.length];
         const LC = COPY_LINE_COLORS[ci % COPY_LINE_COLORS.length]; // line colour this copy
         const layR = {hLineWidth:()=>0.7,vLineWidth:()=>0.7,hLineColor:()=>LC,vLineColor:()=>LC};
-        const redLbl = (t,margin) => ({text:t,fontSize:5.5,color:LC,bold:false,margin:margin||[3,3,3,1]});
-        const bodyTxt = (t,fs,bold,margin) => ({text:t||'',fontSize:fs||8,bold:!!bold,color:'#000',margin:margin||[3,1,3,3],lineHeight:1.2});
+        const redLbl = (t,margin) => ({text:t,fontSize:6.5,color:LC,bold:false,margin:margin||[3,3,3,2]});
+        const bodyTxt = (t,fs,bold,margin) => ({text:t||'',fontSize:fs||8.5,bold:!!bold,color:'#000',margin:margin||[3,1,3,3],lineHeight:1.2});
         const sender  = D.senderBlock||'';
         const rcv     = D.rcvBlock||'';
         const carrier = D.carrierBlock||'';
@@ -2224,8 +2223,8 @@ function buildPDF_Classic(D, safetyTimer){
         const gl    = D.goodsLines&&D.goodsLines.length?D.goodsLines:[{}];
         const totalW= gl.reduce((s,l)=>s+(parseFloat(l.weight)||0),0);
         const totalV= gl.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
-        const rows8 = gl.slice(0, 20); // procesa todas las líneas reales (máx 20)
-        while(rows8.length<8) rows8.push({});
+        const rows8 = gl.slice(0, 7); // procesa todas las líneas reales (máx 7)
+        while(rows8.length<7) rows8.push({});
 
         // ── SINGLE FLAT TABLE covering the whole page ──
         // Columns: [LEFT_HALF | RIGHT_HALF] for 2-col sections
@@ -2268,18 +2267,18 @@ function buildPDF_Classic(D, safetyTimer){
                 body:[[
                     {stack:[
                         {columns:[
-                            {text:'1 Remitente',fontSize:5.5,color:LC,margin:[3,3,0,1]},
-                            {text:'N\u00ba: '+num,fontSize:7,bold:true,alignment:'right',color:'#000',margin:[0,3,3,1]},
+                            {text:'1 Remitente',fontSize:6.5,color:LC,margin:[3,3,0,2]},
+                            {text:'N\u00ba: '+num,fontSize:8,bold:true,alignment:'right',color:'#000',margin:[0,3,3,2]},
                         ]},
-                        bodyTxt(sender,8,true),
+                        bodyTxt(sender,9,true),
                     ], fillColor:WH, border:[true,true,false,true]},
                     {stack:[
-                        {text:'CARTA DE PORTE INTERNACIONAL',fontSize:7.5,bold:true,color:LC,alignment:'center',margin:[0,4,0,1]},
-                        {text:'Este transporte est\u00e1 sometido no obstante toda clausula contraria, al Convenio sobre el',fontSize:5,color:'#000',alignment:'center'},
-                        {text:'Contrato de Transporte internacional de mercancias por carretera ( CMR )',fontSize:5,color:'#000',alignment:'center',margin:[0,0,0,1]},
+                        {text:'CARTA DE PORTE INTERNACIONAL',fontSize:8,bold:true,color:LC,alignment:'center',margin:[0,4,0,1]},
+                        {text:'Este transporte est\u00e1 sometido no obstante toda clausula contraria, al Convenio sobre el',fontSize:5.5,color:'#000',alignment:'center'},
+                        {text:'Contrato de Transporte internacional de mercancias por carretera ( CMR )',fontSize:5.5,color:'#000',alignment:'center',margin:[0,0,0,1]},
                         {text:'C  M  R',fontSize:18,bold:true,color:'#000',alignment:'center',margin:[0,1,0,1]},
-                        {text:'e 1-15 ambos inclusive y 19+21+22',fontSize:5,color:LC,alignment:'center',margin:[0,0,0,2]},
-                        {text:cp.lbl+' \u2014 '+cp.sub,fontSize:7.5,bold:true,color:LC,alignment:'center'},
+                        {text:'e 1-15 ambos inclusive y 19+21+22',fontSize:5.5,color:LC,alignment:'center',margin:[0,0,0,2]},
+                        {text:cp.lbl+' \u2014 '+cp.sub,fontSize:8,bold:true,color:LC,alignment:'center'},
                         ...(ref?[{text:'N\u00ba PEDIDO: '+ref,fontSize:11,bold:true,color:'#000',alignment:'center',margin:[0,2,0,0]}]:[]),
                     ], fillColor:YE, border:[false,true,true,true]},
                 ]]
@@ -2320,9 +2319,9 @@ function buildPDF_Classic(D, safetyTimer){
 
         // ── ROW 5: Goods — 7-column table with ALL horizontal lines ──
         const gW = ['18%','10%','14%','28%','10%','11%','9%'];
-        const gh = (t,a) => ({text:t,fontSize:5.5,bold:true,color:LC,fillColor:WH,alignment:a||'left',margin:[2,2,2,2],border:bA});
-        const gd = (t,a,b) => ({text:t||'',fontSize:7,bold:!!b,color:'#000',fillColor:WH,alignment:a||'left',margin:[2,2,2,2],border:bA});
-        const gt = (t,a,b) => ({text:t||'',fontSize:7,bold:!!b,color:'#000',fillColor:GR,alignment:a||'left',margin:[2,2,2,2],border:bA});
+        const gh = (t,a) => ({text:t,fontSize:6.5,bold:true,color:LC,fillColor:WH,alignment:a||'left',margin:[3,3,3,3],border:bA});
+        const gd = (t,a,b) => ({text:t||'',fontSize:7.5,bold:!!b,color:'#000',fillColor:WH,alignment:a||'left',margin:[3,4,3,4],border:bA});
+        const gt = (t,a,b) => ({text:t||'',fontSize:7.5,bold:!!b,color:'#000',fillColor:GR,alignment:a||'left',margin:[3,3,3,3],border:bA});
 
         const gHdrRow = [
             gh('6 Marcas y n\u00fameros'),
@@ -2336,7 +2335,7 @@ function buildPDF_Classic(D, safetyTimer){
         const gDataRows = rows8.map(l=>{
             if (l.freeMode && l.freeText) {
                 return [
-                    {text:l.freeText,fontSize:7,color:'#000',fillColor:WH,margin:[3,3,3,3],border:[true,false,true,false],colSpan:7},
+                    {text:l.freeText,fontSize:8,color:'#000',fillColor:WH,margin:[4,4,4,4],border:[true,false,true,false],colSpan:7},
                     {},{},{},{},{},{}
                 ];
             }
@@ -2356,8 +2355,8 @@ function buildPDF_Classic(D, safetyTimer){
             gt(totalV?totalV.toFixed(2):'','center',true),
         ];
         // Merge TOTALES across first 2 cols
-        gTotRow[0] = {text:'TOTALES',fontSize:6.5,bold:true,color:'#000',fillColor:GR,alignment:'right',margin:[2,2,2,2],border:bA,colSpan:2};
-        gTotRow[1] = {text:'',fillColor:GR,border:bA,margin:[2,2,2,2]};
+        gTotRow[0] = {text:'TOTALES',fontSize:7.5,bold:true,color:'#000',fillColor:GR,alignment:'right',margin:[3,3,3,3],border:bA,colSpan:2};
+        gTotRow[1] = {text:'',fillColor:GR,border:bA,margin:[3,3,3,3]};
 
         const r5 = {
             table:{
@@ -2371,11 +2370,11 @@ function buildPDF_Classic(D, safetyTimer){
         const _eurC = D['eurosCargados']||''; const _eurD = D['eurosDevueltos']||'';
         // Líneas libres modelo 2
         const _fl1 = D['freeline-1']||''; const _fl2 = D['freeline-2']||'';
-        if(_fl1) { r5.table.body.push([{text:_fl1,fontSize:6.5,color:'#000',margin:[3,2,3,2],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]); r5.table.heights.push(12); }
-        if(_fl2) { r5.table.body.push([{text:_fl2,fontSize:6.5,color:'#000',margin:[3,2,3,2],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]); r5.table.heights.push(12); }
+        if(_fl1) { r5.table.body.push([{text:_fl1,fontSize:7.5,color:'#000',margin:[4,3,4,3],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]); r5.table.heights.push(16); }
+        if(_fl2) { r5.table.body.push([{text:_fl2,fontSize:7.5,color:'#000',margin:[4,3,4,3],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]); r5.table.heights.push(16); }
         if(_eurC||_eurD){
-            r5.table.body.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:7},{text:_eurC||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:7},{text:_eurD||'0'}],fontSize:7,color:'#000',margin:[3,2,3,2],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]);
-            r5.table.heights.push(12);
+            r5.table.body.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:_eurC||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:_eurD||'0'}],fontSize:8,color:'#000',margin:[4,3,4,3],colSpan:7,fillColor:WH,border:bA},{},{},{},{},{},{}]);
+            r5.table.heights.push(16);
         }
 
         // ── ROW 6: Instrucciones/Pago + Emisión ──
@@ -2395,19 +2394,19 @@ function buildPDF_Classic(D, safetyTimer){
         // Then signatures
 
         const payRh = Math.floor(H.ins / 9); // ~9pt per payment sub-row
-        const yCell = (t) => ({text:t||'',fontSize:5.5,bold:false,color:LC,fillColor:YE,margin:[2,1,2,1],border:bA});
-        const wCell = (t) => ({text:t||'',fontSize:7,color:'#000',fillColor:WH,margin:[2,1,2,1],border:bA});
-        const wCellGr= (t,bold) => ({text:t||'',fontSize:7,bold:!!bold,color:'#000',fillColor:GR,margin:[2,1,2,1],border:bA});
+        const yCell = (t) => ({text:t||'',fontSize:6.5,bold:false,color:LC,fillColor:YE,margin:[3,2,3,2],border:bA});
+        const wCell = (t) => ({text:t||'',fontSize:8,color:'#000',fillColor:WH,margin:[3,2,3,2],border:bA});
+        const wCellGr= (t,bold) => ({text:t||'',fontSize:8,bold:!!bold,color:'#000',fillColor:GR,margin:[3,2,3,2],border:bA});
 
         // Left cell: instrucciones + forma de pago + lugar emisión
         const emitLoc = D.placeEmission||'';
         const leftCell = {
             stack:[
                 redLbl('13 Instrucciones del remitente'),
-                bodyTxt(instr,7),
-                {canvas:[{type:'line',x1:0,y1:0,x2:240,y2:0,lineWidth:0.5,lineColor:LC}],margin:[3,4,3,2]},
-                {text:'21 Lugar y fecha de emisión',fontSize:5.5,color:LC,margin:[3,0,3,1]},
-                {text:emitLoc+(dateS?'\n'+dateS:''),fontSize:7,color:'#000',margin:[3,1,3,2]},
+                bodyTxt(instr,8),
+                {canvas:[{type:'line',x1:0,y1:0,x2:240,y2:0,lineWidth:0.6,lineColor:LC}],margin:[3,4,3,2]},
+                {text:'21 Lugar y fecha de emisión',fontSize:6.5,color:LC,margin:[3,0,3,2]},
+                {text:emitLoc+(dateS?'\n'+dateS:''),fontSize:8,color:'#000',margin:[3,2,3,3]},
             ],
             fillColor:WH, border:[true,true,false,true],
             rowSpan:9, margin:[0,0,0,0]
@@ -2420,13 +2419,13 @@ function buildPDF_Classic(D, safetyTimer){
                 heights:Array(9).fill(payRh),
                 body:[
                     [leftCell,
-                     {text:'19 Estipulaciones particulares',fontSize:5.5,color:LC,margin:[2,1,2,1],fillColor:WH,border:[false,true,true,false],colSpan:4},{},{},{}],
-                    [eL,{text:stipul,fontSize:6.5,color:'#000',margin:[2,1,2,1],fillColor:WH,border:[false,false,true,true],colSpan:4},{},{},{}],
+                     {text:'19 Estipulaciones particulares',fontSize:6.5,color:LC,margin:[3,2,3,2],fillColor:WH,border:[false,true,true,false],colSpan:4},{},{},{}],
+                    [eL,{text:stipul,fontSize:7.5,color:'#000',margin:[3,2,3,2],fillColor:WH,border:[false,false,true,true],colSpan:4},{},{},{}],
                     [eL,
-                     {text:'20 A pagar por',fontSize:5.5,color:LC,bold:false,fillColor:YE,margin:[2,1,2,1],border:bA},
-                     {text:'Remitente',fontSize:5.5,bold:true,color:LC,alignment:'center',fillColor:YE,margin:[2,1,2,1],border:bA},
-                     {text:'Moneda',fontSize:5.5,bold:true,color:LC,alignment:'center',fillColor:YE,margin:[2,1,2,1],border:bA},
-                     {text:'Cosignatario',fontSize:5.5,bold:true,color:LC,alignment:'center',fillColor:YE,margin:[2,1,2,1],border:bA}],
+                     {text:'20 A pagar por',fontSize:6.5,color:LC,bold:false,fillColor:YE,margin:[3,2,3,2],border:bA},
+                     {text:'Remitente',fontSize:6.5,bold:true,color:LC,alignment:'center',fillColor:YE,margin:[3,2,3,2],border:bA},
+                     {text:'Moneda',fontSize:6.5,bold:true,color:LC,alignment:'center',fillColor:YE,margin:[3,2,3,2],border:bA},
+                     {text:'Cosignatario',fontSize:6.5,bold:true,color:LC,alignment:'center',fillColor:YE,margin:[3,2,3,2],border:bA}],
                     [eL,yCell('Precio del porte'),wCell(''),wCell(''),wCell('')],
                     [eL,yCell('Descuentos'),wCell(''),wCell(''),wCell('')],
                     [eL,yCell('L\u00edquido'),wCell(''),wCell(''),wCell('')],
@@ -2441,18 +2440,18 @@ function buildPDF_Classic(D, safetyTimer){
         };
         // ── Sig cells with actual signature images if available ──
         const sigSndStack = [
-            {text:'22',fontSize:5.5,color:LC,margin:[3,3,3,2]},
-            {text:'Firma y sello del remitente',fontSize:5,color:'#aaa',margin:[3,0,3,4]},
+            {text:'22',fontSize:6.5,color:LC,margin:[4,4,4,3]},
+            {text:'Firma y sello del remitente',fontSize:6,color:'#aaa',margin:[4,0,4,5]},
         ];
         if(D.sigSender&&D.sigSender.startsWith('data:image')){
-            sigSndStack.push({image:D.sigSender,width:120,height:55,alignment:'center',margin:[0,2,0,2]});
+            sigSndStack.push({image:D.sigSender,width:120,height:55,alignment:'center',margin:[0,4,0,4]});
         }
         const sigDrvStack = [
-            {text:'23',fontSize:5.5,color:LC,margin:[3,3,3,2]},
-            {text:'Firma y sello del transportista',fontSize:5,color:'#aaa',margin:[3,0,3,4]},
+            {text:'23',fontSize:6.5,color:LC,margin:[4,4,4,3]},
+            {text:'Firma y sello del transportista',fontSize:6,color:'#aaa',margin:[4,0,4,5]},
         ];
         if(D.sigDriver&&D.sigDriver.startsWith('data:image')){
-            sigDrvStack.push({image:D.sigDriver,width:120,height:55,alignment:'center',margin:[0,2,0,2]});
+            sigDrvStack.push({image:D.sigDriver,width:120,height:55,alignment:'center',margin:[0,4,0,4]});
         }
         const r7 = {
             table:{
@@ -2461,7 +2460,7 @@ function buildPDF_Classic(D, safetyTimer){
                 body:[[
                     {stack:sigSndStack,fillColor:WH,border:bA},
                     {stack:sigDrvStack,fillColor:WH,border:bA},
-                    {stack:[{text:'24 Recibo de la mercancia',fontSize:5.5,color:LC,margin:[3,3,3,4]},{text:'Firma y sello del consignatario',fontSize:5,color:'#aaa',margin:[3,0,3,0]}],fillColor:BL,border:bA},
+                    {stack:[{text:'24 Recibo de la mercancia',fontSize:6.5,color:LC,margin:[4,4,4,5]},{text:'Firma y sello del consignatario',fontSize:6,color:'#aaa',margin:[4,0,4,0]}],fillColor:BL,border:bA},
                 ]]
             },
             layout:layR, margin:[0,0,0,0]
@@ -2472,7 +2471,7 @@ function buildPDF_Classic(D, safetyTimer){
             text:isNac
                 ?'1 Remitente          2 Destinatario          3 Transportista'
                 :'1 Remitente          2 Destinatario          3 Transportista          4 Transportista',
-            fontSize:6.5,color:'#444',margin:[4,2,4,0],alignment:'center'
+            fontSize:7.5,color:'#444',margin:[4,3,4,2],alignment:'center'
         };
 
         // Red horizontal line separator between independent tables
@@ -2485,9 +2484,9 @@ function buildPDF_Classic(D, safetyTimer){
 
     try{
         pdfMake.createPdf({
-            pageSize:'A4', pageMargins:[20,6,20,4],
+            pageSize:'A4', pageMargins:[20,16,20,8],
             content:allContent,
-            defaultStyle:{font:'Roboto',fontSize:8,color:'#111'},
+            defaultStyle:{font:'Roboto',fontSize:9,color:'#111'},
             info:{title:'CMR '+num,author:'CMR Manager Pro',subject:'Carta de Porte Internacional CMR'}
         }).getBlob(blob=>{
             clearTimeout(safetyTimer); showOv(false);
@@ -2512,9 +2511,9 @@ function buildPDF_IncoDocs(D, safetyTimer){
     const dateS = fmt(D.docDate);
     const delivS= fmt(D.dateDelivery);
 
-    const BLK = '#1a1009'; const LBL = '#f0ece4'; const BDR = '#d4cfc3';
+    const BLK = '#1a1009'; const LBL = '#f0ece4'; const BDR = '#a09888';
     const ACC = '#c4421a'; const WH  = '#ffffff';
-    const lay = {hLineWidth:()=>0.5,vLineWidth:()=>0.5,hLineColor:()=>BDR,vLineColor:()=>BDR};
+    const lay = {hLineWidth:()=>0.8,vLineWidth:()=>0.8,hLineColor:()=>BDR,vLineColor:()=>BDR};
     const layN= {hLineWidth:()=>0,vLineWidth:()=>0};
 
     const copies = isNac
@@ -2522,10 +2521,10 @@ function buildPDF_IncoDocs(D, safetyTimer){
         : [{lbl:'COPIA 1 — REMITENTE',color:'#c4421a'},{lbl:'COPIA 2 — DESTINATARIO',color:'#0e9b8a'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#7c3aed'},{lbl:'COPIA 4 — ADMINISTRACIÓN',color:'#374151'}];
 
     const field = (label, value, opts) => {
-        const fs = (opts && opts.fs) || 8;
+        const fs = (opts && opts.fs) || 9;
         return { stack:[
-            {text:label, fontSize:5.5, color:'#7a6a58', bold:false, margin:[4,3,4,1]},
-            {text:value||'', fontSize:fs, bold:!!(opts&&opts.bold), color:BLK, margin:[4,0,4,4], lineHeight:1.25}
+            {text:label, fontSize:6.5, color:'#7a6a58', bold:false, margin:[4,4,4,2]},
+            {text:value||'', fontSize:fs, bold:!!(opts&&opts.bold), color:BLK, margin:[4,0,4,5], lineHeight:1.3}
         ], fillColor:WH, border:[true,true,true,true]};
     };
 
@@ -2536,11 +2535,11 @@ function buildPDF_IncoDocs(D, safetyTimer){
 
         // Cabecera
         const hdrRight = { stack:[
-            {text:isNac?'CARTA DE PORTE NACIONAL':'INTERNATIONAL CONSIGNMENT NOTE (CMR)', fontSize:10, bold:true, color:WH, alignment:'right'},
-            {text:isNac?'Ley 15/2009 · Orden FOM/1882/2012':'CMR Convention Geneva 1956 · Protocol 1978', fontSize:5.5, color:'rgba(255,255,255,.65)', alignment:'right', margin:[0,2,0,4]},
-            {text:'N.º '+num+(dateS?'  ·  '+dateS:''), fontSize:8, bold:true, color:WH, alignment:'right'},
-            {text:cp.lbl, fontSize:6.5, color:'rgba(255,255,255,.8)', alignment:'right', margin:[0,3,0,0], bold:true},
-        ], border:[false,false,false,false], margin:[0,6,6,6]};
+            {text:isNac?'CARTA DE PORTE NACIONAL':'INTERNATIONAL CONSIGNMENT NOTE (CMR)', fontSize:11, bold:true, color:WH, alignment:'right'},
+            {text:isNac?'Ley 15/2009 · Orden FOM/1882/2012':'CMR Convention Geneva 1956 · Protocol 1978', fontSize:6.5, color:'rgba(255,255,255,.65)', alignment:'right', margin:[0,3,0,5]},
+            {text:'N.º '+num+(dateS?'  ·  '+dateS:''), fontSize:9, bold:true, color:WH, alignment:'right'},
+            {text:cp.lbl, fontSize:7.5, color:'rgba(255,255,255,.8)', alignment:'right', margin:[0,4,0,0], bold:true},
+        ], border:[false,false,false,false], margin:[0,6,8,8]};
 
         const hdrLeft = window.logoDataURL
             ? {image:window.logoDataURL, width:68, height:40, margin:[8,8,8,8], border:[false,false,false,false]}
@@ -2561,71 +2560,76 @@ function buildPDF_IncoDocs(D, safetyTimer){
 
         // Transportista
         const platesStr=[D.plateTractor,D.plateTrailer].filter(Boolean).join('  /  ');
-        const carrierVal=(D.carrierBlock||'')+(platesStr?'\n'+platesStr:'')+(D.driverName?'\nConductor: '+D.driverName+(D.driverDNI?' — DNI: '+D.driverDNI:''):'');
-        content.push({table:{widths:['50%','50%'],body:[[field('16  Transportista / Carrier',carrierVal,{fs:8}),field('17  Porteadores sucesivos',D.successiveCarriers&&D.successiveCarriers.length?D.successiveCarriers.map(s=>s.name+(s.address?'\n'+s.address:'')).join('\n\n'):'')]]},layout:lay,margin:[0,0,0,2]});
+        const carrierBaseVal=(D.carrierBlock||'')+(D.driverName?'\nConductor: '+D.driverName+(D.driverDNI?' — DNI: '+D.driverDNI:''):'');
+        const carrierCell16 = { stack:[
+            {text:'16  Transportista / Carrier', fontSize:6.5, color:'#7a6a58', bold:false, margin:[4,4,4,2]},
+            {text:carrierBaseVal||'', fontSize:8, bold:false, color:BLK, margin:[4,0,4,2], lineHeight:1.3},
+            ...(platesStr?[{text:platesStr, fontSize:18, bold:true, color:BLK, margin:[4,3,4,4], characterSpacing:1}]:[])
+        ], fillColor:WH, border:[true,true,true,true]};
+        content.push({table:{widths:['50%','50%'],body:[[carrierCell16,field('17  Porteadores sucesivos',D.successiveCarriers&&D.successiveCarriers.length?D.successiveCarriers.map(s=>s.name+(s.address?'\n'+s.address:'')).join('\n\n'):'')]]},layout:lay,margin:[0,0,0,2]});
 
         // Tabla mercancías — procesa TODAS las líneas reales, luego rellena hasta mínimo 12
         const gl=D.goodsLines&&D.goodsLines.length?D.goodsLines:[{}];
         const totalW=gl.reduce((s,l)=>s+(parseFloat(l.weight)||0),0);
         const totalV=gl.reduce((s,l)=>s+(parseFloat(l.volume)||0),0);
-        // Filas reales primero, luego vacías hasta completar al menos 12
-        const realRows = gl.slice(0, 20); // máx 20 líneas reales
-        const padCount = Math.max(0, 12 - realRows.length);
+        // Filas reales primero, luego vacías hasta completar al menos 7
+        const realRows = gl.slice(0, 7); // máx 7 líneas reales
+        const padCount = Math.max(0, 7 - realRows.length);
         const allRows = [...realRows, ...Array(padCount).fill({})];
         const gW=['18%','9%','13%','30%','10%','12%','8%'];
-        const gh=t=>({text:t,fontSize:5.5,bold:true,color:'#4a3828',fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:'center'});
-        const gd=(t,a,b)=>({text:t||'',fontSize:7,bold:!!b,color:BLK,fillColor:WH,margin:[3,5,3,5],border:[true,false,true,false],alignment:a||'left'});
-        const gt=(t,a,b)=>({text:t||'',fontSize:7,bold:!!b,color:BLK,fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:a||'left'});
+        const gh=t=>({text:t,fontSize:6.5,bold:true,color:'#4a3828',fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:'center'});
+        const gd=(t,a,b)=>({text:t||'',fontSize:7.5,bold:!!b,color:BLK,fillColor:WH,margin:[3,3,3,3],border:[true,true,true,true],alignment:a||'left'});
+        const gt=(t,a,b)=>({text:t||'',fontSize:7.5,bold:!!b,color:BLK,fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:a||'left'});
         const gRows=allRows.map(l=>l.freeMode&&l.freeText
-            ?[{text:l.freeText,fontSize:7,color:BLK,fillColor:WH,margin:[4,5,4,5],border:[true,false,true,false],colSpan:7},...Array(6).fill({})]
+            ?[{text:l.freeText,fontSize:7.5,color:BLK,fillColor:WH,margin:[3,3,3,3],border:[true,true,true,true],colSpan:7},...Array(6).fill({})]
             :[gd(l.marks),gd(l.qty,'center'),gd(l.packing),gd(l.desc,'left',!!l.desc),gd(l.stat,'center'),gd(l.weight?(l.weight+' kg'):'','center'),gd(l.volume?String(l.volume):'','center')]);
-        const gTot=[{text:'TOTALES',fontSize:6.5,bold:true,color:BLK,fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:'right',colSpan:5},{},{},{},{},gt(totalW?totalW.toFixed(2)+' kg':'','center',true),gt(totalV?totalV.toFixed(2):'','center',true)];
+        const gTot=[{text:'TOTALES',fontSize:7.5,bold:true,color:BLK,fillColor:LBL,margin:[4,3,4,3],border:[true,true,true,true],alignment:'right',colSpan:5},{},{},{},{},gt(totalW?totalW.toFixed(2)+' kg':'','center',true),gt(totalV?totalV.toFixed(2):'','center',true)];
         const gTableBody=[[gh('6 Marcas'),gh('7 Bultos'),gh('8 Embalaje'),gh('9 Mercancía'),gh('10 N.Est.'),gh('11 Peso kg'),gh('12 Vol m³')],...gRows,gTot];
         // Eurps — solo si tienen valor
         const _eC=D['eurosCargados']||''; const _eD=D['eurosDevueltos']||'';
         const _f1=D['freeline-1']||''; const _f2=D['freeline-2']||'';
-        if(_f1) gTableBody.push([{text:_f1,fontSize:6.5,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
-        if(_f2) gTableBody.push([{text:_f2,fontSize:6.5,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
-        if(_eC||_eD) gTableBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:7},{text:_eC||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:7},{text:_eD||'0'}],fontSize:7,color:BLK,margin:[4,3,4,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
-        content.push({table:{widths:gW,body:gTableBody},layout:{hLineWidth:(i,n)=>i===0||i===1||i===n.table.body.length?0.5:0.3,vLineWidth:()=>0.5,hLineColor:()=>BDR,vLineColor:()=>BDR},margin:[0,0,0,2]});
+        if(_f1) gTableBody.push([{text:_f1,fontSize:7.5,color:BLK,margin:[3,3,3,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
+        if(_f2) gTableBody.push([{text:_f2,fontSize:7.5,color:BLK,margin:[3,3,3,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
+        if(_eC||_eD) gTableBody.push([{text:[{text:'EURP. CARGADOS: ',bold:true,fontSize:8},{text:_eC||'0'},{text:'    EURP. DEVUELTOS: ',bold:true,fontSize:8},{text:_eD||'0'}],fontSize:8,color:BLK,margin:[3,3,3,3],colSpan:7,fillColor:WH,border:[true,true,true,true]},{},{},{},{},{},{}]);
+        content.push({table:{widths:gW,body:gTableBody},layout:{hLineWidth:(i,n)=>i===0||i===1||i===n.table.body.length?0.8:0.6,vLineWidth:()=>0.8,hLineColor:()=>BDR,vLineColor:()=>BDR},margin:[0,0,0,2]});
 
         // Instrucciones / Estipulaciones / Emisión — anclado al fondo
         const cl = isNac
             ? `Este contrato se rige por la Ley 15/2009 del contrato de transporte terrestre de mercancías y la Orden FOM/1882/2012. 1. El porteador responde de la pérdida total o parcial y de las averías desde la recepción hasta la entrega. 2. La indemnización por pérdida o avería no excederá del valor de mercado de la mercancía o 1/3 del IPREM por kilogramo. 3. El retraso en la entrega dará lugar a indemnización si se ha formulado reserva en el momento de la entrega. 4. Las reclamaciones prescribirán al año, salvo dolo o culpa grave (3 años). 5. El destinatario deberá manifestar las reservas en el momento de la entrega o dentro de los siete días siguientes. 6. La carta de porte deberá ser firmada por remitente, transportista y destinatario.`
             : `Este contrato se rige por el Convenio CMR (Ginebra, 19 mayo 1956) y el Protocolo de 5 julio 1978. 1. El transportista responde de la pérdida total o parcial y de las averías desde la recepción hasta la entrega. 2. La indemnización no excederá de 8,33 DEG por kilogramo de peso bruto faltante. 3. El retraso sólo dará lugar a indemnización si se ha formulado reserva por escrito. 4. Las reclamaciones deberán dirigirse al transportista en el plazo de 1 año (3 años en caso de dolo o culpa grave). 5. Los daños no derivados de pérdida o avería se limitan al importe del porte. 6. El destinatario deberá manifestar reservas por escrito en el momento de la entrega o a más tardar en los 7 días siguientes.`;
-        const sigH=68;
+        const sigH=72;
 
         const bottomBlock = {
-            absolutePosition:{x:16, y:618},
+            absolutePosition:{x:16, y:558},
             stack:[
                 // Instrucciones / Estipulaciones / Emisión
                 {table:{widths:['33%','34%','33%'],body:[[
                     field('13  Instrucciones remitente',D.senderInstr||''),
                     field('19  Estipulaciones especiales',D.specialStipulations||''),
                     {stack:[
-                        {text:'21  Lugar y fecha de emisión',fontSize:5.5,color:'#7a6a58',margin:[4,3,4,1]},
-                        {text:(D.placeEmission||'')+(dateS?'\n'+dateS:''),fontSize:8,color:BLK,margin:[4,0,4,2]},
-                        {canvas:[{type:'line',x1:4,y1:0,x2:120,y2:0,lineWidth:0.4,lineColor:BDR}],margin:[0,2,0,2]},
-                        {text:'18  Reservas / Observations',fontSize:5.5,color:'#7a6a58',margin:[4,0,4,1]},
-                        {text:D.observations||'',fontSize:7,color:BLK,margin:[4,0,4,3]}
+                        {text:'21  Lugar y fecha de emisión',fontSize:6.5,color:'#7a6a58',margin:[4,4,4,2]},
+                        {text:(D.placeEmission||'')+(dateS?'\n'+dateS:''),fontSize:9,color:BLK,margin:[4,0,4,3]},
+                        {canvas:[{type:'line',x1:4,y1:0,x2:120,y2:0,lineWidth:0.8,lineColor:BDR}],margin:[0,3,0,3]},
+                        {text:'18  Reservas / Observations',fontSize:6.5,color:'#7a6a58',margin:[4,0,4,2]},
+                        {text:D.observations||'',fontSize:8,color:BLK,margin:[4,0,4,4]}
                     ],fillColor:WH,border:[true,true,true,true]}
                 ]]},layout:lay,margin:[0,0,0,2]},
                 // Firmas
                 {table:{widths:['33%','34%','33%'],body:[[
-                    (()=>{const st=[{text:'22  Remitente / Sender',fontSize:6,bold:true,color:cp.color,margin:[4,4,4,1]},{text:'Firma y sello',fontSize:5,color:'#b0a090',margin:[4,0,4,6]}];if(D.sigSender&&D.sigSender.startsWith('data:image'))st.push({image:D.sigSender,width:110,height:40,alignment:'center',margin:[0,2,0,2]});else st.push({text:'',margin:[4,sigH-28,4,4]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
-                    (()=>{const st=[{text:'23  Transportista / Carrier',fontSize:6,bold:true,color:cp.color,margin:[4,4,4,1]},{text:'Firma y sello',fontSize:5,color:'#b0a090',margin:[4,0,4,6]}];if(D.sigDriver&&D.sigDriver.startsWith('data:image'))st.push({image:D.sigDriver,width:110,height:40,alignment:'center',margin:[0,2,0,2]});else st.push({text:'',margin:[4,sigH-28,4,4]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
-                    {stack:[{text:'24  Destinatario / Consignee',fontSize:6,bold:true,color:cp.color,margin:[4,4,4,1]},{text:'Firma y sello (en entrega)',fontSize:5,color:'#b0a090',margin:[4,0,4,6]},{text:'',margin:[4,sigH-28,4,4]}],fillColor:WH,border:[true,true,true,true],minHeight:sigH}
+                    (()=>{const st=[{text:'22  Remitente / Sender',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,8]}];if(D.sigSender&&D.sigSender.startsWith('data:image'))st.push({image:D.sigSender,width:120,height:45,alignment:'center',margin:[0,4,0,4]});else st.push({text:'',margin:[4,sigH-32,4,4]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
+                    (()=>{const st=[{text:'23  Transportista / Carrier',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,8]}];if(D.sigDriver&&D.sigDriver.startsWith('data:image'))st.push({image:D.sigDriver,width:120,height:45,alignment:'center',margin:[0,4,0,4]});else st.push({text:'',margin:[4,sigH-32,4,4]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
+                    {stack:[{text:'24  Destinatario / Consignee',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello (en entrega)',fontSize:6,color:'#b0a090',margin:[4,0,4,8]},{text:'',margin:[4,sigH-32,4,4]}],fillColor:WH,border:[true,true,true,true],minHeight:sigH}
                 ]]},layout:lay,margin:[0,0,0,2]},
                 // Cláusulas
                 {table:{widths:['*'],body:[[{stack:[
-                    {text:isNac?'CLÁUSULAS LEGALES (Ley 15/2009)':'CMR CONVENTION CONDITIONS',fontSize:5,bold:true,color:'#4a3828',margin:[4,3,4,1]},
-                    {text:cl,fontSize:4.5,color:'#7a6a58',lineHeight:1.3,margin:[4,0,4,3]}
+                    {text:isNac?'CLÁUSULAS LEGALES (Ley 15/2009)':'CMR CONVENTION CONDITIONS',fontSize:6,bold:true,color:'#4a3828',margin:[4,4,4,2]},
+                    {text:cl,fontSize:5.5,color:'#7a6a58',lineHeight:1.4,margin:[4,0,4,4]}
                 ],fillColor:LBL,border:[false,false,false,false]}]]},layout:layN,margin:[0,0,0,2]},
                 // Pie
                 {columns:[
-                    {text:(isNac?'CARTA PORTE ':'CMR N.º ')+num+(dateS?'  ·  '+dateS:'')+(D.placeEmission?'  ·  '+D.placeEmission:''),fontSize:5,color:'#b0a090'},
-                    {text:'CMR Manager Pro  ·  Generado digitalmente',fontSize:5,color:'#d4cfc3',alignment:'right'}
-                ],margin:[0,0,0,0]}
+                    {text:(isNac?'CARTA PORTE ':'CMR N.º ')+num+(dateS?'  ·  '+dateS:'')+(D.placeEmission?'  ·  '+D.placeEmission:''),fontSize:6,color:'#b0a090'},
+                    {text:'CMR Manager Pro  ·  Generado digitalmente',fontSize:6,color:'#b0a090',alignment:'right'}
+                ],margin:[0,3,0,0]}
             ]
         };
         content.push(bottomBlock);
@@ -2637,7 +2641,7 @@ function buildPDF_IncoDocs(D, safetyTimer){
     try{
         pdfMake.createPdf({
             pageSize:'A4',pageMargins:[16,10,16,8],content:allContent,
-            defaultStyle:{font:'Roboto',fontSize:8,color:BLK},
+            defaultStyle:{font:'Roboto',fontSize:9,color:BLK},
             info:{title:(isNac?'Carta Porte ':'CMR ')+num,author:'CMR Manager Pro'}
         }).getBlob(blob=>{
             clearTimeout(safetyTimer);showOv(false);
