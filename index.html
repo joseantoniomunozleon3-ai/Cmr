@@ -1599,12 +1599,12 @@ window.renderTemplates = async function() {
         a === 'Sin cliente' ? 1 : b === 'Sin cliente' ? -1 : a.localeCompare(b, 'es')
     );
 
-    // Estado de acordeones en sessionStorage
+    // Estado de acordeones: por defecto todos cerrados siempre
     const openKey = 'tmpl_open_groups';
     let openGroups;
     try { openGroups = new Set(JSON.parse(sessionStorage.getItem(openKey) || '[]')); }
-    catch { openGroups = new Set(clients); }
-    if (openGroups.size === 0) clients.forEach(c => openGroups.add(c)); // primera vez: todos abiertos
+    catch { openGroups = new Set(); }
+    // No añadir nada: todos colapsados por defecto
 
     const makeTpl = t => `
         <div class="tpl-row" data-id="${t.id}">
@@ -2521,12 +2521,15 @@ function buildPDF_IncoDocs(D, safetyTimer){
 
     const BLK = '#1a1009'; const LBL = '#f0ece4'; const BDR = '#a09888';
     const ACC = '#c4421a'; const WH  = '#ffffff';
+    // Color de cabecera aligerado para que al imprimir no consuma tanto tóner
+    const HDR_BG = '#3a3028';
     const lay = {hLineWidth:()=>0.8,vLineWidth:()=>0.8,hLineColor:()=>BDR,vLineColor:()=>BDR};
     const layN= {hLineWidth:()=>0,vLineWidth:()=>0};
 
+    // Colores de cabecera aligerados para menor consumo de tóner al imprimir
     const copies = isNac
-        ? [{lbl:'COPIA 1 — REMITENTE',color:'#c4421a'},{lbl:'COPIA 2 — DESTINATARIO',color:'#0e9b8a'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#7c3aed'}]
-        : [{lbl:'COPIA 1 — REMITENTE',color:'#c4421a'},{lbl:'COPIA 2 — DESTINATARIO',color:'#0e9b8a'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#7c3aed'},{lbl:'COPIA 4 — ADMINISTRACIÓN',color:'#374151'}];
+        ? [{lbl:'COPIA 1 — REMITENTE',color:'#4a5568'},{lbl:'COPIA 2 — DESTINATARIO',color:'#2d6a5a'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#4a3a7a'}]
+        : [{lbl:'COPIA 1 — REMITENTE',color:'#4a5568'},{lbl:'COPIA 2 — DESTINATARIO',color:'#2d6a5a'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#4a3a7a'},{lbl:'COPIA 4 — ADMINISTRACIÓN',color:'#4a4a4a'}];
 
     const field = (label, value, opts) => {
         const fs = (opts && opts.fs) || 9;
