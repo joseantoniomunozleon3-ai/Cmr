@@ -1958,10 +1958,16 @@ async function generateCMR(){
     if(!pdfMake.vfs||Object.keys(pdfMake.vfs).length===0){toast('⚠ Fuentes PDF no cargadas','err',5000);return;}
     const chosenLayout = await _askPDFLayout();
     if(!chosenLayout) return;
+    const saveToHist = await _askSaveToHist();
+    if(saveToHist === null) return;
     const data=collect();
     data._pdfLayout = chosenLayout;
     delete data.id;
-    try{const id=await dbAdd(STORE,data);data.id=id;await updateHistBadge();clearDraft();_advanceSeq();}catch(e){console.warn('DB save:',e);toast('⚠ Error guardando en historial: '+e.message,'err',6000);}
+    if(saveToHist){
+        try{const id=await dbAdd(STORE,data);data.id=id;await updateHistBadge();clearDraft();_advanceSeq();}catch(e){console.warn('DB save:',e);toast('⚠ Error guardando en historial: '+e.message,'err',6000);}
+    } else {
+        clearDraft();
+    }
     showOv(true);
     const safetyTimer=setTimeout(()=>{showOv(false);toast('⚠ Tiempo agotado','err',5000)},60000);
     try{buildPDF_dispatch(data,safetyTimer);}catch(err){clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+err.message,'err',6000);}
@@ -2150,6 +2156,21 @@ function _askPDFLayout(){
             const a=document.getElementById('_lyt_cls'); if(a) a.addEventListener('click',()=>{closeBS();resolve('classic');});
             const b=document.getElementById('_lyt_pro'); if(b) b.addEventListener('click',()=>{closeBS();resolve('pro');});
             const c=document.getElementById('_lyt_inc'); if(c) c.addEventListener('click',()=>{closeBS();resolve('incodocs');});
+        },60);
+    });
+}
+
+// ---- Pregunta si guardar en historial ----
+function _askSaveToHist(){
+    return new Promise(resolve => {
+        const mbs = "width:100%;margin-bottom:8px;padding:13px 14px;border-radius:10px;border:1.5px solid var(--line2);background:var(--bg3);color:var(--snow);font-size:.83rem;font-weight:600;font-family:'Sora',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:flex-start;gap:12px;line-height:1.4";
+        const h = '<p style="font-size:.78rem;color:var(--dim);margin-bottom:12px">¿Guardar este documento en el historial?</p>'
+            + '<button id="_hist_si" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">💾</span><span><b style="display:block">Sí, guardar</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Se añade al historial y podrás cargarlo después</span></span></button>'
+            + '<button id="_hist_no" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">🚫</span><span><b style="display:block">No guardar</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Solo generar el PDF sin guardarlo</span></span></button>';
+        showBS('Guardar en historial', h, [{label:'Cancelar',cls:'cancel',fn:()=>{closeBS();resolve(null);}}]);
+        setTimeout(()=>{
+            const a=document.getElementById('_hist_si'); if(a) a.addEventListener('click',()=>{closeBS();resolve(true);});
+            const b=document.getElementById('_hist_no'); if(b) b.addEventListener('click',()=>{closeBS();resolve(false);});
         },60);
     });
 }
@@ -2526,10 +2547,10 @@ function buildPDF_IncoDocs(D, safetyTimer){
     const lay = {hLineWidth:()=>0.8,vLineWidth:()=>0.8,hLineColor:()=>BDR,vLineColor:()=>BDR};
     const layN= {hLineWidth:()=>0,vLineWidth:()=>0};
 
-    // Colores de cabecera aligerados para menor consumo de tóner al imprimir
+    // Colores oficiales suavizados para mejor impresión en b/n
     const copies = isNac
-        ? [{lbl:'COPIA 1 — REMITENTE',color:'#4a5568'},{lbl:'COPIA 2 — DESTINATARIO',color:'#2d6a5a'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#4a3a7a'}]
-        : [{lbl:'COPIA 1 — REMITENTE',color:'#4a5568'},{lbl:'COPIA 2 — DESTINATARIO',color:'#2d6a5a'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#4a3a7a'},{lbl:'COPIA 4 — ADMINISTRACIÓN',color:'#4a4a4a'}];
+        ? [{lbl:'COPIA 1 — REMITENTE',color:'#d4614a'},{lbl:'COPIA 2 — DESTINATARIO',color:'#2db8a4'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#7c5ec8'}]
+        : [{lbl:'COPIA 1 — REMITENTE',color:'#d4614a'},{lbl:'COPIA 2 — DESTINATARIO',color:'#2db8a4'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#7c5ec8'},{lbl:'COPIA 4 — ADMINISTRACIÓN',color:'#555f6e'}];
 
     const field = (label, value, opts) => {
         const fs = (opts && opts.fs) || 9;
