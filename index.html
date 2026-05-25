@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8"/>
@@ -2022,10 +2022,33 @@ async function generateCMR(){
     }
     showOv(true);
     const safetyTimer=setTimeout(()=>{showOv(false);toast('⚠ Tiempo agotado','err',5000)},60000);
+    // Combinar firma y sello en una sola imagen antes de generar PDF
+    const hasSig   = data.sigSender && data.sigSender.startsWith('data:image');
+    const hasSello = data.selloDataURL && data.selloDataURL.startsWith('data:image');
+    if (hasSello) {
+        data.sigSender = await mergeSignatureAndSello(hasSig ? data.sigSender : null, data.selloDataURL, 220, 140);
+        data.selloDataURL = null; // ya está fusionado, no usar por separado
+    }
     try{buildPDF_dispatch(data,safetyTimer);}catch(err){clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+err.message,'err',6000);}
 }
 
 function fmtD(iso){if(!iso)return'—';try{return new Date(iso).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})}catch{return iso}}
+// Combina firma + sello en un único dataURL para evitar expansión de celda en pdfmake
+function mergeSignatureAndSello(sigDataURL, selloDataURL, w, h) {
+    return new Promise(resolve => {
+        const canvas = document.createElement('canvas');
+        canvas.width = w * 2; canvas.height = h * 2;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const loadImg = src => new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+        Promise.all([sigDataURL ? loadImg(sigDataURL) : Promise.resolve(null), selloDataURL ? loadImg(selloDataURL) : Promise.resolve(null)]).then(([sig, sello]) => {
+            if (sig) { ctx.globalAlpha = 1; ctx.drawImage(sig, 0, 0, canvas.width, canvas.height); }
+            if (sello) { ctx.globalAlpha = 0.42; const sw = canvas.width * 0.8, sh = canvas.height * 0.8; ctx.drawImage(sello, (canvas.width - sw) / 2, (canvas.height - sh) / 2, sw, sh); }
+            resolve(canvas.toDataURL('image/png'));
+        });
+    });
+}
+
 function buildPDF(D,safetyTimer){
     const isNacional = D.tipoDoc === 'nacional';
     const num=D.docNum||'CMR-'+Date.now();
@@ -2170,17 +2193,9 @@ function buildPDF(D,safetyTimer){
         const sigHdr24={table:{widths:['*'],body:[[{text:[{text:'24 ',bold:true},{text:'Firma Consignatario'}],fontSize:6.5,color:'#000',fillColor:'#e8e8e8',margin:[3,3,3,3]}]]},layout:'noBorders'};
         const sigSenderCell=()=>{
             const hasSig=D.sigSender&&D.sigSender.startsWith('data:image');
-            const hasSello=D.selloDataURL&&D.selloDataURL.startsWith('data:image');
             const stack=[sigHdr22];
-            if(hasSig&&hasSello){
-                // firma + sello superpuesto centrado con opacidad via canvas — usamos columns trick
-                stack.push({image:D.sigSender,width:110,height:70,alignment:'center',margin:[0,2,0,-72],opacity:0.9});
-                stack.push({image:D.selloDataURL,width:80,height:80,alignment:'center',margin:[0,0,0,0],opacity:0.45});
-            } else if(hasSig){
-                stack.push({image:D.sigSender,width:110,height:70,alignment:'center',margin:[0,6,0,0]});
-                stack.push({text:'',margin:[0,0,0,0]});
-            } else if(hasSello){
-                stack.push({image:D.selloDataURL,width:90,height:90,alignment:'center',margin:[0,4,0,0],opacity:0.45});
+            if(hasSig){
+                stack.push({image:D.sigSender,width:110,height:70,alignment:'center',margin:[0,4,0,0]});
             } else {
                 stack.push({text:'',margin:[0,50,0,0]});
             }
@@ -2525,15 +2540,8 @@ function buildPDF_Classic(D, safetyTimer){
             {text:'22',fontSize:6.5,color:LC,margin:[4,4,4,3]},
             {text:'Firma y sello del remitente',fontSize:6,color:'#aaa',margin:[4,0,4,5]},
         ];
-        const _hasSigS=D.sigSender&&D.sigSender.startsWith('data:image');
-        const _hasSelloS=D.selloDataURL&&D.selloDataURL.startsWith('data:image');
-        if(_hasSigS&&_hasSelloS){
-            sigSndStack.push({image:D.sigSender,width:110,height:65,alignment:'center',margin:[0,2,0,-70],opacity:0.9});
-            sigSndStack.push({image:D.selloDataURL,width:80,height:80,alignment:'center',margin:[0,0,0,0],opacity:0.45});
-        } else if(_hasSigS){
-            sigSndStack.push({image:D.sigSender,width:120,height:55,alignment:'center',margin:[0,4,0,4]});
-        } else if(_hasSelloS){
-            sigSndStack.push({image:D.selloDataURL,width:90,height:90,alignment:'center',margin:[0,2,0,2],opacity:0.45});
+        if(D.sigSender&&D.sigSender.startsWith('data:image')){
+            sigSndStack.push({image:D.sigSender,width:120,height:65,alignment:'center',margin:[0,4,0,4]});
         } else {
             sigSndStack.push({text:'',margin:[0,30,0,0]});
         }
@@ -2715,15 +2723,8 @@ function buildPDF_IncoDocs(D, safetyTimer){
                 {table:{widths:['33%','34%','33%'],body:[[
                     (()=>{
                         const st=[{text:'22  Remitente / Sender',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,4]}];
-                        const _hS=D.sigSender&&D.sigSender.startsWith('data:image');
-                        const _hSe=D.selloDataURL&&D.selloDataURL.startsWith('data:image');
-                        if(_hS&&_hSe){
-                            st.push({image:D.sigSender,width:110,height:55,alignment:'center',margin:[0,2,0,-60],opacity:0.9});
-                            st.push({image:D.selloDataURL,width:75,height:75,alignment:'center',margin:[0,0,0,0],opacity:0.45});
-                        } else if(_hS){
-                            st.push({image:D.sigSender,width:120,height:45,alignment:'center',margin:[0,4,0,4]});
-                        } else if(_hSe){
-                            st.push({image:D.selloDataURL,width:85,height:85,alignment:'center',margin:[0,2,0,2],opacity:0.45});
+                        if(D.sigSender&&D.sigSender.startsWith('data:image')){
+                            st.push({image:D.sigSender,width:120,height:55,alignment:'center',margin:[0,4,0,4]});
                         } else {
                             st.push({text:'',margin:[4,sigH-32,4,0]});
                         }
