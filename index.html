@@ -526,6 +526,18 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
             </div>
         </div></div>
 
+        <div class="block"><div class="bhead"><span class="btag a">SELLO</span><span class="btitle">Sello del Remitente en PDF</span></div><div class="bbody">
+            <div style="display:flex;align-items:center;gap:14px">
+                <div class="logo-preview" id="selloPreview" onclick="document.getElementById('selloInput').click()" style="width:80px;height:80px;border-radius:50%"><span style="font-size:.65rem;text-align:center;color:var(--dim)">+ Sello</span></div>
+                <div style="flex:1">
+                    <div style="font-size:.78rem;font-weight:600;margin-bottom:4px">Imagen del sello</div>
+                    <div style="font-size:.7rem;color:var(--dim);line-height:1.6">PNG o JPG. Se incluirá en la casilla 22 (Firma Remitente) del PDF.</div>
+                    <button style="margin-top:8px;font-size:.7rem;padding:5px 10px;border-radius:6px;border:1px solid var(--rose-l);background:transparent;color:var(--rose-l);cursor:pointer;font-family:'Sora',sans-serif" onclick="removeSello()">Quitar sello</button>
+                </div>
+                <input type="file" id="selloInput" accept="image/*" style="display:none" onchange="loadSello(event)"/>
+            </div>
+        </div></div>
+
         <div class="block"><div class="bhead"><span class="btag t">DEF</span><span class="btitle">Datos por Defecto</span></div><div class="bbody">
             <div class="ssep">Remitente Habitual</div>
             <div class="fr"><textarea id="cfgSenderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45&#10;41500 Sevilla&#10;España" rows="5"></textarea></div>
@@ -893,6 +905,7 @@ window.collect = function() {
     };
     d.sigDriver = compressSig(sigPad);
     d.sigSender = compressSig(sigPadSender);
+    d.selloDataURL = window.selloDataURL || null;
     return d;
 };
 
@@ -1008,6 +1021,8 @@ window.loadDefaults = function() {
     if (cfg.senderBlock || cfg.carrierBlock) showBadges(true);
     window.logoDataURL = localStorage.getItem('cmr_logo') || null;
     if (window.logoDataURL) showLogoPreview(window.logoDataURL);
+    window.selloDataURL = localStorage.getItem('cmr_sello') || null;
+    if (window.selloDataURL) showSelloPreview(window.selloDataURL);
 };
 
 window.syncCfgPanel = function() {
@@ -1048,6 +1063,34 @@ window.removeLogo = function() {
         mark.innerHTML = 'CMR';
     }
     toast('Logo eliminado', 'warn');
+};
+
+// ── Sello ──────────────────────────────────────────────────────
+window.selloDataURL = null;
+
+window.loadSello = function(e) {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+        window.selloDataURL = ev.target.result;
+        localStorage.setItem('cmr_sello', window.selloDataURL);
+        showSelloPreview(window.selloDataURL);
+        toast('✓ Sello cargado', 'ok');
+    };
+    r.readAsDataURL(f);
+};
+
+window.showSelloPreview = function(src) {
+    const el = document.getElementById('selloPreview');
+    if (el) el.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:contain;border-radius:50%"/>';
+};
+
+window.removeSello = function() {
+    window.selloDataURL = null;
+    localStorage.removeItem('cmr_sello');
+    const el = document.getElementById('selloPreview');
+    if (el) el.innerHTML = '<span style="font-size:.65rem;text-align:center;color:var(--dim)">+ Sello</span>';
+    toast('Sello eliminado', 'warn');
 };
 
 // ── Nuevo CMR ─────────────────────────────────────────────────
@@ -2125,7 +2168,7 @@ function buildPDF(D,safetyTimer){
         const sigHdr22={table:{widths:['*'],body:[[{text:[{text:'22 ',bold:true},{text:'Firma Remitente'}],fontSize:6.5,color:'#000',fillColor:'#e8e8e8',margin:[3,3,3,3]}]]},layout:'noBorders'};
         const sigHdr23={table:{widths:['*'],body:[[{text:[{text:'23 ',bold:true},{text:'Firma Transportista'}],fontSize:6.5,color:'#000',fillColor:'#e8e8e8',margin:[3,3,3,3]}]]},layout:'noBorders'};
         const sigHdr24={table:{widths:['*'],body:[[{text:[{text:'24 ',bold:true},{text:'Firma Consignatario'}],fontSize:6.5,color:'#000',fillColor:'#e8e8e8',margin:[3,3,3,3]}]]},layout:'noBorders'};
-        const sigSenderCell=()=>{ const hasSig=D.sigSender&&D.sigSender.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr22,{image:D.sigSender,width:110,height:70,alignment:'center',margin:[0,6,0,0]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],fillColor:'#fff'}; } return {stack:[sigHdr22,{text:'',margin:[0,50,0,0]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],fillColor:'#fff'}; };
+        const sigSenderCell=()=>{ const hasSig=D.sigSender&&D.sigSender.startsWith('data:image'); const hasSello=D.selloDataURL&&D.selloDataURL.startsWith('data:image'); const selloEl=hasSello?{image:D.selloDataURL,width:40,height:40,alignment:'right',margin:[0,0,4,0]}:{text:''}; if(hasSig){ return {stack:[sigHdr22,{columns:[{image:D.sigSender,width:110,height:60,alignment:'center',margin:[0,4,0,0]},hasSello?{stack:[selloEl],margin:[0,4,0,0],width:44}:{text:'',width:0}]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],fillColor:'#fff'}; } if(hasSello){ return {stack:[sigHdr22,{columns:[{text:'',width:'*'},{image:D.selloDataURL,width:50,height:50,alignment:'right',margin:[0,4,4,0]}]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],fillColor:'#fff'}; } return {stack:[sigHdr22,{text:'',margin:[0,50,0,0]},{text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],fillColor:'#fff'}; };
         const sigDriverCell=()=>{ const hasSig=D.sigDriver&&D.sigDriver.startsWith('data:image'); if(hasSig){ return {stack:[sigHdr23,{image:D.sigDriver,width:110,height:70,alignment:'center',margin:[0,6,0,0]},{text:D.driverName||'',fontSize:6.5,alignment:'center',margin:[0,1,0,2]}],border:[true,true,true,true],fillColor:'#fff'}; } return {stack:[sigHdr23,{text:'',margin:[0,50,0,0]},{text:D.driverName||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],border:[true,true,true,true],fillColor:'#fff'}; };
         const sigConsCell=()=>({stack:[sigHdr24,{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,50,0,2]}],border:[true,true,true,true],fillColor:'#fff'});
 
@@ -2465,9 +2508,12 @@ function buildPDF_Classic(D, safetyTimer){
             {text:'Firma y sello del remitente',fontSize:6,color:'#aaa',margin:[4,0,4,5]},
         ];
         if(D.sigSender&&D.sigSender.startsWith('data:image')){
-            sigSndStack.push({image:D.sigSender,width:120,height:55,alignment:'center',margin:[0,4,0,4]});
+            sigSndStack.push({image:D.sigSender,width:D.selloDataURL?80:120,height:55,alignment:'center',margin:[0,4,0,4]});
         } else {
             sigSndStack.push({text:'',margin:[0,30,0,0]});
+        }
+        if(D.selloDataURL&&D.selloDataURL.startsWith('data:image')){
+            sigSndStack.push({image:D.selloDataURL,width:44,height:44,alignment:'right',margin:[0,-44,4,0]});
         }
         sigSndStack.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]});
         const sigDrvStack = [
@@ -2645,7 +2691,7 @@ function buildPDF_IncoDocs(D, safetyTimer){
                 ]]},layout:lay,margin:[0,0,0,2]},
                 // Firmas
                 {table:{widths:['33%','34%','33%'],body:[[
-                    (()=>{const st=[{text:'22  Remitente / Sender',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,8]}];if(D.sigSender&&D.sigSender.startsWith('data:image')){st.push({image:D.sigSender,width:120,height:45,alignment:'center',margin:[0,4,0,4]});}else{st.push({text:'',margin:[4,sigH-32,4,0]});}st.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
+                    (()=>{const st=[{text:'22  Remitente / Sender',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,8]}];if(D.sigSender&&D.sigSender.startsWith('data:image')){st.push({image:D.sigSender,width:D.selloDataURL?80:120,height:45,alignment:'center',margin:[0,4,0,4]});}else{st.push({text:'',margin:[4,sigH-32,4,0]});}if(D.selloDataURL&&D.selloDataURL.startsWith('data:image')){st.push({image:D.selloDataURL,width:44,height:44,alignment:'right',margin:[0,-44,4,0]});}st.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
                     (()=>{const st=[{text:'23  Transportista / Carrier',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,8]}];if(D.sigDriver&&D.sigDriver.startsWith('data:image')){st.push({image:D.sigDriver,width:120,height:45,alignment:'center',margin:[0,4,0,4]});}else{st.push({text:'',margin:[4,sigH-32,4,0]});}st.push({text:D.driverName||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]});return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};})(),
                     {stack:[{text:'24  Destinatario / Consignee',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello (en entrega)',fontSize:6,color:'#b0a090',margin:[4,0,4,8]},{text:'',margin:[4,sigH-32,4,0]},{text:(D.rcvBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]}],fillColor:WH,border:[true,true,true,true],minHeight:sigH}
                 ]]},layout:lay,margin:[0,0,0,2]},
