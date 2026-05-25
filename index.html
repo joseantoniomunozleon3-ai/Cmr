@@ -1081,14 +1081,14 @@ window.addGoodsLine = function(data = {}) {
         <div class="fr" style="margin-bottom:0"><label>9 Naturaleza</label><input type="text" id="gl-desc-${id}" placeholder="Descripción" value="${data.desc || ''}" oninput="updateTotals()"/></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:8px">
-        <div class="fr" style="margin-bottom:0"><label>7 Bultos</label><input type="${freeMode ? 'text' : 'number'}" id="gl-qty-${id}" min="0" value="${data.qty || ''}" oninput="updateTotals()"/></div>
+        <div class="fr" style="margin-bottom:0"><label>7 Bultos</label><input type="text" inputmode="numeric" id="gl-qty-${id}" value="${data.qty || ''}" oninput="updateTotals()"/></div>
         <div class="fr" style="margin-bottom:0;position:relative"><label>8 Embalaje</label>
           <input type="text" id="gl-packing-${id}" value="${data.packing || ''}" autocomplete="off"
             oninput="${freeMode ? '' : 'filterPackingLine('+id+',this.value)'}"
             onblur="setTimeout(()=>{const d=document.getElementById('gl-pdrop-${id}');if(d)d.style.display='none'},200)"/>
           <div id="gl-pdrop-${id}" style="display:none;position:absolute;z-index:50;background:var(--bg3);border:1px solid var(--line2);border-radius:var(--r3);top:100%;left:0;width:100%;max-height:140px;overflow-y:auto"></div>
         </div>
-        <div class="fr" style="margin-bottom:0"><label>11 Peso kg</label><input type="${freeMode ? 'text' : 'number'}" id="gl-weight-${id}" step="0.01" min="0" value="${data.weight || ''}" oninput="updateTotals()"/></div>
+        <div class="fr" style="margin-bottom:0"><label>11 Peso kg</label><input type="text" inputmode="decimal" id="gl-weight-${id}" value="${data.weight || ''}" oninput="updateTotals()"/></div>
         <div class="fr" style="margin-bottom:0"><label>12 Volumen</label><input type="text" id="gl-volume-${id}" value="${data.volume || ''}" oninput="updateTotals()"/></div>
       </div>
       <div class="fr" style="margin-bottom:0"><label>N. Estadístico</label><input type="text" id="gl-stat-${id}" placeholder="Número estadístico / código aduanero" value="${data.stat || ''}"/></div>
@@ -1096,7 +1096,7 @@ window.addGoodsLine = function(data = {}) {
     container.appendChild(div);
     // Si se carga en modo libre, aplicar estilos visuales violeta
     if (freeMode) {
-        // Llamar al toggle para que use swapInput (evita bug de type en navegadores)
+
         toggleGoodsLineMode(id);
     }
     updateTotals();
@@ -1105,48 +1105,25 @@ window.addGoodsLine = function(data = {}) {
 window.toggleGoodsLineMode = function(id) {
     const btnEl = document.getElementById('gl-modetoggle-' + id);
     const isFree = btnEl.dataset.free === '1';
-
-    // Reemplazar input por uno nuevo para evitar restricción de cambio de type en navegadores
-    function swapInput(elId, newType, step) {
-        const old = document.getElementById(elId);
-        if (!old) return;
-        const val = old.value;
-        const inp = document.createElement('input');
-        inp.type = newType;
-        inp.id   = elId;
-        inp.value = val;
-        inp.style.cssText = old.style.cssText;
-        inp.className = old.className;
-        // copiar atributos relevantes
-        if (old.getAttribute('placeholder')) inp.placeholder = old.getAttribute('placeholder');
-        if (newType === 'number') { inp.min = '0'; if (step) inp.step = step; }
-        if (old.getAttribute('oninput')) inp.setAttribute('oninput', old.getAttribute('oninput'));
-        old.parentNode.replaceChild(inp, old);
-        return inp;
-    }
-
+    const allFields = ['gl-marks-','gl-qty-','gl-packing-','gl-desc-','gl-weight-','gl-volume-','gl-stat-'];
     if (isFree) {
-        // Volver a estándar
-        const qtyNew = swapInput('gl-qty-'    + id, 'number');
-        const wgtNew = swapInput('gl-weight-' + id, 'number', '0.01');
-        if (qtyNew) qtyNew.style.borderColor = '';
-        if (wgtNew) wgtNew.style.borderColor = '';
-        ['gl-marks-','gl-desc-','gl-packing-','gl-volume-','gl-stat-'].forEach(p => {
-            const el = document.getElementById(p + id); if (el) el.style.borderColor = '';
-        });
+        // Volver a estándar: quitar borde violeta, restaurar inputmode numérico
+        allFields.forEach(p => { const el = document.getElementById(p + id); if (el) el.style.borderColor = ''; });
+        const qtyEl = document.getElementById('gl-qty-'    + id);
+        const wgtEl = document.getElementById('gl-weight-' + id);
+        if (qtyEl) qtyEl.inputMode = 'numeric';
+        if (wgtEl) wgtEl.inputMode = 'decimal';
         btnEl.textContent      = '☰ ESTÁNDAR';
         btnEl.style.background = 'var(--bg3)';
         btnEl.style.color      = 'var(--dim)';
         btnEl.dataset.free     = '0';
     } else {
-        // Ir a libre
-        const qtyNew = swapInput('gl-qty-'    + id, 'text');
-        const wgtNew = swapInput('gl-weight-' + id, 'text');
-        if (qtyNew) qtyNew.style.borderColor = 'rgba(124,58,237,.5)';
-        if (wgtNew) wgtNew.style.borderColor = 'rgba(124,58,237,.5)';
-        ['gl-marks-','gl-desc-','gl-packing-','gl-volume-','gl-stat-'].forEach(p => {
-            const el = document.getElementById(p + id); if (el) el.style.borderColor = 'rgba(124,58,237,.5)';
-        });
+        // Ir a libre: borde violeta, inputmode text
+        allFields.forEach(p => { const el = document.getElementById(p + id); if (el) el.style.borderColor = 'rgba(124,58,237,.5)'; });
+        const qtyEl = document.getElementById('gl-qty-'    + id);
+        const wgtEl = document.getElementById('gl-weight-' + id);
+        if (qtyEl) qtyEl.inputMode = 'text';
+        if (wgtEl) wgtEl.inputMode = 'text';
         btnEl.textContent      = '✏️ LIBRE';
         btnEl.style.background = 'rgba(124,58,237,.12)';
         btnEl.style.color      = 'var(--violet-l)';
