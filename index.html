@@ -1094,10 +1094,18 @@ window.addGoodsLine = function(data = {}) {
       <div class="fr" style="margin-bottom:0"><label>N. Estadístico</label><input type="text" id="gl-stat-${id}" placeholder="Número estadístico / código aduanero" value="${data.stat || ''}"/></div>
     </div>
     <div id="gl-free-${id}" style="display:${freeMode ? 'block' : 'none'}">
-      <div class="fr" style="margin-bottom:0">
-        <label style="color:var(--violet-l)">Descripción libre de la mercancía</label>
-        <textarea id="gl-freetext-${id}" rows="5" placeholder="Escribe la mercancía tal como aparece en el CMR del cliente (marcas, bultos, naturaleza, clase, peso, origen, formato...)" style="width:100%;resize:vertical;font-size:.8rem;padding:8px;border-radius:var(--r3);border:1px solid rgba(124,58,237,.35);background:var(--bg2);color:var(--snow);font-family:'Sora',sans-serif;line-height:1.6">${data.freeText || ''}</textarea>
+      <div style="font-size:.58rem;color:var(--violet-l);font-family:'JetBrains Mono',monospace;letter-spacing:.07em;margin-bottom:6px;font-weight:600">✏️ MODO LIBRE — escribe cualquier texto o número en cada campo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="fr" style="margin-bottom:0"><label style="color:var(--violet-l)">6 Marca</label><input type="text" id="gl-fmarks-${id}" value="${data.fmarks || data.marks || ''}" style="border-color:rgba(124,58,237,.35)"/></div>
+        <div class="fr" style="margin-bottom:0"><label style="color:var(--violet-l)">9 Naturaleza</label><input type="text" id="gl-fdesc-${id}" value="${data.fdesc || data.desc || ''}" style="border-color:rgba(124,58,237,.35)" oninput="updateTotals()"/></div>
       </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:8px">
+        <div class="fr" style="margin-bottom:0"><label style="color:var(--violet-l)">7 Bultos</label><input type="text" id="gl-fqty-${id}" value="${data.fqty || data.qty || ''}" style="border-color:rgba(124,58,237,.35)"/></div>
+        <div class="fr" style="margin-bottom:0"><label style="color:var(--violet-l)">8 Embalaje</label><input type="text" id="gl-fpacking-${id}" value="${data.fpacking || data.packing || ''}" style="border-color:rgba(124,58,237,.35)"/></div>
+        <div class="fr" style="margin-bottom:0"><label style="color:var(--violet-l)">11 Peso</label><input type="text" id="gl-fweight-${id}" value="${data.fweight || data.weight || ''}" style="border-color:rgba(124,58,237,.35)"/></div>
+        <div class="fr" style="margin-bottom:0"><label style="color:var(--violet-l)">12 Volumen</label><input type="text" id="gl-fvolume-${id}" value="${data.fvolume || data.volume || ''}" style="border-color:rgba(124,58,237,.35)"/></div>
+      </div>
+      <div class="fr" style="margin-bottom:0"><label style="color:var(--violet-l)">10 N. Estadístico</label><input type="text" id="gl-fstat-${id}" value="${data.fstat || data.stat || ''}" style="border-color:rgba(124,58,237,.35)"/></div>
     </div>`;
     container.appendChild(div); updateTotals();
 };
@@ -1147,8 +1155,13 @@ window.collectGoodsLines = function() {
         if (isFree) {
             lines.push({
                 freeMode: true,
-                freeText: (document.getElementById('gl-freetext-' + id) || {}).value?.trim() || '',
-                // campos estándar vacíos para compatibilidad PDF
+                fmarks:   (document.getElementById('gl-fmarks-'   + id) || {}).value?.trim() || '',
+                fdesc:    (document.getElementById('gl-fdesc-'    + id) || {}).value?.trim() || '',
+                fqty:     (document.getElementById('gl-fqty-'     + id) || {}).value?.trim() || '',
+                fpacking: (document.getElementById('gl-fpacking-' + id) || {}).value?.trim() || '',
+                fweight:  (document.getElementById('gl-fweight-'  + id) || {}).value?.trim() || '',
+                fvolume:  (document.getElementById('gl-fvolume-'  + id) || {}).value?.trim() || '',
+                fstat:    (document.getElementById('gl-fstat-'    + id) || {}).value?.trim() || '',
                 qty: '', weight: '', desc: '', marks: '', packing: '', volume: '', stat: ''
             });
         } else {
@@ -1799,7 +1812,7 @@ window._discardDraft = function() { closeBS(); clearDraft(); toast('Borrador des
 // ── App init ──────────────────────────────────────────────────
 window._appInit = async function() {
     initSig(); loadDefaults();
-    if (!document.querySelector('[id^="gl-"]') || (!document.querySelector('[id^="gl-desc-"]') && !document.querySelector('[id^="gl-freetext-"]'))) addGoodsLine();
+    if (!document.querySelector('[id^="gl-"]') || (!document.querySelector('[id^="gl-desc-"]') && !document.querySelector('[id^="gl-fdesc-"]'))) addGoodsLine();
     window.renderHist       = renderHist;
     window.renderTemplates  = renderTemplates;
     window.renderAgenda     = renderAgenda;
@@ -1904,8 +1917,9 @@ async function generateCMR(){
     const hasGoods = (() => {
         const descs = document.querySelectorAll('[id^="gl-desc-"]');
         for (const el of descs) { if ((el.value||'').trim()) return true; }
-        const frees = document.querySelectorAll('[id^="gl-freetext-"]');
-        for (const el of frees) { if ((el.value||'').trim()) return true; }
+        // modo libre: cualquier campo libre con contenido
+        const freeFields = document.querySelectorAll('[id^="gl-fdesc-"],[id^="gl-fmarks-"],[id^="gl-fqty-"]');
+        for (const el of freeFields) { if ((el.value||'').trim()) return true; }
         return false;
     })();
 
@@ -2073,8 +2087,13 @@ function buildPDF(D,safetyTimer){
         allRows.forEach(l => {
             if (l.freeMode && l.freeText) {
                 goodsBody.push([
-                    {text:l.freeText,fontSize:8,color:'#111',margin:[4,6,4,6],fillColor:'#fff',colSpan:7,border:[true,false,true,false]},
-                    {},{},{},{},{},{}
+                    {text:l.fmarks||'',fontSize:7.5,color:l.fmarks?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff'},
+                    {text:l.fqty||' ',fontSize:7.5,color:l.fqty?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff',alignment:'center'},
+                    {text:l.fpacking||' ',fontSize:7.5,color:l.fpacking?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff'},
+                    {text:l.fdesc||' ',fontSize:7.5,bold:!!l.fdesc,color:l.fdesc?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff'},
+                    {text:l.fstat||' ',fontSize:7.5,color:l.fstat?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff',alignment:'center'},
+                    {text:l.fweight||' ',fontSize:7.5,color:l.fweight?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff',alignment:'center'},
+                    {text:l.fvolume||' ',fontSize:7.5,color:l.fvolume?'#111':'#fff',margin:[2,3,2,3],fillColor:'#fff',alignment:'center'}
                 ]);
             } else {
                 goodsBody.push([
@@ -2356,10 +2375,15 @@ function buildPDF_Classic(D, safetyTimer){
             gh('12 Volumen m3','center'),
         ];
         const gDataRows = rows8.map(l=>{
-            if (l.freeMode && l.freeText) {
+            if (l.freeMode) {
                 return [
-                    {text:l.freeText,fontSize:8,color:'#000',fillColor:WH,margin:[4,4,4,4],border:[true,false,true,false],colSpan:7},
-                    {},{},{},{},{},{}
+                    gd(l.fmarks),
+                    gd(l.fqty,'center'),
+                    gd(l.fpacking),
+                    gd(l.fdesc,'left',!!l.fdesc),
+                    gd(l.fstat,'center'),
+                    gd(l.fweight?l.fweight:'','center'),
+                    gd(l.fvolume?String(l.fvolume):'','center'),
                 ];
             }
             return [
@@ -2613,8 +2637,8 @@ function buildPDF_IncoDocs(D, safetyTimer){
         const gh=t=>({text:t,fontSize:6.5,bold:true,color:'#4a3828',fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:'center'});
         const gd=(t,a,b)=>({text:t||'',fontSize:7.5,bold:!!b,color:BLK,fillColor:WH,margin:[3,3,3,3],border:[true,true,true,true],alignment:a||'left'});
         const gt=(t,a,b)=>({text:t||'',fontSize:7.5,bold:!!b,color:BLK,fillColor:LBL,margin:[3,2,3,2],border:[true,true,true,true],alignment:a||'left'});
-        const gRows=allRows.map(l=>l.freeMode&&l.freeText
-            ?[{text:l.freeText,fontSize:7.5,color:BLK,fillColor:WH,margin:[3,3,3,3],border:[true,true,true,true],colSpan:7},...Array(6).fill({})]
+        const gRows=allRows.map(l=>l.freeMode
+            ?[gd(l.fmarks),gd(l.fqty,'center'),gd(l.fpacking),gd(l.fdesc,'left',!!l.fdesc),gd(l.fstat,'center'),gd(l.fweight||'','center'),gd(l.fvolume||'','center')]
             :[gd(l.marks),gd(l.qty,'center'),gd(l.packing),gd(l.desc,'left',!!l.desc),gd(l.stat,'center'),gd(l.weight?(l.weight+' kg'):'','center'),gd(l.volume?String(l.volume):'','center')]);
         const gTot=[{text:'TOTALES',fontSize:7.5,bold:true,color:BLK,fillColor:LBL,margin:[4,3,4,3],border:[true,true,true,true],alignment:'right',colSpan:5},{},{},{},{},gt(totalW?totalW.toFixed(2)+' kg':'','center',true),gt(totalV?totalV.toFixed(2):'','center',true)];
         const gTableBody=[[gh('6 Marcas'),gh('7 Bultos'),gh('8 Embalaje'),gh('9 Mercancía'),gh('10 N.Est.'),gh('11 Peso kg'),gh('12 Vol m³')],...gRows,gTot];
