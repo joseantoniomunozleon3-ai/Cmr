@@ -1509,7 +1509,7 @@ window.regenPDF = async function(id) {
     const chosenLayout = await _askPDFLayout(); if (!chosenLayout) return;
     const data = { ...r, _pdfLayout: chosenLayout };
     showOv(true); const st = setTimeout(() => { showOv(false); toast('⚠ Tiempo agotado', 'err', 5000); }, 60000);
-    try { buildPDF_dispatch(data, st); } catch (e) { clearTimeout(st); showOv(false); toast('⚠ Error: ' + e.message, 'err', 5000); }
+    try { buildPDF_withSello(data, st); } catch (e) { clearTimeout(st); showOv(false); toast('⚠ Error: ' + e.message, 'err', 5000); }
 };
 window.delRec  = id => { showBS('Eliminar Documento', 'Este registro se eliminará permanentemente.', [{ label: 'Cancelar', cls: 'cancel', fn: closeBS }, { label: 'Eliminar', cls: 'danger', fn: () => _delOk(id) }]); };
 window._delOk  = async id => { closeBS(); await dbDel(STORE, id); await renderHist(); await updateHistBadge(); toast('Eliminado', 'warn'); };
@@ -2022,28 +2022,33 @@ async function generateCMR(){
     }
     showOv(true);
     const safetyTimer=setTimeout(()=>{showOv(false);toast('⚠ Tiempo agotado','err',5000)},60000);
-    // Combinar firma y sello en una sola imagen antes de generar PDF
-    const hasSig   = data.sigSender && data.sigSender.startsWith('data:image');
-    const hasSello = data.selloDataURL && data.selloDataURL.startsWith('data:image');
-    if (hasSello) {
-        data.sigSender = await mergeSignatureAndSello(hasSig ? data.sigSender : null, data.selloDataURL, 220, 140);
-        data.selloDataURL = null; // ya está fusionado, no usar por separado
-    }
-    try{buildPDF_dispatch(data,safetyTimer);}catch(err){clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+err.message,'err',6000);}
+    try{buildPDF_withSello(data,safetyTimer);}catch(err){clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+err.message,'err',6000);}
 }
 
 function fmtD(iso){if(!iso)return'—';try{return new Date(iso).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})}catch{return iso}}
-// Combina firma + sello en un único dataURL para evitar expansión de celda en pdfmake
+// Combina firma + sello en un único dataURL manteniendo proporciones del sello
 function mergeSignatureAndSello(sigDataURL, selloDataURL, w, h) {
     return new Promise(resolve => {
+        const CW = w * 2, CH = h * 2;
         const canvas = document.createElement('canvas');
-        canvas.width = w * 2; canvas.height = h * 2;
+        canvas.width = CW; canvas.height = CH;
         const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, CW, CH);
         const loadImg = src => new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
-        Promise.all([sigDataURL ? loadImg(sigDataURL) : Promise.resolve(null), selloDataURL ? loadImg(selloDataURL) : Promise.resolve(null)]).then(([sig, sello]) => {
-            if (sig) { ctx.globalAlpha = 1; ctx.drawImage(sig, 0, 0, canvas.width, canvas.height); }
-            if (sello) { ctx.globalAlpha = 0.42; const sw = canvas.width * 0.8, sh = canvas.height * 0.8; ctx.drawImage(sello, (canvas.width - sw) / 2, (canvas.height - sh) / 2, sw, sh); }
+        Promise.all([
+            sigDataURL  ? loadImg(sigDataURL)  : Promise.resolve(null),
+            selloDataURL? loadImg(selloDataURL): Promise.resolve(null)
+        ]).then(([sig, sello]) => {
+            // Dibujar firma a tamaño completo
+            if (sig) { ctx.globalAlpha = 1; ctx.drawImage(sig, 0, 0, CW, CH); }
+            // Dibujar sello manteniendo proporciones (cuadrado centrado) con opacidad
+            if (sello) {
+                ctx.globalAlpha = 0.45;
+                const side = Math.min(CW, CH) * 0.85; // sello ocupa 85% del lado menor
+                const sx = (CW - side) / 2;
+                const sy = (CH - side) / 2;
+                ctx.drawImage(sello, sx, sy, side, side);
+            }
             resolve(canvas.toDataURL('image/png'));
         });
     });
@@ -2260,6 +2265,18 @@ function buildPDF_dispatch(D, safetyTimer){
     if(D._pdfLayout === 'classic')       buildPDF_Classic(D, safetyTimer);
     else if(D._pdfLayout === 'incodocs') buildPDF_IncoDocs(D, safetyTimer);
     else                                 buildPDF(D, safetyTimer);
+}
+
+// Wrapper que siempre fusiona sello antes de llamar buildPDF_dispatch
+async function buildPDF_withSello(D, safetyTimer) {
+    const hasSig   = D.sigSender   && D.sigSender.startsWith('data:image');
+    const hasSello = (D.selloDataURL || window.selloDataURL || '').startsWith('data:image');
+    if (!D.selloDataURL && window.selloDataURL) D.selloDataURL = window.selloDataURL;
+    if (hasSello) {
+        D.sigSender    = await mergeSignatureAndSello(hasSig ? D.sigSender : null, D.selloDataURL, 220, 140);
+        D.selloDataURL = null;
+    }
+    buildPDF_dispatch(D, safetyTimer);
 }
 
 // ---- Classic CMR layout — replica del modelo oficial ----
