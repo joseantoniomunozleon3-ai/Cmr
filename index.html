@@ -42,6 +42,7 @@
             if (sp) sp.style.display = 'none';
         }
     </script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"
             onload="_tryLoadFonts()"
             onerror="showLoadErr('Error cargando pdfmake. Comprueba tu conexión a Internet.')"></script>
@@ -1072,10 +1073,36 @@ window.loadSello = function(e) {
     const f = e.target.files[0]; if (!f) return;
     const r = new FileReader();
     r.onload = ev => {
-        window.selloDataURL = ev.target.result;
-        localStorage.setItem('cmr_sello', window.selloDataURL);
-        showSelloPreview(window.selloDataURL);
-        toast('✓ Sello cargado', 'ok');
+        const img = new Image();
+        img.onload = () => {
+            // Procesar: fondo transparente + tinta azul
+            const sz = Math.max(img.naturalWidth, img.naturalHeight);
+            const c = document.createElement('canvas');
+            c.width = sz; c.height = sz;
+            const ctx = c.getContext('2d');
+            // Centrar imagen en canvas cuadrado
+            const ox = (sz - img.naturalWidth)  / 2;
+            const oy = (sz - img.naturalHeight) / 2;
+            ctx.drawImage(img, ox, oy);
+            const d = ctx.getImageData(0, 0, sz, sz);
+            for (let i = 0; i < d.data.length; i += 4) {
+                const lum = 0.299*d.data[i] + 0.587*d.data[i+1] + 0.114*d.data[i+2];
+                if (lum < 200) {
+                    d.data[i]   = 30;
+                    d.data[i+1] = 60;
+                    d.data[i+2] = 160;
+                    d.data[i+3] = Math.round((1 - lum/200) * 220);
+                } else {
+                    d.data[i+3] = 0;
+                }
+            }
+            ctx.putImageData(d, 0, 0);
+            window.selloDataURL = c.toDataURL('image/png');
+            localStorage.setItem('cmr_sello', window.selloDataURL);
+            showSelloPreview(window.selloDataURL);
+            toast('✓ Sello cargado', 'ok');
+        };
+        img.src = ev.target.result;
     };
     r.readAsDataURL(f);
 };
@@ -2228,13 +2255,12 @@ function buildPDF(D,safetyTimer){
         const sigHdr23={table:{widths:['*'],body:[[{text:[{text:'23 ',bold:true},{text:'Firma Transportista'}],fontSize:6.5,color:'#000',fillColor:'#e8e8e8',margin:[3,3,3,3]}]]},layout:'noBorders'};
         const sigHdr24={table:{widths:['*'],body:[[{text:[{text:'24 ',bold:true},{text:'Firma Consignatario'}],fontSize:6.5,color:'#000',fillColor:'#e8e8e8',margin:[3,3,3,3]}]]},layout:'noBorders'};
         const sigSenderCell=()=>{
-            const hasSig=D.sigSender&&D.sigSender.startsWith('data:image');
+            const hasSig  = D.sigSender   && D.sigSender.startsWith('data:image');
+            const hasSello= D.selloDataURL && D.selloDataURL.startsWith('data:image');
             const stack=[sigHdr22];
-            if(hasSig){
-                stack.push({image:D.sigSender,width:130,height:72,alignment:'center',margin:[0,2,0,0]});
-            } else {
-                stack.push({text:'',margin:[0,50,0,0]});
-            }
+            if(hasSig)   stack.push({image:D.sigSender,   width:130,height:72, alignment:'center',margin:[0,2,0,0]});
+            if(hasSello) stack.push({image:D.selloDataURL,width:120,height:120,alignment:'center',margin:hasSig?[-130,-60,0,0]:[0,4,0,0]});
+            if(!hasSig&&!hasSello) stack.push({text:'',margin:[0,50,0,0]});
             stack.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,2,0,2]});
             return {stack,border:[true,true,true,true],fillColor:'#fff'};
         };
@@ -2250,7 +2276,6 @@ function buildPDF(D,safetyTimer){
         if(ci<copies.length-1) content.push({text:'',pageBreak:'after'});
     });
     try{
-        if(D.selloDataURL&&D.selloDataURL.startsWith('data:image')){content.push({image:D.selloDataURL,width:130,height:130,absolutePosition:{x:22,y:694}});}
         pdfMake.createPdf({pageSize:'A4',pageMargins:[18,8,18,6],compress:false,content,defaultStyle:{font:'Roboto',fontSize:10,color:'#111'},info:{title:(isNacional?'Carta Porte Nacional ':'CMR ')+num,author:'CMR Manager Pro',subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
             clearTimeout(safetyTimer);showOv(false);
             const fname=(isNacional?'CARTA_PORTE_NAC_':'CMR_')+num.replace(/[^a-z0-9]/gi,'_')+'.pdf';
@@ -2300,7 +2325,37 @@ function buildPDF_dispatch(D, safetyTimer){
 }
 
 // Wrapper que inyecta selloDataURL y llama buildPDF_dispatch
-async function buildPDF_withSello(D, safetyTimer) {
+async // Estampa el sello sobre el PDF ya generado usando pdf-lib
+async function stampSelloOnPDF(pdfBlob, selloDataURL) {
+    if (!selloDataURL || !selloDataURL.startsWith('data:image')) return pdfBlob;
+    try {
+        const { PDFDocument } = PDFLib;
+        const pdfBytes  = await pdfBlob.arrayBuffer();
+        const pdfDoc    = await PDFDocument.load(pdfBytes);
+        const page      = pdfDoc.getPages()[0]; // solo página 1
+        const { width, height } = page.getSize(); // A4: ~595 x 842
+
+        // Convertir sello dataURL a bytes
+        const b64 = selloDataURL.split(',')[1];
+        const imgBytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        const isJpeg = selloDataURL.startsWith('data:image/jpeg') || selloDataURL.startsWith('data:image/jpg');
+        const selloImg = isJpeg ? await pdfDoc.embedJpg(imgBytes) : await pdfDoc.embedPng(imgBytes);
+
+        const size = 130; // tamaño en pt
+        const x = 20;                // desde borde izquierdo
+        const y = height - 842 + 50; // desde abajo — ajustado para A4
+
+        page.drawImage(selloImg, { x, y, width: size, height: size, opacity: 0.55 });
+
+        const finalBytes = await pdfDoc.save();
+        return new Blob([finalBytes], { type: 'application/pdf' });
+    } catch(e) {
+        console.warn('stampSello error:', e);
+        return pdfBlob; // devolver original si falla
+    }
+}
+
+function buildPDF_withSello(D, safetyTimer) {
     if (!D.selloDataURL && window.selloDataURL) D.selloDataURL = window.selloDataURL;
     buildPDF_dispatch(D, safetyTimer);
 }
@@ -2583,11 +2638,11 @@ function buildPDF_Classic(D, safetyTimer){
             {text:'22',fontSize:6.5,color:LC,margin:[4,4,4,3]},
             {text:'Firma y sello del remitente',fontSize:6,color:'#aaa',margin:[4,0,4,5]},
         ];
-        if(D.sigSender&&D.sigSender.startsWith('data:image')){
-            sigSndStack.push({image:D.sigSender,width:155,height:99,alignment:'center',margin:[0,2,0,2]});
-        } else {
-            sigSndStack.push({text:'',margin:[0,30,0,0]});
-        }
+        const _hSig=D.sigSender&&D.sigSender.startsWith('data:image');
+        const _hSel=D.selloDataURL&&D.selloDataURL.startsWith('data:image');
+        if(_hSig)   sigSndStack.push({image:D.sigSender,   width:130,height:72, alignment:'center',margin:[0,2,0,0]});
+        if(_hSel)   sigSndStack.push({image:D.selloDataURL,width:120,height:120,alignment:'center',margin:_hSig?[-130,-60,0,0]:[0,4,0,0]});
+        if(!_hSig&&!_hSel) sigSndStack.push({text:'',margin:[0,30,0,0]});
         sigSndStack.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,0,0,2]});
         const sigDrvStack = [
             {text:'23',fontSize:6.5,color:LC,margin:[4,4,4,3]},
@@ -2629,7 +2684,6 @@ function buildPDF_Classic(D, safetyTimer){
     });
 
     try{
-        if(D.selloDataURL&&D.selloDataURL.startsWith('data:image')){allContent.push({image:D.selloDataURL,width:130,height:130,absolutePosition:{x:22,y:694}});}
         pdfMake.createPdf({
             pageSize:'A4', pageMargins:[20,16,20,8], compress:false,
             content:allContent,
@@ -2767,11 +2821,11 @@ function buildPDF_IncoDocs(D, safetyTimer){
                 {table:{widths:['33%','34%','33%'],body:[[
                     (()=>{
                         const st=[{text:'22  Remitente / Sender',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,4]}];
-                        if(D.sigSender&&D.sigSender.startsWith('data:image')){
-                            st.push({image:D.sigSender,width:155,height:99,alignment:'center',margin:[0,2,0,2]});
-                        } else {
-                            st.push({text:'',margin:[4,sigH-32,4,0]});
-                        }
+                        const _iSig=D.sigSender&&D.sigSender.startsWith('data:image');
+                        const _iSel=D.selloDataURL&&D.selloDataURL.startsWith('data:image');
+                        if(_iSig)   st.push({image:D.sigSender,   width:130,height:72, alignment:'center',margin:[0,2,0,0]});
+                        if(_iSel)   st.push({image:D.selloDataURL,width:120,height:120,alignment:'center',margin:_iSig?[-130,-60,0,0]:[0,4,0,0]});
+                        if(!_iSig&&!_iSel) st.push({text:'',margin:[4,sigH-32,4,0]});
                         st.push({text:(D.senderBlock||'').split('\n')[0]||'',fontSize:6.5,alignment:'center',color:'#888',margin:[0,2,0,2]});
                         return{stack:st,fillColor:WH,border:[true,true,true,true],minHeight:sigH};
                     })(),
@@ -2797,7 +2851,6 @@ function buildPDF_IncoDocs(D, safetyTimer){
     });
 
     try{
-        if(D.selloDataURL&&D.selloDataURL.startsWith('data:image')){allContent.push({image:D.selloDataURL,width:130,height:130,absolutePosition:{x:22,y:694}});}
         pdfMake.createPdf({
             pageSize:'A4',pageMargins:[16,10,16,8],compress:false,content:allContent,
             defaultStyle:{font:'Roboto',fontSize:9,color:BLK},
