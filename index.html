@@ -2231,7 +2231,7 @@ function buildPDF(D,safetyTimer){
             const hasSig=D.sigSender&&D.sigSender.startsWith('data:image');
             const stack=[sigHdr22];
             if(hasSig){
-                stack.push({image:D.sigSender,width:110,height:70,alignment:'center',margin:[0,4,0,0]});
+                stack.push({image:D.sigSender,width:155,height:99,alignment:'center',margin:[0,2,0,0]});
             } else {
                 stack.push({text:'',margin:[0,50,0,0]});
             }
@@ -2304,7 +2304,7 @@ async function buildPDF_withSello(D, safetyTimer) {
     const hasSello = (D.selloDataURL || window.selloDataURL || '').startsWith('data:image');
     if (!D.selloDataURL && window.selloDataURL) D.selloDataURL = window.selloDataURL;
     if (hasSello) {
-        D.sigSender    = await mergeSignatureAndSello(hasSig ? D.sigSender : null, D.selloDataURL, 220, 140);
+        D.sigSender    = await mergeSignatureAndSello(hasSig ? D.sigSender : null, D.selloDataURL, 310, 198);
         D.selloDataURL = null;
     }
     buildPDF_dispatch(D, safetyTimer);
@@ -2589,7 +2589,7 @@ function buildPDF_Classic(D, safetyTimer){
             {text:'Firma y sello del remitente',fontSize:6,color:'#aaa',margin:[4,0,4,5]},
         ];
         if(D.sigSender&&D.sigSender.startsWith('data:image')){
-            sigSndStack.push({image:D.sigSender,width:120,height:65,alignment:'center',margin:[0,4,0,4]});
+            sigSndStack.push({image:D.sigSender,width:155,height:99,alignment:'center',margin:[0,2,0,2]});
         } else {
             sigSndStack.push({text:'',margin:[0,30,0,0]});
         }
@@ -2772,7 +2772,7 @@ function buildPDF_IncoDocs(D, safetyTimer){
                     (()=>{
                         const st=[{text:'22  Remitente / Sender',fontSize:7,bold:true,color:cp.color,margin:[4,4,4,2]},{text:'Firma y sello',fontSize:6,color:'#b0a090',margin:[4,0,4,4]}];
                         if(D.sigSender&&D.sigSender.startsWith('data:image')){
-                            st.push({image:D.sigSender,width:120,height:55,alignment:'center',margin:[0,4,0,4]});
+                            st.push({image:D.sigSender,width:155,height:99,alignment:'center',margin:[0,2,0,2]});
                         } else {
                             st.push({text:'',margin:[4,sigH-32,4,0]});
                         }
