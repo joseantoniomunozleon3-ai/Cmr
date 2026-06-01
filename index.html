@@ -890,6 +890,7 @@ const FIELDS = ['docNum','docDate','placeEmission','docsAnexos','senderBlock','r
 window.collect = function() {
     const d = { savedAt: new Date().toISOString() };
     FIELDS.forEach(f => { d[f] = gv(f); });
+    d.templateName = window._activeTemplateName || '';
     d['plateTractor'] = (d['plateTractor'] || '').toUpperCase();
     d['plateTrailer'] = (d['plateTrailer'] || '').toUpperCase();
     d.goodsLines = collectGoodsLines();
@@ -1130,6 +1131,7 @@ window.newCMR = window.doNewCMR = function() {
     clearSig(); clearSigSender();
     sv('docNum', genDocNum());
     sv('docDate', new Date().toISOString().split('T')[0]);
+    window._activeTemplateName = '';
     clearDraft(); tab('form'); toast('✓ Formulario limpio', 'ok');
 };
 
@@ -1327,12 +1329,22 @@ window.saveRcvToAgenda = async function() {
 
 window.saveDrvToAgenda = async function() {
     const name = gv('driverName'); if (!name) { toast('Rellena el conductor primero', 'err'); return; }
-    await dbAdd(AG, { type: 'drv', name, tractor: gvUp('plateTractor'), trailer: gvUp('plateTrailer'), savedAt: new Date().toISOString() });
-    toast('✓ Conductor guardado', 'ok'); renderDrvQF();
+    const dni = gv('driverDNI');
+    if (dni) {
+        const all = await dbAll(AG);
+        const existing = all.find(x => x.type === 'drv' && (x.dni || '').toUpperCase() === dni.toUpperCase());
+        if (existing) {
+            await dbDel(AG, existing.id);
+            await dbAdd(AG, { type: 'drv', name, dni: dni.toUpperCase(), tractor: gvUp('plateTractor'), trailer: gvUp('plateTrailer'), savedAt: new Date().toISOString() });
+            toast('\u2713 Conductor actualizado', 'ok'); renderDrvQF(); renderAgenda(); return;
+        }
+    }
+    await dbAdd(AG, { type: 'drv', name, dni: dni ? dni.toUpperCase() : '', tractor: gvUp('plateTractor'), trailer: gvUp('plateTrailer'), savedAt: new Date().toISOString() });
+    toast('\u2713 Conductor guardado', 'ok'); renderDrvQF(); renderAgenda();
 };
 
 window.fillRcv = async id => { const all = await dbAll(AG); const r = all.find(x => x.id == id); if (!r) return; sv('rcvBlock', r.block); tab('form'); toast('✓ Consignatario cargado', 'ok'); };
-window.fillDrv = async id => { const all = await dbAll(AG); const d = all.find(x => x.id == id); if (!d) return; sv('driverName', d.name); sv('plateTractor', d.tractor); sv('plateTrailer', d.trailer); tab('form'); toast('✓ Conductor cargado', 'ok'); };
+window.fillDrv = async id => { const all = await dbAll(AG); const d = all.find(x => x.id == id); if (!d) return; sv('driverName', d.name); sv('driverDNI', d.dni || ''); sv('plateTractor', d.tractor || ''); sv('plateTrailer', d.trailer || ''); tab('form'); toast('✓ Conductor cargado', 'ok'); };
 window.fillCar = async id => { const all = await dbAll(AG); const c = all.find(x => x.id == id); if (!c) return; sv('carrierBlock', c.block); tab('form'); renderCarQF(); toast('✓ Transportista cargado', 'ok'); };
 
 window.saveCarToAgenda = async function() {
@@ -1365,21 +1377,23 @@ window.editRcv = async function(id) {
 
 window.editDrv = async function(id) {
     const all = await dbAll(AG); const d = all.find(x => x.id == id); if (!d) return;
-    const iName = '_editDrvName', iTrac = '_editDrvTrac', iTrail = '_editDrvTrail';
+    const iName = '_editDrvName', iDNI = '_editDrvDNI', iTrac = '_editDrvTrac', iTrail = '_editDrvTrail';
     const s = 'width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid rgba(100,130,255,.4);border-radius:8px;font-size:.9rem;background:rgba(255,255,255,.07);color:inherit;outline:none;margin-bottom:8px';
     const l = 'display:block;margin-bottom:4px;font-size:.78rem;color:#aaa';
     showBS('Editar conductor',
         `<label style="${l}">Nombre:</label><input id="${iName}" type="text" value="${(d.name || '').replace(/"/g, '&quot;')}" style="${s}"/>
+         <label style="${l}">DNI Conductor:</label><input id="${iDNI}" type="text" value="${(d.dni || '').replace(/"/g, '&quot;')}" style="${s}" placeholder="12345678X"/>
          <label style="${l}">Matrícula tractora:</label><input id="${iTrac}" type="text" value="${(d.tractor || '').replace(/"/g, '&quot;')}" style="${s}"/>
          <label style="${l}">Matrícula semirremolque:</label><input id="${iTrail}" type="text" value="${(d.trailer || '').replace(/"/g, '&quot;')}" style="${s.replace('margin-bottom:8px', '')}"/>`,
         [
             { label: 'Cancelar', cls: 'cancel', fn: closeBS },
             { label: 'Guardar', cls: 'ok', fn: async () => {
                 const name    = (document.getElementById(iName)  || { value: '' }).value.trim();
+                const dni     = ((document.getElementById(iDNI)   || { value: '' }).value || '').toUpperCase().trim();
                 const tractor = ((document.getElementById(iTrac)  || { value: '' }).value || '').toUpperCase().trim();
                 const trailer = ((document.getElementById(iTrail) || { value: '' }).value || '').toUpperCase().trim();
                 if (!name) { toast('El nombre es obligatorio', 'err', 3000); return; }
-                await dbDel(AG, id); await dbAdd(AG, { type: 'drv', name, tractor, trailer, savedAt: new Date().toISOString() });
+                await dbDel(AG, id); await dbAdd(AG, { type: 'drv', name, dni, tractor, trailer, savedAt: new Date().toISOString() });
                 closeBS(); renderAgenda(); renderDrvQF(); toast('✓ Conductor actualizado', 'ok');
             }}
         ]
@@ -1416,7 +1430,7 @@ window.renderAgenda = async function() {
     const drvEl = document.getElementById('agDrvList');
     if (!drvs.length) { drvEl.innerHTML = '<div class="hist-empty" style="padding:20px 0">Sin conductores</div>'; }
     else {
-        drvEl.innerHTML = drvs.map(d => `<div class="ag-item" data-id="${d.id}" data-act="drv"><div class="ag-ico drv">${d.name.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase()}</div><div class="ag-info"><div class="ag-name">${d.name}</div><div class="ag-sub">${[d.tractor, d.trailer].filter(Boolean).join(' · ')}</div></div><div class="hacts"><div class="hb" data-id="${d.id}" data-act="loaddrv" title="Cargar en formulario">${loadIco}</div><div class="hb" data-id="${d.id}" data-act="editdrv" title="Editar">${editIco}</div><div class="hb de" data-id="${d.id}" data-act="deldrv" title="Eliminar">${xi}</div></div></div>`).join('');
+        drvEl.innerHTML = drvs.map(d => `<div class="ag-item" data-id="${d.id}" data-act="drv"><div class="ag-ico drv">${d.name.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase()}</div><div class="ag-info"><div class="ag-name">${d.name}</div><div class="ag-sub">${[d.dni ? ('DNI: ' + d.dni) : null, d.tractor, d.trailer].filter(Boolean).join(' · ')}</div></div><div class="hacts"><div class="hb" data-id="${d.id}" data-act="loaddrv" title="Cargar en formulario">${loadIco}</div><div class="hb" data-id="${d.id}" data-act="editdrv" title="Editar">${editIco}</div><div class="hb de" data-id="${d.id}" data-act="deldrv" title="Eliminar">${xi}</div></div></div>`).join('');
         drvEl.querySelectorAll('[data-act="drv"]').forEach(el => el.addEventListener('click', e => {
             if (e.target.closest('[data-act="loaddrv"]') || e.target.closest('[data-act="editdrv"]') || e.target.closest('[data-act="deldrv"]')) return;
             fillDrv(el.dataset.id);
@@ -1499,13 +1513,14 @@ window.renderHist = async function() {
     let data = all.filter(r => {
         if (filt === 'month') { const d = new Date(r.savedAt); if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return false; }
         if (filt === 'week')  { const d = new Date(r.savedAt); if ((now - d) / 864e5 > 7) return false; }
-        if (q) return (r.docNum + r.rcvBlock + r.placeDelivery).toLowerCase().includes(q);
+        if (q) return (r.docNum + r.rcvBlock + r.placeDelivery + (r.templateName || '')).toLowerCase().includes(q);
         return true;
     });
     const el = document.getElementById('histList');
     const makeItem = (r, style = '') => {
         const dt = r.savedAt ? new Date(r.savedAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—';
-        return `<div class="hitem" data-id="${r.id}" ${style}><div class="hico">📄</div><div class="hinfo"><div class="hnum">${r.docNum || 'Sin N.º'} ${r.tipoDoc === 'nacional' ? '<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>' : ''} ${r.goodsWeight ? `<span class="hwbadge">${r.goodsWeight}kg</span>` : ''}</div><div class="hsub">${[(r.rcvBlock || '').split('\n')[0], r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" data-id="${r.id}" data-act="load">⬆</div><div class="hb du" data-id="${r.id}" data-act="dup">📋</div><div class="hb pd" data-id="${r.id}" data-act="pdf">📄</div><div class="hb de" data-id="${r.id}" data-act="del">🗑</div></div></div>`;
+        const tplLabel = r.templateName ? `<span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim);font-weight:600;margin-right:4px">${r.templateName} ·</span>` : '';
+        return `<div class="hitem" data-id="${r.id}" ${style}><div class="hico">📄</div><div class="hinfo"><div class="hnum">${tplLabel}${r.docNum || 'Sin N.º'} ${r.tipoDoc === 'nacional' ? '<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>' : ''} ${r.goodsWeight ? `<span class="hwbadge">${r.goodsWeight}kg</span>` : ''}</div><div class="hsub">${[(r.rcvBlock || '').split('\n')[0], r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" data-id="${r.id}" data-act="load">⬆</div><div class="hb du" data-id="${r.id}" data-act="dup">📋</div><div class="hb pd" data-id="${r.id}" data-act="pdf">📄</div><div class="hb de" data-id="${r.id}" data-act="del">🗑</div></div></div>`;
     };
     if (group) {
         const grouped = {};
@@ -1617,7 +1632,7 @@ window._tplRename = async function() {
     setTimeout(() => { const inp = document.getElementById(inputId); if (inp) { inp.focus(); inp.select(); } }, 80);
 };
 
-window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); tab('form'); toast('✓ Plantilla cargada', 'ok'); };
+window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); window._activeTemplateName = tpl.templateName || ''; tab('form'); toast('✓ Plantilla cargada', 'ok'); };
 window.updateTemplate = async function(id) {
     const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return;
     showBS('Actualizar plantilla', `<p>Se sobreescribirá <b>${tpl.templateName}</b> con los datos actuales del formulario.</p>`,
