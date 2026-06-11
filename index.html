@@ -2348,7 +2348,8 @@ window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.fin
 window.regenPDF = async function(id) {
     const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return;
     const chosenLayout = await _askPDFLayout(); if (!chosenLayout) return;
-    const data = { ...r, _pdfLayout: chosenLayout };
+    const extraCustoms = await _askExtraCustomsCopy(); if (extraCustoms === null) return;
+    const data = { ...r, _pdfLayout: chosenLayout, _extraCopiaAduana: extraCustoms };
     showOv(true); const st = setTimeout(() => { showOv(false); toast('⚠ Tiempo agotado', 'err', 5000); }, 60000);
     try { buildPDF_withSello(data, st); } catch (e) { clearTimeout(st); showOv(false); toast('⚠ Error: ' + e.message, 'err', 5000); }
 };
@@ -2851,10 +2852,13 @@ async function generateCMR(){
     if(!pdfMake.vfs||Object.keys(pdfMake.vfs).length===0){toast('⚠ Fuentes PDF no cargadas','err',5000);return;}
     const chosenLayout = await _askPDFLayout();
     if(!chosenLayout) return;
+    const extraCustoms = await _askExtraCustomsCopy();
+    if(extraCustoms === null) return;
     const saveToHist = await _askSaveToHist();
     if(saveToHist === null) return;
     const data=collect();
     data._pdfLayout = chosenLayout;
+    data._extraCopiaAduana = extraCustoms;
     delete data.id;
     if(saveToHist){
         try{const id=await dbAdd(STORE,data);data.id=id;await updateHistBadge();clearDraft();_advanceSeq();}catch(e){console.warn('DB save:',e);toast('⚠ Error guardando en historial: '+e.message,'err',6000);}
@@ -2942,6 +2946,7 @@ function buildPDF(D,safetyTimer){
         {lbl:'COPIA 3',sub:'TRANSPORTISTA / CARRIER', AC:'#065f46'},
         {lbl:'COPIA 4',sub:'ADMINISTRACIÓN / ADMIN', AC:'#1f2937'}
     ];
+    if(D._extraCopiaAduana) copies.push({lbl:'COPIA ADUANA',sub:'CUSTOMS / DOUANE', AC:'#92400e'});
 
     const tituloDocumento = isNacional ? 'CARTA DE PORTE NACIONAL' : 'CARTA DE PORTE INTERNACIONAL (CMR)';
     const subtituloLegal = isNacional
@@ -3117,6 +3122,21 @@ function _askPDFLayout(){
     });
 }
 
+// ---- Pregunta si añadir copia extra para Aduana ----
+function _askExtraCustomsCopy(){
+    return new Promise(resolve => {
+        const mbs = "width:100%;margin-bottom:8px;padding:13px 14px;border-radius:10px;border:1.5px solid var(--line2);background:var(--bg3);color:var(--snow);font-size:.83rem;font-weight:600;font-family:'Sora',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:flex-start;gap:12px;line-height:1.4";
+        const h = '<p style="font-size:.78rem;color:var(--dim);margin-bottom:12px">¿Añadir una copia adicional para Aduana?</p>'
+            + '<button id="_cust_si" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">🛂</span><span><b style="display:block">Sí, añadir copia para Aduana</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Se incluirá una copia extra etiquetada para Aduana</span></span></button>'
+            + '<button id="_cust_no" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">🚫</span><span><b style="display:block">No, copias estándar</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Generar el documento sin copia extra</span></span></button>';
+        showBS('Copia para Aduana', h, [{label:'Cancelar',cls:'cancel',fn:()=>{closeBS();resolve(null);}}]);
+        setTimeout(()=>{
+            const a=document.getElementById('_cust_si'); if(a) a.addEventListener('click',()=>{closeBS();resolve(true);});
+            const b=document.getElementById('_cust_no'); if(b) b.addEventListener('click',()=>{closeBS();resolve(false);});
+        },60);
+    });
+}
+
 // ---- Pregunta si guardar en historial ----
 function _askSaveToHist(){
     return new Promise(resolve => {
@@ -3190,6 +3210,7 @@ function buildPDF_Classic(D, safetyTimer){
     const copies = isNac
         ? [{lbl:'ORIGINAL',sub:'1 Remitente'},{lbl:'DUPLICADO',sub:'2 Consignatario'},{lbl:'TRIPLICADO',sub:'3 Transportista'}]
         : [{lbl:'ORIGINAL',sub:'1 Remitente'},{lbl:'DUPLICADO',sub:'2 Consignatario'},{lbl:'TRIPLICADO',sub:'3 Transportista'},{lbl:'CUADRUPLICADO',sub:'4 Transportista'}];
+    if(D._extraCopiaAduana) copies.push({lbl:'ADUANA',sub:'Customs / Douane'});
 
     // Row heights (pt) — measured directly from reference CMR PDF
     // Total ~796pt matching real CMR layout
@@ -3540,6 +3561,7 @@ function buildPDF_IncoDocs(D, safetyTimer){
     const copies = isNac
         ? [{lbl:'COPIA 1 — REMITENTE',color:'#d4614a'},{lbl:'COPIA 2 — DESTINATARIO',color:'#2db8a4'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#7c5ec8'}]
         : [{lbl:'COPIA 1 — REMITENTE',color:'#d4614a'},{lbl:'COPIA 2 — DESTINATARIO',color:'#2db8a4'},{lbl:'COPIA 3 — TRANSPORTISTA',color:'#7c5ec8'},{lbl:'COPIA 4 — ADMINISTRACIÓN',color:'#555f6e'}];
+    if(D._extraCopiaAduana) copies.push({lbl:'COPIA ADUANA — CUSTOMS',color:'#92400e'});
 
     const field = (label, value, opts) => {
         const fs = (opts && opts.fs) || 9;
