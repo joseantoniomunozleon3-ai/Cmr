@@ -2273,14 +2273,14 @@ window.renderHist = async function() {
     let data = all.filter(r => {
         if (filt === 'month') { const d = new Date(r.savedAt); if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return false; }
         if (filt === 'week')  { const d = new Date(r.savedAt); if ((now - d) / 864e5 > 7) return false; }
-        if (q) return (r.docNum + r.rcvBlock + r.placeDelivery + (r.templateName || '')).toLowerCase().includes(q);
+        if (q) return (r.docNum + r.rcvBlock + r.placeDelivery + (r.clientRef || '') + (r.templateName || '')).toLowerCase().includes(q);
         return true;
     });
     const el = document.getElementById('histList');
     const makeItem = (r, style = '') => {
         const dt = r.savedAt ? new Date(r.savedAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—';
         const tplLabel = r.templateName ? `<span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim);font-weight:600;margin-right:4px">${r.templateName} ·</span>` : '';
-        return `<div class="hitem" data-id="${r.id}" ${style}><div class="hico">📄</div><div class="hinfo"><div class="hnum">${tplLabel}${r.docNum || 'Sin N.º'} ${r.tipoDoc === 'nacional' ? '<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>' : ''} ${r.goodsWeight ? `<span class="hwbadge">${r.goodsWeight}kg</span>` : ''}</div><div class="hsub">${[(r.rcvBlock || '').split('\n')[0], r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" data-id="${r.id}" data-act="load">⬆</div><div class="hb du" data-id="${r.id}" data-act="dup">📋</div><div class="hb pd" data-id="${r.id}" data-act="pdf">📄</div><div class="hb de" data-id="${r.id}" data-act="del">🗑</div></div></div>`;
+        return `<div class="hitem" data-id="${r.id}" ${style}><div class="hico">📄</div><div class="hinfo"><div class="hnum">${tplLabel}${r.docNum || 'Sin N.º'} ${r.clientRef ? `<span class="hwbadge" style="background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25);color:#f5a623">${r.clientRef}</span>` : ''} ${r.tipoDoc === 'nacional' ? '<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>' : ''} ${r.goodsWeight ? `<span class="hwbadge">${r.goodsWeight}kg</span>` : ''}</div><div class="hsub">${[(r.rcvBlock || '').split('\n')[0], r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" data-id="${r.id}" data-act="load">⬆</div><div class="hb du" data-id="${r.id}" data-act="dup">📋</div><div class="hb pd" data-id="${r.id}" data-act="pdf">📄</div><div class="hb de" data-id="${r.id}" data-act="del">🗑</div></div></div>`;
     };
     if (group) {
         const grouped = {};
