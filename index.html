@@ -1062,7 +1062,7 @@ select {
     #panel-form .block:nth-child(11) { grid-column: 1 / span 2; grid-row: 7; }
     #panel-form > div:not(.block)    { grid-column: 1 / span 2; }
 
-    #panel-hist.active, #panel-agenda.active, #panel-tmpl.active, #panel-cfg.active {
+    #panel-hist.active, #panel-hoy.active, #panel-agenda.active, #panel-tmpl.active, #panel-cfg.active {
         max-width: 960px; margin: 0 auto; display: block;
     }
 
@@ -1150,6 +1150,7 @@ select {
 
     <div id="tabs" role="tablist" aria-label="Secciones de la aplicación">
         <div class="tab active" role="tab" tabindex="0" aria-selected="true"  aria-controls="panel-form"   data-p="form"   onclick="tab('form')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('form')">Documento</div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-hoy"    data-p="hoy"    onclick="tab('hoy')"    onkeydown="if(event.key==='Enter'||event.key===' ')tab('hoy')">Hoy <span class="tbadge" id="hoyBadge" aria-label="CMR de hoy">0</span></div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-hist"   data-p="hist"   onclick="tab('hist')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('hist')">Historial <span class="tbadge" id="histBadge" aria-label="documentos guardados">0</span></div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-agenda" data-p="agenda" onclick="tab('agenda')" onkeydown="if(event.key==='Enter'||event.key===' ')tab('agenda')">Agenda</div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-tmpl"   data-p="tmpl"   onclick="tab('tmpl')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('tmpl')">Plantillas</div>
@@ -1242,6 +1243,25 @@ select {
         <div class="block"><div class="bhead"><span class="btag r">22</span><span class="btitle">Firma del Remitente</span></div><div class="bbody"><div class="sig-box" id="sigWrapSender"><canvas id="sigCanvasSender" role="img" aria-label="Área de firma del remitente"></canvas><div class="sig-hint" id="sigHintSender">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSigSender()">✕ Borrar firma</button></div></div>
 
         <div class="block"><div class="bhead"><span class="btag g">23</span><span class="btitle">Firma del Conductor</span></div><div class="bbody"><div class="sig-box" id="sigWrap"><canvas id="sigCanvas" role="img" aria-label="Área de firma del conductor"></canvas><div class="sig-hint" id="sigHint">✎ Firma aquí</div></div><button class="sig-clr" onclick="clearSig()">✕ Borrar firma</button></div></div>
+    </div>
+
+    <!-- ── Panel: Hoy ── -->
+    <div id="panel-hoy" role="tabpanel" class="panel">
+        <!-- Resumen del día -->
+        <div class="stats" id="hoy-stats">
+            <div class="stat"><div class="stat-n" id="hoy-st0">0</div><div class="stat-l">CMR Hoy</div></div>
+            <div class="stat"><div class="stat-n" id="hoy-st1">0</div><div class="stat-l">Kg Totales</div></div>
+            <div class="stat"><div class="stat-n" id="hoy-st2">0</div><div class="stat-l">Bultos</div></div>
+            <div class="stat"><div class="stat-n" id="hoy-st3">—</div><div class="stat-l">m³ Total</div></div>
+        </div>
+        <!-- Cabecera de fecha -->
+        <div id="hoy-fecha-hdr" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(240,234,220,.4));border:1px solid rgba(255,255,255,.8);border-bottom-color:var(--line);border-right-color:var(--line);border-radius:var(--r2);box-shadow:var(--sh-float)">
+            <span class="btag b" style="font-size:.6rem;padding:3px 9px">HOY</span>
+            <span id="hoy-fecha-txt" style="font-size:.84rem;font-weight:700;color:var(--snow);flex:1"></span>
+            <button onclick="newCMR();tab('form')" style="height:30px;padding:0 12px;border-radius:7px;border:none;background:linear-gradient(180deg,#e87020,#b83812);color:#fff;font-size:.72rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;box-shadow:var(--sh-btn-primary)">+ Nuevo CMR</button>
+        </div>
+        <!-- Lista -->
+        <div id="hoyList"></div>
     </div>
 
     <!-- ── Panel: Historial ── -->
@@ -1643,6 +1663,7 @@ window.tab = function(n) {
     if (n === 'agenda') renderAgenda();
     if (n === 'tmpl')   renderTemplates();
     if (n === 'cfg')    syncCfgPanel();
+    if (n === 'hoy')    renderHoy();
 };
 
 // ── Field helpers ─────────────────────────────────────────────
@@ -2270,6 +2291,79 @@ window.updateHistBadge = async function() {
     const n = (await dbAll(STORE)).length;
     const el = document.getElementById('histBadge');
     el.textContent = n; el.style.display = n ? 'inline' : 'none';
+    // también actualiza badge Hoy
+    const today = new Date();
+    const ymd = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const all2 = await dbAll(STORE);
+    const todayN = all2.filter(r => { try { return ymd(new Date(r.savedAt)) === ymd(today); } catch { return false; } }).length;
+    const hb = document.getElementById('hoyBadge');
+    if (hb) { hb.textContent = todayN; hb.style.display = todayN ? 'inline' : 'none'; }
+};
+
+// ── Panel HOY ─────────────────────────────────────────────────
+window.renderHoy = async function() {
+    const all  = await dbAll(STORE);
+    const now  = new Date();
+    const ymd  = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const todayStr = ymd(now);
+    const data = all.filter(r => { try { return ymd(new Date(r.savedAt)) === todayStr; } catch { return false; } })
+                    .sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
+
+    // Cabecera fecha
+    const fechaEl = document.getElementById('hoy-fecha-txt');
+    if (fechaEl) fechaEl.textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Stats del día
+    const totalKg  = data.reduce((s,r) => s + (parseFloat(r.goodsWeight)  || 0), 0);
+    const totalBlt = data.reduce((s,r) => s + (parseFloat(r.goodsQty)     || 0), 0);
+    const totalVol = data.reduce((s,r) => s + (parseFloat(r.goodsVolume)  || 0), 0);
+    document.getElementById('hoy-st0').textContent = data.length;
+    document.getElementById('hoy-st1').textContent = totalKg  > 0 ? (totalKg  >= 1000 ? (totalKg/1000).toFixed(1)+'t' : Math.round(totalKg))  : '—';
+    document.getElementById('hoy-st2').textContent = totalBlt > 0 ? Math.round(totalBlt) : '—';
+    document.getElementById('hoy-st3').textContent = totalVol > 0 ? totalVol.toFixed(2) : '—';
+
+    // Badge
+    const hb = document.getElementById('hoyBadge');
+    if (hb) { hb.textContent = data.length; hb.style.display = data.length ? 'inline' : 'none'; }
+
+    // Lista
+    const el = document.getElementById('hoyList');
+    if (!el) return;
+    if (!data.length) {
+        el.innerHTML = '<div class="hist-empty">Aún no has generado ningún CMR hoy.<br>Pulsa <b>+ Nuevo CMR</b> para empezar.</div>';
+        return;
+    }
+    const makeHoyItem = (r, idx) => {
+        const hora = r.savedAt ? new Date(r.savedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '—';
+        const cliente = (r.rcvBlock || '').split('\n')[0].trim() || 'Sin consignatario';
+        const destino = r.placeDelivery || '';
+        const kg      = r.goodsWeight ? r.goodsWeight + ' kg' : '';
+        const ref     = r.clientRef || '';
+        const nacBadge = r.tipoDoc === 'nacional'
+            ? `<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>`
+            : '';
+        const numLabel = `#${data.length - idx}`;
+        return `<div class="hitem" data-id="${r.id}">
+            <div class="hico" style="font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue-l);width:36px;height:36px;border-radius:9px;background:linear-gradient(145deg,rgba(196,66,26,.12),rgba(196,66,26,.06));border:1px solid rgba(196,66,26,.25);border-bottom:2px solid rgba(196,66,26,.3);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 2px 6px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.72rem">${numLabel}</div>
+            <div class="hinfo">
+                <div class="hnum">${r.docNum || 'Sin N.º'} ${nacBadge} ${kg ? `<span class="hwbadge">${kg}</span>` : ''}</div>
+                ${ref ? `<div class="hrefbadge">🏷 ${ref}</div>` : ''}
+                <div class="hsub">${[cliente, destino].filter(Boolean).join(' → ')}</div>
+            </div>
+            <div class="hdate" style="font-size:.68rem;color:var(--blue-l);font-weight:600">${hora}</div>
+            <div class="hacts">
+                <div class="hb lo" data-id="${r.id}" data-act="load" title="Cargar">⬆</div>
+                <div class="hb du" data-id="${r.id}" data-act="dup"  title="Duplicar">📋</div>
+                <div class="hb pd" data-id="${r.id}" data-act="pdf"  title="PDF">📄</div>
+                <div class="hb de" data-id="${r.id}" data-act="del"  title="Eliminar">🗑</div>
+            </div>
+        </div>`;
+    };
+    el.innerHTML = data.map((r,i) => makeHoyItem(r,i)).join('');
+    el.querySelectorAll('[data-act="load"]').forEach(b => b.addEventListener('click', () => loadRec(b.dataset.id)));
+    el.querySelectorAll('[data-act="dup"]').forEach(b  => b.addEventListener('click', () => dupRec(b.dataset.id)));
+    el.querySelectorAll('[data-act="pdf"]').forEach(b  => b.addEventListener('click', () => regenPDF(b.dataset.id)));
+    el.querySelectorAll('[data-act="del"]').forEach(b  => b.addEventListener('click', () => delRec(b.dataset.id)));
 };
 
 window.renderHist = async function() {
@@ -2362,7 +2456,7 @@ window.regenPDF = async function(id) {
     try { buildPDF_withSello(data, st); } catch (e) { clearTimeout(st); showOv(false); toast('⚠ Error: ' + e.message, 'err', 5000); }
 };
 window.delRec  = id => { showBS('Eliminar Documento', 'Este registro se eliminará permanentemente.', [{ label: 'Cancelar', cls: 'cancel', fn: closeBS }, { label: 'Eliminar', cls: 'danger', fn: () => _delOk(id) }]); };
-window._delOk  = async id => { closeBS(); await dbDel(STORE, id); await renderHist(); await updateHistBadge(); toast('Eliminado', 'warn'); };
+window._delOk  = async id => { closeBS(); await dbDel(STORE, id); await renderHist(); if (window.renderHoy) await renderHoy(); await updateHistBadge(); toast('Eliminado', 'warn'); };
 
 // ── Plantillas ────────────────────────────────────────────────
 window.saveAsTemplate = async function() {
@@ -2711,6 +2805,7 @@ window._appInit = async function() {
     window.renderDrvQF      = renderDrvQF;
     window.renderCarQF      = renderCarQF;
     window.updateHistBadge  = updateHistBadge;
+    window.renderHoy        = renderHoy;
     await updateHistBadge(); renderRcvQF(); renderDrvQF(); renderCarQF(); renderPackingQF();
     if (window._attachAutosaveListeners) window._attachAutosaveListeners();
     await updateBackupStats();
