@@ -2336,7 +2336,8 @@ window.renderHoy = async function() {
     const makeHoyItem = (r, idx) => {
         const hora     = r.savedAt ? new Date(r.savedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '—';
         const numLabel = `#${data.length - idx}`;
-        const tplName  = r.templateName || (r.rcvBlock || '').split('\n')[0].trim() || '';
+        const tplName  = r.templateName || r.templateClient || (r.rcvBlock || '').split('\n')[0].trim() || '';
+        const isTpl    = !!(r.templateName || r.templateClient);
         const docNum   = r.docNum || 'Sin N.º';
         const ref      = r.clientRef || '';
         const kg       = r.goodsWeight ? r.goodsWeight + ' kg' : '';
@@ -2346,7 +2347,7 @@ window.renderHoy = async function() {
         return `<div class="hitem" data-id="${r.id}">
             <div class="hico" style="width:36px;height:36px;border-radius:9px;background:linear-gradient(145deg,rgba(196,66,26,.12),rgba(196,66,26,.06));border:1px solid rgba(196,66,26,.25);border-bottom:2px solid rgba(196,66,26,.3);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 2px 6px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.72rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue-l)">${numLabel}</div>
             <div class="hinfo">
-                ${tplName ? `<div style="font-size:.6rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:${r.templateName ? 'var(--blue-l)' : 'var(--dim)'};letter-spacing:.04em;margin-bottom:2px;text-transform:uppercase">${tplName}</div>` : ''}
+                ${tplName ? `<div style="font-size:.6rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:${isTpl ? 'var(--blue-l)' : 'var(--dim)'};letter-spacing:.04em;margin-bottom:2px;text-transform:uppercase">${tplName}</div>` : ''}
                 <div class="hnum" style="font-size:.82rem">${docNum} ${nacBadge} ${kg ? `<span class="hwbadge">${kg}</span>` : ''}</div>
                 ${ref ? `<div style="margin-top:3px"><span class="hrefbadge" style="font-size:.72rem;padding:2px 8px">🏷 ${ref}</span></div>` : ''}
             </div>
@@ -2445,8 +2446,8 @@ window.renderHist = async function() {
     document.getElementById('st3').textContent = monthKg > 0 ? (monthKg >= 1000 ? (monthKg / 1000).toFixed(1) + 't' : Math.round(monthKg)) : '—';
 };
 
-window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); clearSig(); clearSigSender(); tab('form'); toast('✓ Documento cargado', 'ok'); };
-window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
+window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); window._activeTemplateName = r.templateName || ''; clearSig(); clearSigSender(); tab('form'); toast('✓ Documento cargado', 'ok'); };
+window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); window._activeTemplateName = r.templateName || ''; sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
 window.regenPDF = async function(id) {
     const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return;
     const chosenLayout = await _askPDFLayout(); if (!chosenLayout) return;
@@ -2790,7 +2791,7 @@ window._clearOk = async function() { closeBS(); await dbClear(STORE); await rend
 // ── Borrador helpers (delegan a autosave.js) ──────────────────
 window._restoreDraft = function() {
     closeBS(); const draft = loadDraft(); if (!draft) return;
-    fill(draft); _lastDraftHash = null; toast('✓ Borrador restaurado', 'ok');
+    fill(draft); window._activeTemplateName = draft.templateName || ''; _lastDraftHash = null; toast('✓ Borrador restaurado', 'ok');
 };
 window._discardDraft = function() { closeBS(); clearDraft(); toast('Borrador descartado', 'warn'); };
 
