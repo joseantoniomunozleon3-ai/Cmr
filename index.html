@@ -2336,7 +2336,7 @@ window.renderHoy = async function() {
     const makeHoyItem = (r, idx) => {
         const hora     = r.savedAt ? new Date(r.savedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '—';
         const numLabel = `#${data.length - idx}`;
-        const tplName  = r.templateName || '';
+        const tplName  = r.templateName || (r.rcvBlock || '').split('\n')[0].trim() || '';
         const docNum   = r.docNum || 'Sin N.º';
         const ref      = r.clientRef || '';
         const kg       = r.goodsWeight ? r.goodsWeight + ' kg' : '';
@@ -2346,7 +2346,7 @@ window.renderHoy = async function() {
         return `<div class="hitem" data-id="${r.id}">
             <div class="hico" style="width:36px;height:36px;border-radius:9px;background:linear-gradient(145deg,rgba(196,66,26,.12),rgba(196,66,26,.06));border:1px solid rgba(196,66,26,.25);border-bottom:2px solid rgba(196,66,26,.3);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 2px 6px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.72rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue-l)">${numLabel}</div>
             <div class="hinfo">
-                ${tplName ? `<div style="font-size:.6rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue-l);letter-spacing:.04em;margin-bottom:2px;text-transform:uppercase">${tplName}</div>` : ''}
+                ${tplName ? `<div style="font-size:.6rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:${r.templateName ? 'var(--blue-l)' : 'var(--dim)'};letter-spacing:.04em;margin-bottom:2px;text-transform:uppercase">${tplName}</div>` : ''}
                 <div class="hnum" style="font-size:.82rem">${docNum} ${nacBadge} ${kg ? `<span class="hwbadge">${kg}</span>` : ''}</div>
                 ${ref ? `<div style="margin-top:3px"><span class="hrefbadge" style="font-size:.72rem;padding:2px 8px">🏷 ${ref}</span></div>` : ''}
             </div>
