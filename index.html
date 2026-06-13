@@ -2334,23 +2334,23 @@ window.renderHoy = async function() {
         return;
     }
     const makeHoyItem = (r, idx) => {
-        const hora = r.savedAt ? new Date(r.savedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '—';
-        const cliente = (r.rcvBlock || '').split('\n')[0].trim() || 'Sin consignatario';
-        const destino = r.placeDelivery || '';
-        const kg      = r.goodsWeight ? r.goodsWeight + ' kg' : '';
-        const ref     = r.clientRef || '';
+        const hora     = r.savedAt ? new Date(r.savedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '—';
+        const numLabel = `#${data.length - idx}`;
+        const tplName  = r.templateName || '';
+        const docNum   = r.docNum || 'Sin N.º';
+        const ref      = r.clientRef || '';
+        const kg       = r.goodsWeight ? r.goodsWeight + ' kg' : '';
         const nacBadge = r.tipoDoc === 'nacional'
             ? `<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>`
             : '';
-        const numLabel = `#${data.length - idx}`;
         return `<div class="hitem" data-id="${r.id}">
-            <div class="hico" style="font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue-l);width:36px;height:36px;border-radius:9px;background:linear-gradient(145deg,rgba(196,66,26,.12),rgba(196,66,26,.06));border:1px solid rgba(196,66,26,.25);border-bottom:2px solid rgba(196,66,26,.3);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 2px 6px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.72rem">${numLabel}</div>
+            <div class="hico" style="width:36px;height:36px;border-radius:9px;background:linear-gradient(145deg,rgba(196,66,26,.12),rgba(196,66,26,.06));border:1px solid rgba(196,66,26,.25);border-bottom:2px solid rgba(196,66,26,.3);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 2px 6px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.72rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue-l)">${numLabel}</div>
             <div class="hinfo">
-                <div class="hnum">${r.docNum || 'Sin N.º'} ${nacBadge} ${kg ? `<span class="hwbadge">${kg}</span>` : ''}</div>
-                ${ref ? `<div class="hrefbadge">🏷 ${ref}</div>` : ''}
-                <div class="hsub">${[cliente, destino].filter(Boolean).join(' → ')}</div>
+                ${tplName ? `<div style="font-size:.6rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue-l);letter-spacing:.04em;margin-bottom:2px;text-transform:uppercase">${tplName}</div>` : ''}
+                <div class="hnum" style="font-size:.82rem">${docNum} ${nacBadge} ${kg ? `<span class="hwbadge">${kg}</span>` : ''}</div>
+                ${ref ? `<div style="margin-top:3px"><span class="hrefbadge" style="font-size:.72rem;padding:2px 8px">🏷 ${ref}</span></div>` : ''}
             </div>
-            <div class="hdate" style="font-size:.68rem;color:var(--blue-l);font-weight:600">${hora}</div>
+            <div class="hdate" style="font-size:.68rem;color:var(--blue-l);font-weight:600;flex-shrink:0">${hora}</div>
             <div class="hacts">
                 <div class="hb lo" data-id="${r.id}" data-act="load" title="Cargar">⬆</div>
                 <div class="hb du" data-id="${r.id}" data-act="dup"  title="Duplicar">📋</div>
