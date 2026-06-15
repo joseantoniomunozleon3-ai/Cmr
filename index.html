@@ -3922,62 +3922,83 @@ const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// ── Firestore API ──
-const COL = { cmr: 'cmr_docs', plantillas: 'cmr_plantillas', agenda: 'cmr_agenda' };
+// ── Firestore API — datos bajo users/{uid}/ (aislados por usuario) ──
+const COL_KEY = { cmr: 'cmr_docs', plantillas: 'cmr_plantillas', agenda: 'cmr_agenda' };
+
+// Devuelve la colección raíz del usuario autenticado actualmente
+function _userCol(store) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error('No hay sesión activa');
+    const col = COL_KEY[store] || store;
+    return collection(db, 'users', uid, col);
+}
+function _userDoc(store, id) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error('No hay sesión activa');
+    const col = COL_KEY[store] || store;
+    return doc(db, 'users', uid, col, String(id));
+}
 
 window._fb = {
     add: async (store, rec) => {
-        const col = COL[store] || store;
         rec = { ...rec, _fbUpdated: new Date().toISOString() };
-        const ref = await addDoc(collection(db, col), rec);
+        const ref = await addDoc(_userCol(store), rec);
         return ref.id;
     },
     all: async (store) => {
-        const col = COL[store] || store;
         if (store === 'plantillas') {
-            const snap = await getDocs(collection(db, col));
+            const snap = await getDocs(_userCol(store));
             const docs = snap.docs.map(d => ({ ...d.data(), id: d.id }));
             return docs.sort((a, b) => (b.savedAt || '') > (a.savedAt || '') ? 1 : -1);
         }
-        const snap = await getDocs(query(collection(db, col), orderBy('savedAt', 'desc')));
+        const snap = await getDocs(query(_userCol(store), orderBy('savedAt', 'desc')));
         return snap.docs.map(d => ({ ...d.data(), id: d.id }));
     },
     del: async (store, id) => {
-        const col = COL[store] || store;
-        await deleteDoc(doc(db, col, String(id)));
+        await deleteDoc(_userDoc(store, id));
     },
     clear: async (store) => {
-        const col = COL[store] || store;
-        const snap = await getDocs(collection(db, col));
+        const snap = await getDocs(_userCol(store));
         const batch = writeBatch(db);
         snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
     }
 };
 
-// Realtime listeners
-onSnapshot(collection(db, 'cmr_docs'), () => {
-    if (document.querySelector('.tab[data-p="hist"]')?.classList.contains('active')) {
-        if (window.renderHist) window.renderHist();
-    }
-    if (window.updateHistBadge) window.updateHistBadge();
-});
-onSnapshot(collection(db, 'cmr_plantillas'), (snap) => {
-    if (document.querySelector('.tab[data-p="tmpl"]')?.classList.contains('active')) {
-        if (window.renderTemplates) window.renderTemplates();
-    }
-    const n = snap.docs.length;
-    if (window._lastTplCount !== undefined && n < window._lastTplCount)
-        console.warn('⚠ Plantillas reducidas de', window._lastTplCount, 'a', n);
-    window._lastTplCount = n;
-});
-onSnapshot(collection(db, 'cmr_agenda'), () => {
-    if (window.renderRcvQF) window.renderRcvQF();
-    if (window.renderDrvQF) window.renderDrvQF();
-    if (document.querySelector('.tab[data-p="agenda"]')?.classList.contains('active')) {
-        if (window.renderAgenda) window.renderAgenda();
-    }
-});
+// ── Realtime listeners — se registran cuando el usuario hace login ──
+let _unsubListeners = [];
+function _startListeners() {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    // Limpiar listeners previos (por si hace logout+login)
+    _unsubListeners.forEach(u => u());
+    _unsubListeners = [];
+
+    _unsubListeners.push(
+        onSnapshot(collection(db, 'users', uid, 'cmr_docs'), () => {
+            if (document.querySelector('.tab[data-p="hist"]')?.classList.contains('active')) {
+                if (window.renderHist) window.renderHist();
+            }
+            if (window.updateHistBadge) window.updateHistBadge();
+        }),
+        onSnapshot(collection(db, 'users', uid, 'cmr_plantillas'), (snap) => {
+            if (document.querySelector('.tab[data-p="tmpl"]')?.classList.contains('active')) {
+                if (window.renderTemplates) window.renderTemplates();
+            }
+            const n = snap.docs.length;
+            if (window._lastTplCount !== undefined && n < window._lastTplCount)
+                console.warn('⚠ Plantillas reducidas de', window._lastTplCount, 'a', n);
+            window._lastTplCount = n;
+        }),
+        onSnapshot(collection(db, 'users', uid, 'cmr_agenda'), () => {
+            if (window.renderRcvQF) window.renderRcvQF();
+            if (window.renderDrvQF) window.renderDrvQF();
+            if (document.querySelector('.tab[data-p="agenda"]')?.classList.contains('active')) {
+                if (window.renderAgenda) window.renderAgenda();
+            }
+        })
+    );
+}
 
 // ── Auth ──
 const LOCK_TTL     = 15 * 60 * 1000;
@@ -4131,9 +4152,13 @@ onAuthStateChanged(auth, user => {
     document.getElementById('load-bar').style.display = 'none';
     if (user) {
         window._firebaseUser = user;
+        _startListeners(); // arrancar listeners acotados al uid
         const locked = document.getElementById('lock-overlay').classList.contains('on');
         if (!locked) _showApp();
     } else {
+        // Limpiar listeners al cerrar sesión
+        _unsubListeners.forEach(u => u());
+        _unsubListeners = [];
         window._authOk = false; window._appInited = false; window._firebaseUser = null;
         clearTimeout(_inactivityTimer);
         _showLoginScreen();
