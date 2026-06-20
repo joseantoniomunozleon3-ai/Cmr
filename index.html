@@ -1543,9 +1543,39 @@ window.saveDraft = function () {
         _lastDraftHash = hash;
         data._draftSavedAt = new Date().toISOString();
         localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
-        showAutosaveBar('saved', 'BORRADOR GUARDADO · ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+        if (window._activeTemplateId) {
+            syncActiveTemplate(data);
+        } else {
+            showAutosaveBar('saved', 'BORRADOR GUARDADO · ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+        }
     } catch (e) {
         console.warn('Autoguardado fallido:', e);
+    }
+};
+
+// Cuando el formulario se cargó desde una plantilla, cualquier cambio
+// se vuelca automáticamente sobre esa misma plantilla (sin tocar
+// albarán/fecha/firmas, que son siempre específicos de cada documento).
+window.syncActiveTemplate = async function (data) {
+    const id = window._activeTemplateId;
+    if (!id) return;
+    try {
+        const all = await dbAll(TPL);
+        const tpl = all.find(t => t.id == id);
+        if (!tpl) { window._activeTemplateId = null; return; }
+        const upd = { ...data };
+        delete upd.docNum; delete upd.docDate; delete upd.sigDriver; delete upd.sigSender;
+        delete upd._draftSavedAt; delete upd.templateId;
+        upd.templateName   = tpl.templateName;
+        upd.templateClient = tpl.templateClient || '';
+        upd.savedAt = new Date().toISOString();
+        await dbDel(TPL, id);
+        const newId = await dbAdd(TPL, upd);
+        window._activeTemplateId = newId;
+        if (document.getElementById('panel-tmpl')?.classList.contains('active') && typeof renderTemplates === 'function') renderTemplates();
+        showAutosaveBar('saved', '✓ PLANTILLA ACTUALIZADA · ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+    } catch (e) {
+        console.warn('No se pudo sincronizar la plantilla:', e);
     }
 };
 
@@ -1680,6 +1710,7 @@ window.collect = function() {
     const d = { savedAt: new Date().toISOString() };
     FIELDS.forEach(f => { d[f] = gv(f); });
     d.templateName = window._activeTemplateName || '';
+    d.templateId   = window._activeTemplateId   || null;
     d['plateTractor'] = (d['plateTractor'] || '').toUpperCase();
     d['plateTrailer'] = (d['plateTrailer'] || '').toUpperCase();
     d.goodsLines = collectGoodsLines();
@@ -1921,6 +1952,7 @@ window.newCMR = window.doNewCMR = function() {
     sv('docNum', genDocNum());
     sv('docDate', new Date().toISOString().split('T')[0]);
     window._activeTemplateName = '';
+    window._activeTemplateId = null;
     clearDraft(); tab('form'); toast('✓ Formulario limpio', 'ok');
 };
 
@@ -2446,8 +2478,8 @@ window.renderHist = async function() {
     document.getElementById('st3').textContent = monthKg > 0 ? (monthKg >= 1000 ? (monthKg / 1000).toFixed(1) + 't' : Math.round(monthKg)) : '—';
 };
 
-window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); window._activeTemplateName = r.templateName || ''; clearSig(); clearSigSender(); tab('form'); toast('✓ Documento cargado', 'ok'); };
-window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); window._activeTemplateName = r.templateName || ''; sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
+window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; clearSig(); clearSigSender(); tab('form'); toast('✓ Documento cargado', 'ok'); };
+window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
 window.regenPDF = async function(id) {
     const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return;
     const chosenLayout = await _askPDFLayout(); if (!chosenLayout) return;
@@ -2535,7 +2567,7 @@ window._tplRename = async function() {
     setTimeout(() => { const inp = document.getElementById(inputId); if (inp) { inp.focus(); inp.select(); } }, 80);
 };
 
-window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); window._activeTemplateName = tpl.templateName || ''; tab('form'); toast('✓ Plantilla cargada', 'ok'); };
+window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); window._activeTemplateName = tpl.templateName || ''; window._activeTemplateId = tpl.id; _lastDraftHash = null; tab('form'); toast('✓ Plantilla cargada — los cambios se guardarán en ella automáticamente', 'ok', 4000); };
 window.updateTemplate = async function(id) {
     const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return;
     showBS('Actualizar plantilla', `<p>Se sobreescribirá <b>${tpl.templateName}</b> con los datos actuales del formulario.</p>`,
@@ -2791,7 +2823,7 @@ window._clearOk = async function() { closeBS(); await dbClear(STORE); await rend
 // ── Borrador helpers (delegan a autosave.js) ──────────────────
 window._restoreDraft = function() {
     closeBS(); const draft = loadDraft(); if (!draft) return;
-    fill(draft); window._activeTemplateName = draft.templateName || ''; _lastDraftHash = null; toast('✓ Borrador restaurado', 'ok');
+    fill(draft); window._activeTemplateName = draft.templateName || ''; window._activeTemplateId = draft.templateId || null; _lastDraftHash = null; toast('✓ Borrador restaurado', 'ok');
 };
 window._discardDraft = function() { closeBS(); clearDraft(); toast('Borrador descartado', 'warn'); };
 
