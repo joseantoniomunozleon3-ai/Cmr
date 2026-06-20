@@ -1034,6 +1034,53 @@ select {
 #app-body { display: none; }
 
 /* ── DESKTOP LAYOUT ──────────────────────────────────────── */
+/* Banner plantilla — móvil: franja horizontal */
+#tpl-banner {
+    display: none;
+    width: 100%;
+    margin-bottom: 12px;
+}
+#tpl-banner.visible { display: block; }
+#tpl-banner-inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: var(--r2);
+    background: linear-gradient(180deg, rgba(196,66,26,.13), rgba(196,66,26,.06));
+    border: 1px solid rgba(196,66,26,.28);
+    border-bottom: 2px solid rgba(196,66,26,.35);
+    box-shadow: var(--sh-float);
+}
+#tpl-banner-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .5rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--blue-xl);
+    text-transform: uppercase;
+    opacity: .7;
+    flex-shrink: 0;
+}
+#tpl-banner-name {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-family: 'Sora', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--snow);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70vw;
+}
+
 @media (min-width: 1024px) {
     body { overflow-x: hidden; }
     #topbar { padding: 0 30px; height: 62px; }
@@ -1042,25 +1089,84 @@ select {
     .tab { height: 48px; padding: 0 22px; font-size: .8rem; }
     .panel { max-width: 1200px; padding: 26px 30px 64px; }
 
-    /* Documento tab: 2 cols */
+    /* Documento tab: 3 cols (banner lateral + 2 formulario) */
     #panel-form.active {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 28px 1fr 1fr;
         gap: 0 22px;
         align-items: start;
     }
-    #panel-form .block:nth-child(1)  { grid-column: 1; grid-row: 1; }
-    #panel-form .block:nth-child(4)  { grid-column: 1; grid-row: 2; }
-    #panel-form .block:nth-child(5)  { grid-column: 1; grid-row: 3; }
-    #panel-form .block:nth-child(6)  { grid-column: 1; grid-row: 4; }
-    #panel-form .block:nth-child(7)  { grid-column: 1; grid-row: 5; }
+    /* Banner ocupa toda la altura izquierda */
+    #tpl-banner {
+        grid-column: 1;
+        grid-row: 1 / span 8;
+        align-self: stretch;
+    }
+    #tpl-banner-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 120px;
+        gap: 10px;
+        padding: 16px 0;
+        border-radius: var(--r2);
+        background: linear-gradient(180deg, rgba(196,66,26,.13), rgba(196,66,26,.06));
+        border: 1px solid rgba(196,66,26,.28);
+        border-bottom: 2px solid rgba(196,66,26,.35);
+        box-shadow: var(--sh-float);
+        position: sticky;
+        top: 120px;
+    }
+    #tpl-banner-label {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        transform: rotate(180deg);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .47rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        color: var(--blue-xl);
+        text-transform: uppercase;
+        opacity: .7;
+        flex-shrink: 0;
+    }
+    #tpl-banner-name {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        transform: rotate(180deg);
+        font-family: 'Sora', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--snow);
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        line-height: 1.1;
+        text-align: center;
+        word-break: break-word;
+        overflow: hidden;
+        max-height: 60vh;
+    }
+    /* Cuando no hay plantilla, el banner colapsa sin ocupar espacio */
+    #panel-form:not(.has-tpl) {
+        grid-template-columns: 0px 1fr 1fr;
+        gap: 0 22px;
+    }
+    #panel-form:not(.has-tpl) #tpl-banner { display: none !important; }
+
     #panel-form .block:nth-child(2)  { grid-column: 2; grid-row: 1; }
-    #panel-form .block:nth-child(3)  { grid-column: 2; grid-row: 2; }
-    #panel-form .block:nth-child(8)  { grid-column: 2; grid-row: 3; }
-    #panel-form .block:nth-child(9)  { grid-column: 2; grid-row: 4; }
-    #panel-form .block:nth-child(10) { grid-column: 1 / span 2; grid-row: 6; }
-    #panel-form .block:nth-child(11) { grid-column: 1 / span 2; grid-row: 7; }
-    #panel-form > div:not(.block)    { grid-column: 1 / span 2; }
+    #panel-form .block:nth-child(5)  { grid-column: 2; grid-row: 2; }
+    #panel-form .block:nth-child(6)  { grid-column: 2; grid-row: 3; }
+    #panel-form .block:nth-child(7)  { grid-column: 2; grid-row: 4; }
+    #panel-form .block:nth-child(8)  { grid-column: 2; grid-row: 5; }
+    #panel-form .block:nth-child(3)  { grid-column: 3; grid-row: 1; }
+    #panel-form .block:nth-child(4)  { grid-column: 3; grid-row: 2; }
+    #panel-form .block:nth-child(9)  { grid-column: 3; grid-row: 3; }
+    #panel-form .block:nth-child(10) { grid-column: 3; grid-row: 4; }
+    #panel-form .block:nth-child(11) { grid-column: 2 / span 2; grid-row: 6; }
+    #panel-form .block:nth-child(12) { grid-column: 2 / span 2; grid-row: 7; }
+    #panel-form > div:not(.block):not(#tpl-banner) { grid-column: 2 / span 2; }
 
     #panel-hist.active, #panel-hoy.active, #panel-agenda.active, #panel-tmpl.active, #panel-cfg.active {
         max-width: 960px; margin: 0 auto; display: block;
@@ -1159,6 +1265,13 @@ select {
 
     <!-- ── Panel: Documento ── -->
     <div id="panel-form" role="tabpanel" class="panel active">
+        <!-- Banner nombre de plantilla activa -->
+        <div id="tpl-banner" style="display:none">
+            <div id="tpl-banner-inner">
+                <span id="tpl-banner-label">PLANTILLA</span>
+                <span id="tpl-banner-name"></span>
+            </div>
+        </div>
         <div class="block"><div class="bhead"><span class="btag a">DOC</span><span class="btitle">Datos del Documento</span></div><div class="bbody">
             <div class="fr"><label>Tipo de Documento</label>
                 <select id="tipoDoc" onchange="onTipoDocChange()">
@@ -1276,6 +1389,21 @@ select {
             <input id="histSearch" type="text" placeholder="Buscar por número, consignatario…" oninput="renderHist()"/>
             <select class="fsel" id="histFilter" onchange="renderHist()"><option value="">Todos</option><option value="month">Este mes</option><option value="week">Esta semana</option></select>
             <select class="fsel" id="histGroup" onchange="renderHist()"><option value="">Sin agrupar</option><option value="client">Por Cliente</option><option value="dest">Por Destino</option><option value="carrier">Por Transportista</option></select>
+        </div>
+        <!-- Borrar por rango de fechas -->
+        <div id="hist-daterange-bar" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(240,234,220,.4));border:1px solid rgba(255,255,255,.8);border-bottom-color:var(--line);border-right-color:var(--line);border-radius:var(--r2);box-shadow:var(--sh-float)">
+            <span class="btag r" style="font-size:.52rem;padding:2px 7px;flex-shrink:0">🗑 RANGO</span>
+            <div style="display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:5px">
+                    <label style="font-size:.65rem;color:var(--dim);white-space:nowrap;font-family:'JetBrains Mono',monospace;letter-spacing:.04em">DESDE</label>
+                    <input id="delRangeFrom" type="date" style="height:30px;padding:0 8px;border-radius:6px;border:1px solid var(--line2);border-top-color:var(--line);background:#fff;color:var(--snow);font-size:.75rem;font-family:'Sora',sans-serif;outline:none;box-shadow:var(--sh-inset);transition:border-color .15s" onfocus="this.style.borderColor='var(--rose-l)'" onblur="this.style.borderColor=''"/>
+                </div>
+                <div style="display:flex;align-items:center;gap:5px">
+                    <label style="font-size:.65rem;color:var(--dim);white-space:nowrap;font-family:'JetBrains Mono',monospace;letter-spacing:.04em">HASTA</label>
+                    <input id="delRangeTo" type="date" style="height:30px;padding:0 8px;border-radius:6px;border:1px solid var(--line2);border-top-color:var(--line);background:#fff;color:var(--snow);font-size:.75rem;font-family:'Sora',sans-serif;outline:none;box-shadow:var(--sh-inset);transition:border-color .15s" onfocus="this.style.borderColor='var(--rose-l)'" onblur="this.style.borderColor=''"/>
+                </div>
+            </div>
+            <button onclick="deleteHistByRange()" style="height:30px;padding:0 12px;border-radius:7px;background:linear-gradient(180deg,rgba(225,29,72,.10),rgba(225,29,72,.07));border:1px solid rgba(225,29,72,.28);border-bottom:2px solid rgba(225,29,72,.35);color:var(--rose-l);font-size:.72rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;white-space:nowrap;box-shadow:0 1px 0 rgba(255,255,255,.4) inset;transition:all .12s;flex-shrink:0" onmouseover="this.style.background='linear-gradient(180deg,rgba(225,29,72,.18),rgba(225,29,72,.12))'" onmouseout="this.style.background='linear-gradient(180deg,rgba(225,29,72,.10),rgba(225,29,72,.07))'">Borrar rango</button>
         </div>
         <div id="histList"></div>
     </div>
@@ -1952,7 +2080,7 @@ window.newCMR = window.doNewCMR = function() {
     clearSig(); clearSigSender();
     sv('docNum', genDocNum());
     sv('docDate', new Date().toISOString().split('T')[0]);
-    window._activeTemplateName = '';
+    window._activeTemplateName = ''; updateTplBanner();
     window._activeTemplateId = null;
     window._activeRecordId = null;
     clearDraft(); tab('form'); toast('✓ Formulario limpio', 'ok');
@@ -2480,8 +2608,8 @@ window.renderHist = async function() {
     document.getElementById('st3').textContent = monthKg > 0 ? (monthKg >= 1000 ? (monthKg / 1000).toFixed(1) + 't' : Math.round(monthKg)) : '—';
 };
 
-window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; window._activeRecordId = r.id; _lastDraftHash = null; clearSig(); clearSigSender(); tab('form'); toast('✓ Documento cargado — se actualizará al regenerar el PDF', 'ok', 4000); };
-window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; window._activeRecordId = null; sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
+window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; window._activeRecordId = r.id; _lastDraftHash = null; clearSig(); clearSigSender(); tab('form'); updateTplBanner(); toast('✓ Documento cargado — se actualizará al regenerar el PDF', 'ok', 4000); };
+window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; window._activeRecordId = null; sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); updateTplBanner(); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
 window.regenPDF = async function(id) {
     const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return;
     const chosenLayout = await _askPDFLayout(); if (!chosenLayout) return;
@@ -2492,6 +2620,61 @@ window.regenPDF = async function(id) {
 };
 window.delRec  = id => { showBS('Eliminar Documento', 'Este registro se eliminará permanentemente.', [{ label: 'Cancelar', cls: 'cancel', fn: closeBS }, { label: 'Eliminar', cls: 'danger', fn: () => _delOk(id) }]); };
 window._delOk  = async id => { closeBS(); await dbDel(STORE, id); await renderHist(); if (window.renderHoy) await renderHoy(); await updateHistBadge(); toast('Eliminado', 'warn'); };
+
+/* ── Banner nombre de plantilla ── */
+function updateTplBanner() {
+    const name   = (window._activeTemplateName || '').trim();
+    const banner = document.getElementById('tpl-banner');
+    const nameEl = document.getElementById('tpl-banner-name');
+    const panel  = document.getElementById('panel-form');
+    if (!banner || !nameEl || !panel) return;
+    if (name) {
+        nameEl.textContent = name;
+        banner.classList.add('visible');
+        panel.classList.add('has-tpl');
+    } else {
+        nameEl.textContent = '';
+        banner.classList.remove('visible');
+        panel.classList.remove('has-tpl');
+    }
+}
+window.updateTplBanner = updateTplBanner;
+
+window.deleteHistByRange = async function() {
+    const fromVal = (document.getElementById('delRangeFrom')?.value || '').trim();
+    const toVal   = (document.getElementById('delRangeTo')?.value   || '').trim();
+    if (!fromVal && !toVal) { toast('Selecciona al menos una fecha de inicio o fin', 'err'); return; }
+    const from = fromVal ? new Date(fromVal + 'T00:00:00') : null;
+    const to   = toVal   ? new Date(toVal   + 'T23:59:59') : null;
+    const all  = await dbAll(STORE);
+    const targets = all.filter(r => {
+        const d = r.savedAt ? new Date(r.savedAt) : null;
+        if (!d) return false;
+        if (from && d < from) return false;
+        if (to   && d > to)   return false;
+        return true;
+    });
+    if (!targets.length) { toast('No hay documentos en ese rango de fechas', 'warn'); return; }
+    const fmtDate = v => v ? new Date(v).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+    const rangeDesc = fromVal && toVal
+        ? `del <b>${fmtDate(fromVal)}</b> al <b>${fmtDate(toVal)}</b>`
+        : fromVal ? `desde el <b>${fmtDate(fromVal)}</b>` : `hasta el <b>${fmtDate(toVal)}</b>`;
+    showBS(
+        'Borrar documentos por rango',
+        `<p style="line-height:1.7">Se eliminarán <b>${targets.length} documento${targets.length === 1 ? '' : 's'}</b> guardados ${rangeDesc}.<br><span style="color:var(--rose-l);font-size:.78rem">Esta acción no se puede deshacer.</span></p>`,
+        [
+            { label: 'Cancelar', cls: 'cancel', fn: closeBS },
+            { label: `Eliminar ${targets.length} doc${targets.length === 1 ? '' : 's'}`, cls: 'danger', fn: async () => {
+                closeBS();
+                for (const r of targets) await dbDel(STORE, r.id);
+                await renderHist();
+                if (window.renderHoy) await renderHoy();
+                await updateHistBadge();
+                toast(`🗑 ${targets.length} documento${targets.length === 1 ? '' : 's'} eliminado${targets.length === 1 ? '' : 's'}`, 'warn', 4000);
+            }}
+        ]
+    );
+};
 
 // ── Plantillas ────────────────────────────────────────────────
 window.saveAsTemplate = async function() {
@@ -2569,7 +2752,7 @@ window._tplRename = async function() {
     setTimeout(() => { const inp = document.getElementById(inputId); if (inp) { inp.focus(); inp.select(); } }, 80);
 };
 
-window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); window._activeTemplateName = tpl.templateName || ''; window._activeTemplateId = tpl.id; window._activeRecordId = null; _lastDraftHash = null; tab('form'); toast('✓ Plantilla cargada — los cambios se guardarán en ella automáticamente', 'ok', 4000); };
+window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); window._activeTemplateName = tpl.templateName || ''; window._activeTemplateId = tpl.id; window._activeRecordId = null; _lastDraftHash = null; tab('form'); updateTplBanner(); toast('✓ Plantilla cargada — los cambios se guardarán en ella automáticamente', 'ok', 4000); };
 window.updateTemplate = async function(id) {
     const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return;
     showBS('Actualizar plantilla', `<p>Se sobreescribirá <b>${tpl.templateName}</b> con los datos actuales del formulario.</p>`,
@@ -2825,7 +3008,7 @@ window._clearOk = async function() { closeBS(); await dbClear(STORE); await rend
 // ── Borrador helpers (delegan a autosave.js) ──────────────────
 window._restoreDraft = function() {
     closeBS(); const draft = loadDraft(); if (!draft) return;
-    fill(draft); window._activeTemplateName = draft.templateName || ''; window._activeTemplateId = draft.templateId || null; window._activeRecordId = draft.recordId || null; _lastDraftHash = null; toast('✓ Borrador restaurado', 'ok');
+    fill(draft); window._activeTemplateName = draft.templateName || ''; window._activeTemplateId = draft.templateId || null; window._activeRecordId = draft.recordId || null; _lastDraftHash = null; updateTplBanner(); toast('✓ Borrador restaurado', 'ok');
 };
 window._discardDraft = function() { closeBS(); clearDraft(); toast('Borrador descartado', 'warn'); };
 
@@ -3246,14 +3429,44 @@ function buildPDF(D,safetyTimer){
         content.push({columns:[{text:(isNacional?'CARTA PORTE NAC. ':'CMR N.º ')+num+'  ·  '+dateStr+(D.placeEmission?' — '+D.placeEmission:''),fontSize:5.5,color:'#999'},{text:pieTexto,fontSize:5.5,color:'#bbb',alignment:'right'}],margin:[0,3,0,2]});
         if(ci<copies.length-1) content.push({text:'',pageBreak:'after'});
     });
-    try{
-        pdfMake.createPdf({pageSize:'A4',pageMargins:[18,8,18,6],compress:false,content,defaultStyle:{font:'Roboto',fontSize:10,color:'#111'},info:{title:(isNacional?'Carta Porte Nacional ':'CMR ')+num,author:'CMR Manager Pro',subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}}).getBlob(blob=>{
-            clearTimeout(safetyTimer);showOv(false);
-            const fname=(isNacional?'CARTA_PORTE_NAC_':'CMR_')+num.replace(/[^a-z0-9]/gi,'_')+'.pdf';
-            _sharePDF(blob, fname, num, safetyTimer);
-            setTimeout(()=>URL.revokeObjectURL(URL.createObjectURL(blob)),30000);
-        });
-    }catch(pdfErr){ clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+pdfErr.message,'err',6000); }
+    {
+        // Nombre de cliente en grande, horizontal, en el margen inferior izquierdo — solo primera hoja
+        const _bannerName = (D.templateName || D.templateClient || '').trim().toUpperCase();
+        const _bannerColor = copies[0] ? copies[0].AC : '#b91c1c';
+        const _buildClientLabel = () => {
+            if (!_bannerName) return null;
+            const fontSize = _bannerName.length > 28 ? 13 : _bannerName.length > 18 ? 16 : 20;
+            return {
+                stack: [
+                    { text: 'CLIENTE', fontSize: 6, bold: true, color: '#999', characterSpacing: 1.2, margin: [0, 0, 0, 1] },
+                    { text: _bannerName, fontSize, bold: true, color: _bannerColor, characterSpacing: 0.3 }
+                ],
+                absolutePosition: { x: 18, y: 818 },
+                width: 360
+            };
+        };
+        const _hasBanner   = !!_bannerName;
+        const _clientLabel = _hasBanner ? _buildClientLabel() : null;
+        try{
+            pdfMake.createPdf({
+                pageSize: 'A4',
+                pageMargins: [18,8,18,6],
+                compress: false,
+                content,
+                background: _hasBanner ? function(currentPage) {
+                    if (currentPage !== 1) return [];
+                    return [_clientLabel];
+                } : undefined,
+                defaultStyle: {font:'Roboto', fontSize:10, color:'#111'},
+                info: {title:(isNacional?'Carta Porte Nacional ':'CMR ')+num, author:'CMR Manager Pro', subject:isNacional?'Carta de Porte Nacional':'Carta de Porte Internacional CMR'}
+            }).getBlob(blob=>{
+                clearTimeout(safetyTimer); showOv(false);
+                const fname=(isNacional?'CARTA_PORTE_NAC_':'CMR_')+num.replace(/[^a-z0-9]/gi,'_')+'.pdf';
+                _sharePDF(blob, fname, num, safetyTimer);
+                setTimeout(()=>URL.revokeObjectURL(URL.createObjectURL(blob)),30000);
+            });
+        }catch(pdfErr){ clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+pdfErr.message,'err',6000); }
+    }
 }
 
 // ---- Layout selector helper ----
@@ -3311,7 +3524,7 @@ function buildPDF_dispatch(D, safetyTimer){
 }
 
 // Wrapper que inyecta selloDataURL y llama buildPDF_dispatch
-async // Estampa el sello sobre el PDF ya generado usando pdf-lib
+// Estampa el sello sobre el PDF ya generado usando pdf-lib
 async function stampSelloOnPDF(pdfBlob, selloDataURL) {
     if (!selloDataURL || !selloDataURL.startsWith('data:image')) return pdfBlob;
     try {
