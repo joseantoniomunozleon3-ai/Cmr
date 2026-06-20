@@ -1565,7 +1565,7 @@ window.syncActiveTemplate = async function (data) {
         if (!tpl) { window._activeTemplateId = null; return; }
         const upd = { ...data };
         delete upd.docNum; delete upd.docDate; delete upd.sigDriver; delete upd.sigSender;
-        delete upd._draftSavedAt; delete upd.templateId;
+        delete upd._draftSavedAt; delete upd.templateId; delete upd.recordId;
         upd.templateName   = tpl.templateName;
         upd.templateClient = tpl.templateClient || '';
         upd.savedAt = new Date().toISOString();
@@ -1711,6 +1711,7 @@ window.collect = function() {
     FIELDS.forEach(f => { d[f] = gv(f); });
     d.templateName = window._activeTemplateName || '';
     d.templateId   = window._activeTemplateId   || null;
+    d.recordId     = window._activeRecordId     || null;
     d['plateTractor'] = (d['plateTractor'] || '').toUpperCase();
     d['plateTrailer'] = (d['plateTrailer'] || '').toUpperCase();
     d.goodsLines = collectGoodsLines();
@@ -1953,6 +1954,7 @@ window.newCMR = window.doNewCMR = function() {
     sv('docDate', new Date().toISOString().split('T')[0]);
     window._activeTemplateName = '';
     window._activeTemplateId = null;
+    window._activeRecordId = null;
     clearDraft(); tab('form'); toast('✓ Formulario limpio', 'ok');
 };
 
@@ -2478,8 +2480,8 @@ window.renderHist = async function() {
     document.getElementById('st3').textContent = monthKg > 0 ? (monthKg >= 1000 ? (monthKg / 1000).toFixed(1) + 't' : Math.round(monthKg)) : '—';
 };
 
-window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; clearSig(); clearSigSender(); tab('form'); toast('✓ Documento cargado', 'ok'); };
-window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
+window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; window._activeRecordId = r.id; _lastDraftHash = null; clearSig(); clearSigSender(); tab('form'); toast('✓ Documento cargado — se actualizará al regenerar el PDF', 'ok', 4000); };
+window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; window._activeRecordId = null; sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
 window.regenPDF = async function(id) {
     const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return;
     const chosenLayout = await _askPDFLayout(); if (!chosenLayout) return;
@@ -2567,7 +2569,7 @@ window._tplRename = async function() {
     setTimeout(() => { const inp = document.getElementById(inputId); if (inp) { inp.focus(); inp.select(); } }, 80);
 };
 
-window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); window._activeTemplateName = tpl.templateName || ''; window._activeTemplateId = tpl.id; _lastDraftHash = null; tab('form'); toast('✓ Plantilla cargada — los cambios se guardarán en ella automáticamente', 'ok', 4000); };
+window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); window._activeTemplateName = tpl.templateName || ''; window._activeTemplateId = tpl.id; window._activeRecordId = null; _lastDraftHash = null; tab('form'); toast('✓ Plantilla cargada — los cambios se guardarán en ella automáticamente', 'ok', 4000); };
 window.updateTemplate = async function(id) {
     const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return;
     showBS('Actualizar plantilla', `<p>Se sobreescribirá <b>${tpl.templateName}</b> con los datos actuales del formulario.</p>`,
@@ -2823,7 +2825,7 @@ window._clearOk = async function() { closeBS(); await dbClear(STORE); await rend
 // ── Borrador helpers (delegan a autosave.js) ──────────────────
 window._restoreDraft = function() {
     closeBS(); const draft = loadDraft(); if (!draft) return;
-    fill(draft); window._activeTemplateName = draft.templateName || ''; window._activeTemplateId = draft.templateId || null; _lastDraftHash = null; toast('✓ Borrador restaurado', 'ok');
+    fill(draft); window._activeTemplateName = draft.templateName || ''; window._activeTemplateId = draft.templateId || null; window._activeRecordId = draft.recordId || null; _lastDraftHash = null; toast('✓ Borrador restaurado', 'ok');
 };
 window._discardDraft = function() { closeBS(); clearDraft(); toast('Borrador descartado', 'warn'); };
 
@@ -2990,14 +2992,27 @@ async function generateCMR(){
     if(!chosenLayout) return;
     const extraCustoms = await _askExtraCustomsCopy();
     if(extraCustoms === null) return;
-    const saveToHist = await _askSaveToHist();
+    const saveToHist = await _askSaveToHist(!!window._activeRecordId);
     if(saveToHist === null) return;
     const data=collect();
     data._pdfLayout = chosenLayout;
     data._extraCopiaAduana = extraCustoms;
-    delete data.id;
+    const editingId = window._activeRecordId || null;
+    delete data.id; delete data.templateId; delete data.recordId;
     if(saveToHist){
-        try{const id=await dbAdd(STORE,data);data.id=id;await updateHistBadge();clearDraft();_advanceSeq();}catch(e){console.warn('DB save:',e);toast('⚠ Error guardando en historial: '+e.message,'err',6000);}
+        try{
+            if (editingId) {
+                await dbDel(STORE, editingId);
+                const id = await dbAdd(STORE, data);
+                data.id = id; window._activeRecordId = id;
+            } else {
+                const id = await dbAdd(STORE, data);
+                data.id = id; window._activeRecordId = id;
+            }
+            await updateHistBadge(); clearDraft(); _advanceSeq();
+            if (window.renderHist) renderHist();
+            if (window.renderHoy)  renderHoy();
+        }catch(e){console.warn('DB save:',e);toast('⚠ Error guardando en historial: '+e.message,'err',6000);}
     } else {
         clearDraft();
     }
@@ -3274,13 +3289,13 @@ function _askExtraCustomsCopy(){
 }
 
 // ---- Pregunta si guardar en historial ----
-function _askSaveToHist(){
+function _askSaveToHist(isEditing){
     return new Promise(resolve => {
         const mbs = "width:100%;margin-bottom:8px;padding:13px 14px;border-radius:10px;border:1.5px solid var(--line2);background:var(--bg3);color:var(--snow);font-size:.83rem;font-weight:600;font-family:'Sora',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:flex-start;gap:12px;line-height:1.4";
-        const h = '<p style="font-size:.78rem;color:var(--dim);margin-bottom:12px">¿Guardar este documento en el historial?</p>'
-            + '<button id="_hist_si" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">💾</span><span><b style="display:block">Sí, guardar</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Se añade al historial y podrás cargarlo después</span></span></button>'
+        const h = '<p style="font-size:.78rem;color:var(--dim);margin-bottom:12px">' + (isEditing ? '¿Actualizar este documento en el historial?' : '¿Guardar este documento en el historial?') + '</p>'
+            + '<button id="_hist_si" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">💾</span><span><b style="display:block">' + (isEditing ? 'Sí, actualizar' : 'Sí, guardar') + '</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">' + (isEditing ? 'Se sobreescribe el documento ya guardado, sin duplicarlo' : 'Se añade al historial y podrás cargarlo después') + '</span></span></button>'
             + '<button id="_hist_no" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">🚫</span><span><b style="display:block">No guardar</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Solo generar el PDF sin guardarlo</span></span></button>';
-        showBS('Guardar en historial', h, [{label:'Cancelar',cls:'cancel',fn:()=>{closeBS();resolve(null);}}]);
+        showBS(isEditing ? 'Actualizar en historial' : 'Guardar en historial', h, [{label:'Cancelar',cls:'cancel',fn:()=>{closeBS();resolve(null);}}]);
         setTimeout(()=>{
             const a=document.getElementById('_hist_si'); if(a) a.addEventListener('click',()=>{closeBS();resolve(true);});
             const b=document.getElementById('_hist_no'); if(b) b.addEventListener('click',()=>{closeBS();resolve(false);});
