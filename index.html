@@ -49,6 +49,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js"
             onload="window._sigReady=true;_checkReady()"
             onerror="showLoadErr('Error cargando signature_pad.')"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+        // ── DeCA / Ley 9/2025 — Supabase Storage para Carta de Porte Nacional ──
+        window.SUPA_URL    = 'https://yvmakyfjdqbdapotkryd.supabase.co';
+        window.SUPA_KEY    = 'sb_publishable_drG-vi00SGnw9BJj6FTrWA_x1u4XUec';
+        window.SUPA_ANON_LEGACY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2bWFreWZqZHFiZGFwb3RrcnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMzg4NTMsImV4cCI6MjA5NzYxNDg1M30.boRxGZSbP2LXZb5b_XGHr0jPV14jrE4dbD9zDj7FObg';
+        window.SUPA_BUCKET = 'deca-pdfs';
+        window._supaClient = null;
+        window._getSupaClient = function() {
+            if (!window._supaClient && window.supabase && window.supabase.createClient) {
+                window._supaClient = window.supabase.createClient(window.SUPA_URL, window.SUPA_KEY);
+            }
+            return window._supaClient;
+        };
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 
     <style>
@@ -1290,7 +1306,9 @@ select {
             <button onclick="saveAsTemplate()" class="save-btn" style="width:100%;justify-content:center;margin-top:10px">Guardar como plantilla</button>
         </div></div>
 
-        <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="5"></textarea></div></div></div>
+        <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="5"></textarea></div>
+            <div class="fr" id="senderNIFRow" style="display:none"><label for="senderNIF">NIF Remitente / Cargador <span style="color:#e11d48">*</span></label><input id="senderNIF" type="text" placeholder="B12345678" style="text-transform:uppercase"/></div>
+        </div></div>
 
         <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Consignatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="5"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
 
@@ -1306,6 +1324,7 @@ select {
         <div class="block"><div class="bhead"><span class="btag g">16</span><span class="btitle">Transportista</span><span class="bsaved" id="bs-carrier">✓ guardado</span></div><div class="bbody">
             <div class="qf-row" id="car-qf"></div>
             <div class="fr"><textarea id="carrierBlock" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="5"></textarea></div>
+            <div class="fr" id="carrierNIFRow" style="display:none"><label for="carrierNIF">NIF Transportista efectivo <span style="color:#e11d48">*</span></label><input id="carrierNIF" type="text" placeholder="B87654321" style="text-transform:uppercase"/></div>
             <div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveCarToAgenda()">+ Guardar transportista en agenda</span></div>
             <div class="divl"></div>
             <div class="ssep">Vehículo y Conductor</div>
@@ -1829,8 +1848,8 @@ const gv   = id => (document.getElementById(id) || {}).value?.trim() || '';
 const gvUp = id => gv(id).toUpperCase();
 const sv   = (id, v) => { const e = document.getElementById(id); if (e) e.value = v || ''; };
 
-const FIELDS = ['docNum','docDate','placeEmission','docsAnexos','senderBlock','rcvBlock',
-    'placeLoading','placeDelivery','dateDelivery','clientRef','carrierBlock','driverName',
+const FIELDS = ['docNum','docDate','placeEmission','docsAnexos','senderBlock','senderNIF','rcvBlock',
+    'placeLoading','placeDelivery','dateDelivery','clientRef','carrierBlock','carrierNIF','driverName',
     'driverDNI','plateTractor','plateTrailer','senderInstr','freightTerms','codAmount',
     'observations','tipoDoc','freeline-1','freeline-2','eurosCargados','eurosDevueltos'];
 
@@ -1932,7 +1951,14 @@ window.toggleDocNumLock = function() {
     if (isLocked) inp.focus();
 };
 
-window.onTipoDocChange = () => updateDocNum();
+window.onTipoDocChange = () => {
+    updateDocNum();
+    const isNac = (document.getElementById('tipoDoc')?.value === 'nacional');
+    const r1 = document.getElementById('senderNIFRow');
+    const r2 = document.getElementById('carrierNIFRow');
+    if (r1) r1.style.display = isNac ? '' : 'none';
+    if (r2) r2.style.display = isNac ? '' : 'none';
+};
 
 window.updateNumPreview = function() {
     const el = document.getElementById('numPreview'); if (!el) return;
@@ -3264,11 +3290,85 @@ function mergeSignatureAndSello(sigDataURL, selloDataURL, w, h) {
     });
 }
 
+// ══ DeCA — Ley 9/2025 de Movilidad Sostenible: QR + subida a Supabase ══
+function _decaPrepare(D) {
+    if (D.tipoDoc !== 'nacional') return null;
+    const uuid = D._decaUuid || (D._decaUuid = (
+        window.crypto && window.crypto.randomUUID
+            ? window.crypto.randomUUID()
+            : 'deca-' + Date.now() + '-' + Math.random().toString(36).slice(2)
+    ));
+    const url = window.SUPA_URL + '/storage/v1/object/public/' + window.SUPA_BUCKET + '/' + uuid + '.pdf';
+    let qrDataURL = null;
+    try {
+        const qr = qrcode(0, 'M');
+        qr.addData(url);
+        qr.make();
+        const count = qr.getModuleCount();
+        const cell = 6, margin = 4;
+        const size = count * cell + margin * 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = '#000';
+        for (let r = 0; r < count; r++) {
+            for (let c = 0; c < count; c++) {
+                if (qr.isDark(r, c)) ctx.fillRect(margin + c*cell, margin + r*cell, cell, cell);
+            }
+        }
+        qrDataURL = canvas.toDataURL('image/png');
+    } catch(e) { console.warn('QR DeCA error:', e); }
+    return { uuid, url, qrDataURL };
+}
+
+function _decaQRCell(deca) {
+    if (!deca || !deca.qrDataURL) return {text:'', border:[false,false,false,false]};
+    return {
+        stack: [
+            {text:'DeCA · Control Administrativo', fontSize:5, bold:true, color:'#666', margin:[0,0,0,2], alignment:'center'},
+            {image: deca.qrDataURL, width:48, height:48, alignment:'center'},
+            {text:'Ley 9/2025 Movilidad Sostenible', fontSize:4.3, color:'#999', alignment:'center', margin:[0,2,0,0]}
+        ],
+        border:[true,true,true,true], fillColor:'#fff'
+    };
+}
+
+async function _decaSubirPDF(blob, deca) {
+    if (!deca) return { ok:true };
+    try {
+        if (blob.size > 4.5*1024*1024) toast('⚠ PDF DeCA pesa más de 4.5MB, revisa el contenido','err',5000);
+        const endpoint = window.SUPA_URL + '/storage/v1/object/' + window.SUPA_BUCKET + '/' + deca.uuid + '.pdf';
+        const key = window.SUPA_ANON_LEGACY || window.SUPA_KEY;
+        const resp = await fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + key,
+                'Content-Type': 'application/pdf',
+                'x-upsert': 'true'
+            },
+            body: blob
+        });
+        if (!resp.ok) {
+            const errTxt = await resp.text().catch(()=>resp.statusText);
+            throw new Error('HTTP ' + resp.status + ': ' + errTxt);
+        }
+        return { ok:true };
+    } catch(e) {
+        console.error('Error subiendo DeCA:', e);
+        const fullMsg = 'DeCA upload error\nEndpoint: ' + window.SUPA_URL + '/storage/v1/object/' + window.SUPA_BUCKET + '/' + deca.uuid + '.pdf' + '\n\n' + (e.message||e);
+        toast('⚠ DeCA no publicado — ver ventana de error','err',5000);
+        alert(fullMsg);
+        return { ok:false, error:e };
+    }
+}
+
 function buildPDF(D,safetyTimer){
     const isNacional = D.tipoDoc === 'nacional';
+    const deca = _decaPrepare(D);
     const num=D.docNum||'CMR-'+Date.now();
     const dateStr=fmtD(D.docDate); const delivStr=fmtD(D.dateDelivery);
-    const senderBlock=D.senderBlock||'—'; const rcvBlock=D.rcvBlock||'—'; const carrierBlock=D.carrierBlock||'—';
+    const senderBlock=(D.senderBlock||'—')+(isNacional&&D.senderNIF?'\nNIF: '+D.senderNIF:''); const rcvBlock=D.rcvBlock||'—'; const carrierBlock=(D.carrierBlock||'—')+(isNacional&&D.carrierNIF?'\nNIF: '+D.carrierNIF:'');
 
     const copies = isNacional ? [
         {lbl:'COPIA 1',sub:'REMITENTE / SENDER', AC:'#0f766e'},
@@ -3400,7 +3500,10 @@ function buildPDF(D,safetyTimer){
 
         content.push(colorLine());
         content.push({table:{widths:['*','*'],body:[[(function(){const b=box(13,'Instrucciones del Remitente',D.senderInstr||'—'); b.stack.push(spacer(15)); return b;})(),(function(){const b=box(18,'Reservas y Observaciones',D.observations||''); b.stack.push(spacer(15)); return b;})()]]},layout:lay,margin:[0,0,0,0]});
-        content.push({table:{widths:['*','*'],body:[[(function(){const b=box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')); b.stack.push(spacer(5)); return b;})(),(function(){const b=box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':'')); b.stack.push(spacer(5)); return b;})()]]},layout:lay,margin:[0,0,0,0]});
+        content.push({table:{widths: deca ? ['*','*','auto'] : ['*','*'],body:[deca
+            ? [(function(){const b=box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')); b.stack.push(spacer(5)); return b;})(),(function(){const b=box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':'')); b.stack.push(spacer(5)); return b;})(),_decaQRCell(deca)]
+            : [(function(){const b=box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')); b.stack.push(spacer(5)); return b;})(),(function(){const b=box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':'')); b.stack.push(spacer(5)); return b;})()]
+        ]},layout:lay,margin:[0,0,0,0]});
 
         content.push(colorLine());
 
@@ -3431,7 +3534,7 @@ function buildPDF(D,safetyTimer){
     });
     {
         // Nombre de cliente en grande, horizontal, en el margen inferior izquierdo — solo primera hoja
-        const _bannerName = (D.templateName || D.templateClient || '').trim().toUpperCase();
+        const _bannerName = '';
         const _bannerColor = copies[0] ? copies[0].AC : '#b91c1c';
         const _buildClientLabel = () => {
             if (!_bannerName) return null;
@@ -3463,6 +3566,11 @@ function buildPDF(D,safetyTimer){
                 clearTimeout(safetyTimer); showOv(false);
                 const fname=(isNacional?'CARTA_PORTE_NAC_':'CMR_')+num.replace(/[^a-z0-9]/gi,'_')+'.pdf';
                 _sharePDF(blob, fname, num, safetyTimer);
+                if (deca) {
+                    _decaSubirPDF(blob, deca).then(res=>{
+                        if (res.ok) toast('✓ DeCA publicado online','ok',3500);
+                    });
+                }
                 setTimeout(()=>URL.revokeObjectURL(URL.createObjectURL(blob)),30000);
             });
         }catch(pdfErr){ clearTimeout(safetyTimer);showOv(false);toast('⚠ Error: '+pdfErr.message,'err',6000); }
