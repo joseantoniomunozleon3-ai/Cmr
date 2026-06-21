@@ -3337,7 +3337,11 @@ function _decaPrepare(D) {
     const uuid = window.crypto && window.crypto.randomUUID
         ? window.crypto.randomUUID()
         : 'deca-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-    const url = window.SUPA_URL + '/storage/v1/object/public/' + window.SUPA_BUCKET + '/' + uuid + '.pdf';
+    // Prefijo de fecha solo para legibilidad en el bucket — el UUID es lo
+    // que garantiza unicidad real, no la fecha.
+    const fechaPrefix = (D.docDate || new Date().toISOString().slice(0,10));
+    const fname = 'nacional_' + fechaPrefix + '_' + uuid + '.pdf';
+    const url = window.SUPA_URL + '/storage/v1/object/public/' + window.SUPA_BUCKET + '/' + fname;
     let qrDataURL = null;
     try {
         const qr = qrcode(0, 'M');
@@ -3358,7 +3362,7 @@ function _decaPrepare(D) {
         }
         qrDataURL = canvas.toDataURL('image/png');
     } catch(e) { console.warn('QR DeCA error:', e); }
-    return { uuid, url, qrDataURL };
+    return { uuid, fname, url, qrDataURL };
 }
 
 function _decaQRCell(deca, isNacional) {
@@ -3390,7 +3394,7 @@ async function _decaSubirPDF(blob, deca) {
     if (!deca) return { ok:true };
     try {
         if (blob.size > 4.5*1024*1024) toast('⚠ PDF DeCA pesa más de 4.5MB, revisa el contenido','err',5000);
-        const endpoint = window.SUPA_URL + '/storage/v1/object/' + window.SUPA_BUCKET + '/' + deca.uuid + '.pdf';
+        const endpoint = window.SUPA_URL + '/storage/v1/object/' + window.SUPA_BUCKET + '/' + deca.fname;
         const key = window.SUPA_ANON_LEGACY || window.SUPA_KEY;
         const resp = await fetch(endpoint, {
             method: 'PUT',
@@ -3411,7 +3415,7 @@ async function _decaSubirPDF(blob, deca) {
         return { ok:true };
     } catch(e) {
         console.error('Error subiendo DeCA:', e);
-        const fullMsg = 'DeCA upload error\nEndpoint: ' + window.SUPA_URL + '/storage/v1/object/' + window.SUPA_BUCKET + '/' + deca.uuid + '.pdf' + '\n\n' + (e.message||e);
+        const fullMsg = 'DeCA upload error\nEndpoint: ' + window.SUPA_URL + '/storage/v1/object/' + window.SUPA_BUCKET + '/' + deca.fname + '\n\n' + (e.message||e);
         toast('⚠ DeCA no publicado — ver ventana de error','err',5000);
         alert(fullMsg);
         return { ok:false, error:e };
