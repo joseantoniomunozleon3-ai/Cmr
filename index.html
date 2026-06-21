@@ -2641,6 +2641,37 @@ window.regenPDF = async function(id) {
     const chosenLayout = await _askPDFLayout(); if (!chosenLayout) return;
     const extraCustoms = await _askExtraCustomsCopy(); if (extraCustoms === null) return;
     const data = { ...r, _pdfLayout: chosenLayout, _extraCopiaAduana: extraCustoms };
+    if (data.tipoDoc === 'nacional') {
+        const decaDefinitivo = await _askDecaDefinitivo();
+        if (decaDefinitivo === null) return;
+        data._decaDefinitivo = decaDefinitivo;
+
+        // Mismos datos mínimos exigidos por el DCDT que en generateCMR — solo
+        // se exigen si se confirma como definitivo, no en modo borrador.
+        if (decaDefinitivo) {
+            const DECA_REQUIRED = [
+                { id: 'senderNIF',    label: 'NIF Remitente / Cargador',   field: 'senderNIF' },
+                { id: 'carrierNIF',   label: 'NIF Transportista efectivo', field: 'carrierNIF' },
+                { id: 'plateTractor', label: 'Matrícula Tractora',         field: 'plateTractor' },
+            ];
+            const decaMissing = DECA_REQUIRED.filter(f => !(data[f.field] || '').trim());
+            if (decaMissing.length) {
+                showBS(
+                    '⚠ Faltan datos para el DeCA',
+                    `<p style="margin-bottom:12px;color:var(--dim);font-size:.83rem">Este documento del historial no tiene completos estos datos exigidos por el Documento de Control Digital. Cárgalo en el formulario (⬆) para completarlos antes de emitir el DeCA definitivo:</p>
+                     <ul style="padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px">
+                       ${decaMissing.map(f => `
+                         <li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(225,29,72,.06);border:1px solid rgba(225,29,72,.2);border-radius:8px">
+                           <span style="font-size:.9rem">⚠</span>
+                           <div style="font-weight:700;font-size:.85rem;color:var(--snow)">${f.label}</div>
+                         </li>`).join('')}
+                     </ul>`,
+                    [{ label: 'Entendido', cls: 'ok', fn: closeBS }]
+                );
+                return;
+            }
+        }
+    }
     showOv(true); const st = setTimeout(() => { showOv(false); toast('⚠ Tiempo agotado', 'err', 5000); }, 60000);
     try { buildPDF_withSello(data, st); } catch (e) { clearTimeout(st); showOv(false); toast('⚠ Error: ' + e.message, 'err', 5000); }
 };
