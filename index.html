@@ -3288,20 +3288,46 @@ async function generateCMR(){
     data._pdfLayout = chosenLayout;
     data._extraCopiaAduana = extraCustoms;
     if (data.tipoDoc === 'nacional') {
+        // NIF del cargador y del transportista efectivo: se exigen siempre en
+        // documento nacional, ANTES de preguntar si se quiere DeCA definitivo,
+        // borrador o sin DeCA. Si el documento viene de una plantilla, estos
+        // campos ya estarán rellenos y este paso pasará desapercibido.
+        const NIF_REQUIRED = [
+            { id: 'senderNIF',  label: 'NIF Remitente / Cargador' },
+            { id: 'carrierNIF', label: 'NIF Transportista efectivo' },
+        ];
+        const nifMissing = NIF_REQUIRED.filter(f => !gv(f.id));
+        if (nifMissing.length) {
+            nifMissing.forEach(f => { const el = document.getElementById(f.id); if (el) el.classList.add('field-error'); });
+            tab('form');
+            setTimeout(() => document.getElementById(nifMissing[0].id)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+            showBS(
+                '⚠ Faltan NIF obligatorios',
+                `<p style="margin-bottom:12px;color:var(--dim);font-size:.83rem">El documento nacional exige estos datos antes de continuar:</p>
+                 <ul style="padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px">
+                   ${nifMissing.map(f => `
+                     <li style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(225,29,72,.06);border:1px solid rgba(225,29,72,.2);border-radius:8px">
+                       <span style="font-size:.9rem">⚠</span>
+                       <div style="font-weight:700;font-size:.85rem;color:var(--snow)">${f.label}</div>
+                     </li>`).join('')}
+                 </ul>`,
+                [{ label: 'Corregir', cls: 'ok', fn: closeBS }]
+            );
+            setTimeout(() => document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error')), 4000);
+            return;
+        }
+
         const decaOpcion = await _askDecaDefinitivo();
         if (decaOpcion === null) return;
         // 'definitivo' → QR + subida  |  'borrador' → sin QR pero con aviso  |  'sin_deca' → carta normal sin nada
         data._decaDefinitivo = decaOpcion === 'definitivo';
         data._decaSinDeca    = decaOpcion === 'sin_deca';
 
-        // Datos mínimos exigidos por el DCDT para emitir un DeCA válido: NIF
-        // del cargador, NIF del transportista efectivo y matrícula del
-        // vehículo. Solo se exigen al confirmar el documento como definitivo;
-        // en borrador puedes seguir editando sin estos datos todavía.
+        // Matrícula del vehículo: dato mínimo exigido por el DCDT que sí solo
+        // se requiere al confirmar el documento como definitivo; en borrador
+        // puedes seguir editando sin este dato todavía.
         if (decaOpcion === 'definitivo') {
             const DECA_REQUIRED = [
-                { id: 'senderNIF',    label: 'NIF Remitente / Cargador' },
-                { id: 'carrierNIF',   label: 'NIF Transportista efectivo' },
                 { id: 'plateTractor', label: 'Matrícula Tractora' },
             ];
             const decaMissing = DECA_REQUIRED.filter(f => !gv(f.id));
