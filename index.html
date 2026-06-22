@@ -3238,15 +3238,17 @@ async function generateCMR(){
     data._pdfLayout = chosenLayout;
     data._extraCopiaAduana = extraCustoms;
     if (data.tipoDoc === 'nacional') {
-        const decaDefinitivo = await _askDecaDefinitivo();
-        if (decaDefinitivo === null) return;
-        data._decaDefinitivo = decaDefinitivo;
+        const decaOpcion = await _askDecaDefinitivo();
+        if (decaOpcion === null) return;
+        // 'definitivo' → QR + subida  |  'borrador' → sin QR pero con aviso  |  'sin_deca' → carta normal sin nada
+        data._decaDefinitivo = decaOpcion === 'definitivo';
+        data._decaSinDeca    = decaOpcion === 'sin_deca';
 
         // Datos mínimos exigidos por el DCDT para emitir un DeCA válido: NIF
         // del cargador, NIF del transportista efectivo y matrícula del
         // vehículo. Solo se exigen al confirmar el documento como definitivo;
         // en borrador puedes seguir editando sin estos datos todavía.
-        if (decaDefinitivo) {
+        if (decaOpcion === 'definitivo') {
             const DECA_REQUIRED = [
                 { id: 'senderNIF',    label: 'NIF Remitente / Cargador' },
                 { id: 'carrierNIF',   label: 'NIF Transportista efectivo' },
@@ -3396,11 +3398,12 @@ function _decaPrepare(D) {
     return { uuid, fname, url, qrDataURL };
 }
 
-function _decaQRCell(deca, isNacional) {
+function _decaQRCell(deca, isNacional, sinDeca) {
     if (!deca || !deca.qrDataURL) {
+        // Modo "sin DeCA": casilla vacía sin ningún aviso — carta de porte normal
+        if (sinDeca) return {text:'', border:[false,false,false,false]};
         if (isNacional) {
-            // Carta nacional sin DeCA emitido todavía: aviso visible de que es borrador,
-            // para que nunca se confunda con un documento de control válido.
+            // Carta nacional en modo borrador: aviso visible para distinguirla de un DeCA válido.
             return {
                 stack: [
                     {text:'BORRADOR', fontSize:7, bold:true, color:'#b91c1c', alignment:'center', margin:[0,8,0,2]},
@@ -3590,8 +3593,8 @@ function buildPDF(D,safetyTimer){
 
         content.push(colorLine());
         content.push({table:{widths:['*','*'],body:[[(function(){const b=box(13,'Instrucciones del Remitente',D.senderInstr||'—'); b.stack.push(spacer(15)); return b;})(),(function(){const b=box(18,'Reservas y Observaciones',D.observations||''); b.stack.push(spacer(15)); return b;})()]]},layout:lay,margin:[0,0,0,0]});
-        content.push({table:{widths: (deca || isNacional) ? ['*','*','auto'] : ['*','*'],body:[(deca || isNacional)
-            ? [(function(){const b=box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')); b.stack.push(spacer(5)); return b;})(),(function(){const b=box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':'')); b.stack.push(spacer(5)); return b;})(),_decaQRCell(deca, isNacional)]
+        content.push({table:{widths: (deca || (isNacional && !D._decaSinDeca)) ? ['*','*','auto'] : ['*','*'],body:[(deca || (isNacional && !D._decaSinDeca))
+            ? [(function(){const b=box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')); b.stack.push(spacer(5)); return b;})(),(function(){const b=box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':'')); b.stack.push(spacer(5)); return b;})(),_decaQRCell(deca, isNacional, D._decaSinDeca)]
             : [(function(){const b=box(21,'Lugar y fecha de emisión',(D.placeEmission||'—')+(dateStr?' · '+dateStr:'')); b.stack.push(spacer(5)); return b;})(),(function(){const b=box(14,'Franqueo / Reembolso',(D.freightTerms||'')+(D.codAmount?' — '+D.codAmount+' €':'')); b.stack.push(spacer(5)); return b;})()]
         ]},layout:lay,margin:[0,0,0,0]});
 
@@ -3715,16 +3718,19 @@ function _askSaveToHist(isEditing){
 }
 
 // ---- Pregunta si el DeCA es definitivo (solo carta nacional) ----
+// Devuelve: 'definitivo' | 'borrador' | 'sin_deca' | null (cancelar)
 function _askDecaDefinitivo(){
     return new Promise(resolve => {
         const mbs = "width:100%;margin-bottom:8px;padding:13px 14px;border-radius:10px;border:1.5px solid var(--line2);background:var(--bg3);color:var(--snow);font-size:.83rem;font-weight:600;font-family:'Sora',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:flex-start;gap:12px;line-height:1.4";
-        const h = '<p style="font-size:.78rem;color:var(--dim);margin-bottom:12px">Este documento es Carta de Porte Nacional. ¿Es ya la versión definitiva?</p>'
-            + '<button id="_deca_si" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">✅</span><span><b style="display:block">Sí, es definitivo — emitir DeCA</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Se genera el QR y se sube el PDF de forma permanente. No podrá sobreescribirse después.</span></span></button>'
-            + '<button id="_deca_no" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">✏️</span><span><b style="display:block">No, sigo editando (borrador)</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Se genera el PDF para revisar, sin QR ni subida. Repite este paso cuando esté listo.</span></span></button>';
+        const h = '<p style="font-size:.78rem;color:var(--dim);margin-bottom:12px">Este documento es Carta de Porte Nacional. ¿Cómo quieres generarlo?</p>'
+            + '<button id="_deca_si"      style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">✅</span><span><b style="display:block">Definitivo — emitir DeCA</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Genera QR y sube el PDF a Supabase (Ley 9/2025). No podrá sobreescribirse después.</span></span></button>'
+            + '<button id="_deca_no"      style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">✏️</span><span><b style="display:block">Borrador con aviso (sin DeCA)</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Genera el PDF con marca "BORRADOR". Repite este paso cuando esté listo para emitir.</span></span></button>'
+            + '<button id="_deca_nodeca" style="'+mbs+'"><span style="font-size:1.4rem;line-height:1.1">📄</span><span><b style="display:block">Sin DeCA (hasta la implantación)</b><span style="font-size:.7rem;color:var(--dim);font-weight:400">Genera la carta de porte normal, sin QR ni aviso de borrador. Útil hasta que el sistema DeCA esté activo.</span></span></button>';
         showBS('Carta de Porte Nacional · DeCA', h, [{label:'Cancelar',cls:'cancel',fn:()=>{closeBS();resolve(null);}}]);
         setTimeout(()=>{
-            const a=document.getElementById('_deca_si'); if(a) a.addEventListener('click',()=>{closeBS();resolve(true);});
-            const b=document.getElementById('_deca_no'); if(b) b.addEventListener('click',()=>{closeBS();resolve(false);});
+            const a=document.getElementById('_deca_si');     if(a) a.addEventListener('click',()=>{closeBS();resolve('definitivo');});
+            const b=document.getElementById('_deca_no');     if(b) b.addEventListener('click',()=>{closeBS();resolve('borrador');});
+            const c=document.getElementById('_deca_nodeca'); if(c) c.addEventListener('click',()=>{closeBS();resolve('sin_deca');});
         },60);
     });
 }
