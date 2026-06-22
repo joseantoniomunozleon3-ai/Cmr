@@ -1307,7 +1307,7 @@ select {
         </div></div>
 
         <div class="block"><div class="bhead"><span class="btag r">1</span><span class="btitle">Remitente</span><span class="bsaved" id="bs-sender">✓ guardado</span></div><div class="bbody"><div class="fr"><textarea id="senderBlock" placeholder="Empresa Exportadora S.L.&#10;Calle Mayor, 45 – Nave 3&#10;41500 Sevilla&#10;España" rows="5"></textarea></div>
-            <div class="fr" id="senderNIFRow" style="display:none"><label for="senderNIF">NIF Remitente / Cargador <span style="color:#e11d48">*</span></label><input id="senderNIF" type="text" placeholder="B12345678" style="text-transform:uppercase"/></div>
+            <div class="fr" id="senderNIFRow"><label for="senderNIF">NIF Remitente / Cargador <span style="color:#e11d48">*</span></label><input id="senderNIF" type="text" placeholder="B12345678" style="text-transform:uppercase"/></div>
         </div></div>
 
         <div class="block"><div class="bhead"><span class="btag b">2</span><span class="btitle">Consignatario</span></div><div class="bbody"><div class="qf-row" id="rcv-qf"></div><div class="fr"><textarea id="rcvBlock" placeholder="Importadora GmbH&#10;Industriestrasse, 12&#10;10115 Berlín&#10;Alemania" rows="5"></textarea></div><div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveRcvToAgenda()">+ Guardar en agenda</span></div></div></div>
@@ -1324,7 +1324,7 @@ select {
         <div class="block"><div class="bhead"><span class="btag g">16</span><span class="btitle">Transportista</span><span class="bsaved" id="bs-carrier">✓ guardado</span></div><div class="bbody">
             <div class="qf-row" id="car-qf"></div>
             <div class="fr"><textarea id="carrierBlock" placeholder="Transportes García S.L.&#10;Calle Transporte, 8&#10;41007 Sevilla&#10;España" rows="5"></textarea></div>
-            <div class="fr" id="carrierNIFRow" style="display:none"><label for="carrierNIF">NIF Transportista efectivo <span style="color:#e11d48">*</span></label><input id="carrierNIF" type="text" placeholder="B87654321" style="text-transform:uppercase"/></div>
+            <div class="fr" id="carrierNIFRow"><label for="carrierNIF">NIF Transportista efectivo <span style="color:#e11d48">*</span></label><input id="carrierNIF" type="text" placeholder="B87654321" style="text-transform:uppercase"/></div>
             <div style="text-align:right;margin-top:6px"><span class="qf-pill" onclick="saveCarToAgenda()">+ Guardar transportista en agenda</span></div>
             <div class="divl"></div>
             <div class="ssep">Vehículo y Conductor</div>
@@ -1953,11 +1953,6 @@ window.toggleDocNumLock = function() {
 
 window.onTipoDocChange = () => {
     updateDocNum();
-    const isNac = (document.getElementById('tipoDoc')?.value === 'nacional');
-    const r1 = document.getElementById('senderNIFRow');
-    const r2 = document.getElementById('carrierNIFRow');
-    if (r1) r1.style.display = isNac ? '' : 'none';
-    if (r2) r2.style.display = isNac ? '' : 'none';
 };
 
 window.updateNumPreview = function() {
