@@ -697,17 +697,17 @@ select {
     background: var(--bg2);
     border: 1px solid rgba(255,255,255,.8);
     border-bottom-color: var(--line); border-right-color: var(--line);
-    border-radius: var(--r2); padding: 11px 14px; margin-bottom: 8px;
-    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    border-radius: var(--r2); padding: 7px 10px; margin-bottom: 5px;
+    display: flex; align-items: center; gap: 9px; cursor: pointer;
     box-shadow: var(--sh-float); transition: all .12s;
 }
 .ag-item:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,.09), 0 2px 6px rgba(0,0,0,.07); }
 .ag-item:active { transform: translateY(1px); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
 
 .ag-ico {
-    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: .68rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+    font-size: .62rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
     box-shadow:
         0 1px 0 rgba(255,255,255,.4) inset,
         0 2px 6px rgba(0,0,0,.10);
@@ -716,8 +716,16 @@ select {
 .ag-ico.drv { background: linear-gradient(145deg, rgba(14,138,122,.14), rgba(14,138,122,.08)); border: 1px solid rgba(14,138,122,.28); border-bottom: 2px solid rgba(14,138,122,.35); color: var(--green-l); }
 
 .ag-info { flex: 1; min-width: 0; }
-.ag-name { font-size: .84rem; font-weight: 600; color: var(--snow); }
-.ag-sub  { font-size: .7rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.ag-name { font-size: .78rem; font-weight: 600; color: var(--snow); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ag-sub  { font-size: .66rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+
+.ag-list { max-height: 320px; overflow-y: auto; padding-right: 2px; }
+.ag-list::-webkit-scrollbar { width: 5px; }
+.ag-list::-webkit-scrollbar-track { background: transparent; }
+.ag-list::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
+
+.hacts.ag-hacts { gap: 4px; }
+.hacts.ag-hacts .hb { width: 24px; height: 24px; border-radius: 6px; }
 
 /* ── TOAST ──────────────────────────────────────────────── */
 #toast {
@@ -1433,21 +1441,21 @@ select {
             <div class="bhead"><span class="btag b">DEST.</span><span class="btitle">Consignatarios Frecuentes</span><span class="btag b" id="agRcvCount" style="margin-left:auto">0</span></div>
             <div class="bbody">
                 <div class="search-row" style="margin-bottom:10px"><input id="agRcvSearch" type="text" placeholder="Buscar consignatario…" oninput="renderAgenda()"/></div>
-                <div id="agRcvList"><div class="hist-empty" style="padding:20px 0">Sin consignatarios guardados</div></div>
+                <div id="agRcvList" class="ag-list"><div class="hist-empty" style="padding:20px 0">Sin consignatarios guardados</div></div>
             </div>
         </div>
         <div class="block">
             <div class="bhead"><span class="btag g">COND.</span><span class="btitle">Conductores y Vehículos</span><span class="btag g" id="agDrvCount" style="margin-left:auto">0</span></div>
             <div class="bbody">
                 <div class="search-row" style="margin-bottom:10px"><input id="agDrvSearch" type="text" placeholder="Buscar por nombre, DNI o matrícula…" oninput="renderAgenda()"/></div>
-                <div id="agDrvList"><div class="hist-empty" style="padding:20px 0">Sin conductores guardados</div></div>
+                <div id="agDrvList" class="ag-list"><div class="hist-empty" style="padding:20px 0">Sin conductores guardados</div></div>
             </div>
         </div>
         <div class="block">
             <div class="bhead"><span class="btag a">TRANS.</span><span class="btitle">Transportistas</span><span class="btag a" id="agCarCount" style="margin-left:auto">0</span></div>
             <div class="bbody">
                 <div class="search-row" style="margin-bottom:10px"><input id="agCarSearch" type="text" placeholder="Buscar transportista, NIF…" oninput="renderAgenda()"/></div>
-                <div id="agCarList"><div class="hist-empty" style="padding:20px 0">Sin transportistas guardados</div></div>
+                <div id="agCarList" class="ag-list"><div class="hist-empty" style="padding:20px 0">Sin transportistas guardados</div></div>
             </div>
         </div>
     </div>
@@ -2425,7 +2433,7 @@ window.renderAgenda = async function() {
     if (!totalRcv) { rcvEl.innerHTML = '<div class="hist-empty" style="padding:20px 0">Sin consignatarios</div>'; }
     else if (!rcvs.length) { rcvEl.innerHTML = '<div class="hist-empty" style="padding:20px 0">Sin resultados para esa búsqueda</div>'; }
     else {
-        rcvEl.innerHTML = rcvs.map(r => `<div class="ag-item" data-id="${r.id}" data-act="rcv"><div class="ag-ico rcv">${r.name.slice(0, 2).toUpperCase()}</div><div class="ag-info"><div class="ag-name">${r.name}</div><div class="ag-sub">Toca para ver opciones</div></div><div class="hacts"><div class="hb" data-id="${r.id}" data-act="loadrcv" title="Cargar en formulario">${loadIco}</div><div class="hb" data-id="${r.id}" data-act="editrcv" title="Editar">${editIco}</div><div class="hb de" data-id="${r.id}" data-act="delrcv" title="Eliminar">${xi}</div></div></div>`).join('');
+        rcvEl.innerHTML = rcvs.map(r => `<div class="ag-item" data-id="${r.id}" data-act="rcv"><div class="ag-ico rcv">${r.name.slice(0, 2).toUpperCase()}</div><div class="ag-info"><div class="ag-name">${r.name}</div><div class="ag-sub">Toca para ver opciones</div></div><div class="hacts ag-hacts"><div class="hb" data-id="${r.id}" data-act="loadrcv" title="Cargar en formulario">${loadIco}</div><div class="hb" data-id="${r.id}" data-act="editrcv" title="Editar">${editIco}</div><div class="hb de" data-id="${r.id}" data-act="delrcv" title="Eliminar">${xi}</div></div></div>`).join('');
         rcvEl.querySelectorAll('[data-act="rcv"]').forEach(el => el.addEventListener('click', e => {
             if (e.target.closest('[data-act="loadrcv"]') || e.target.closest('[data-act="editrcv"]') || e.target.closest('[data-act="delrcv"]')) return;
             fillRcv(el.dataset.id);
@@ -2440,7 +2448,7 @@ window.renderAgenda = async function() {
     if (!totalDrv) { drvEl.innerHTML = '<div class="hist-empty" style="padding:20px 0">Sin conductores</div>'; }
     else if (!drvs.length) { drvEl.innerHTML = '<div class="hist-empty" style="padding:20px 0">Sin resultados para esa búsqueda</div>'; }
     else {
-        drvEl.innerHTML = drvs.map(d => `<div class="ag-item" data-id="${d.id}" data-act="drv"><div class="ag-ico drv">${d.name.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase()}</div><div class="ag-info"><div class="ag-name">${d.name}</div><div class="ag-sub">${[d.dni ? ('DNI: ' + d.dni) : null, d.tractor, d.trailer].filter(Boolean).join(' · ')}</div></div><div class="hacts"><div class="hb" data-id="${d.id}" data-act="loaddrv" title="Cargar en formulario">${loadIco}</div><div class="hb" data-id="${d.id}" data-act="editdrv" title="Editar">${editIco}</div><div class="hb de" data-id="${d.id}" data-act="deldrv" title="Eliminar">${xi}</div></div></div>`).join('');
+        drvEl.innerHTML = drvs.map(d => `<div class="ag-item" data-id="${d.id}" data-act="drv"><div class="ag-ico drv">${d.name.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase()}</div><div class="ag-info"><div class="ag-name">${d.name}</div><div class="ag-sub">${[d.dni ? ('DNI: ' + d.dni) : null, d.tractor, d.trailer].filter(Boolean).join(' · ')}</div></div><div class="hacts ag-hacts"><div class="hb" data-id="${d.id}" data-act="loaddrv" title="Cargar en formulario">${loadIco}</div><div class="hb" data-id="${d.id}" data-act="editdrv" title="Editar">${editIco}</div><div class="hb de" data-id="${d.id}" data-act="deldrv" title="Eliminar">${xi}</div></div></div>`).join('');
         drvEl.querySelectorAll('[data-act="drv"]').forEach(el => el.addEventListener('click', e => {
             if (e.target.closest('[data-act="loaddrv"]') || e.target.closest('[data-act="editdrv"]') || e.target.closest('[data-act="deldrv"]')) return;
             fillDrv(el.dataset.id);
@@ -2455,7 +2463,7 @@ window.renderAgenda = async function() {
     if (!totalCar) { carEl.innerHTML = '<div class="hist-empty" style="padding:20px 0">Sin transportistas</div>'; }
     else if (!cars.length) { carEl.innerHTML = '<div class="hist-empty" style="padding:20px 0">Sin resultados para esa búsqueda</div>'; }
     else {
-        carEl.innerHTML = cars.map(c => `<div class="ag-item" data-id="${c.id}" data-act="car"><div class="ag-ico" style="background:linear-gradient(135deg,var(--amber-l),var(--amber))">${c.name.slice(0,2).toUpperCase()}</div><div class="ag-info"><div class="ag-name">${c.name}</div><div class="ag-sub">${(c.block||'').split('\n').slice(1,2).join('') || 'Toca para cargar'}</div></div><div class="hacts"><div class="hb" data-id="${c.id}" data-act="loadcar" title="Cargar en formulario">${loadIco}</div><div class="hb" data-id="${c.id}" data-act="editcar" title="Editar">${editIco}</div><div class="hb de" data-id="${c.id}" data-act="delcar" title="Eliminar">${xi}</div></div></div>`).join('');
+        carEl.innerHTML = cars.map(c => `<div class="ag-item" data-id="${c.id}" data-act="car"><div class="ag-ico" style="background:linear-gradient(135deg,var(--amber-l),var(--amber))">${c.name.slice(0,2).toUpperCase()}</div><div class="ag-info"><div class="ag-name">${c.name}</div><div class="ag-sub">${(c.block||'').split('\n').slice(1,2).join('') || 'Toca para cargar'}</div></div><div class="hacts ag-hacts"><div class="hb" data-id="${c.id}" data-act="loadcar" title="Cargar en formulario">${loadIco}</div><div class="hb" data-id="${c.id}" data-act="editcar" title="Editar">${editIco}</div><div class="hb de" data-id="${c.id}" data-act="delcar" title="Eliminar">${xi}</div></div></div>`).join('');
         carEl.querySelectorAll('[data-act="car"]').forEach(el => el.addEventListener('click', e => {
             if (e.target.closest('[data-act="loadcar"]') || e.target.closest('[data-act="editcar"]') || e.target.closest('[data-act="delcar"]')) return;
             fillCar(el.dataset.id);
