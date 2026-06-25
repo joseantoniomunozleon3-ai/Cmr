@@ -1890,6 +1890,26 @@ window.getGoodsTotals = function(r) {
     };
 };
 
+// Cliente de un documento: usa el campo guardado en el propio registro y,
+// si falta (documentos guardados antes de propagar templateClient, o
+// plantilla luego borrada/renombrada), recurre al nombre de plantilla
+// para buscarlo entre las plantillas actuales.
+window.getRecordClient = function(r, tplClientByName) {
+    const direct = (r.templateClient || '').trim();
+    if (direct) return direct;
+    if (tplClientByName && r.templateName) {
+        const found = tplClientByName[r.templateName.trim().toLowerCase()];
+        if (found) return found;
+    }
+    return '';
+};
+window.buildTplClientMap = async function() {
+    const tpls = await dbAll(TPL);
+    const map = {};
+    tpls.forEach(t => { if (t.templateName && t.templateClient) map[t.templateName.trim().toLowerCase()] = t.templateClient.trim(); });
+    return map;
+};
+
 const FIELDS = ['docNum','docDate','placeEmission','docsAnexos','senderBlock','senderNIF','rcvBlock',
     'placeLoading','placeDelivery','dateDelivery','clientRef','carrierBlock','carrierNIF','driverName',
     'driverDNI','plateTractor','plateTrailer','senderInstr','freightTerms','codAmount',
@@ -1898,7 +1918,8 @@ const FIELDS = ['docNum','docDate','placeEmission','docsAnexos','senderBlock','s
 window.collect = function() {
     const d = { savedAt: new Date().toISOString() };
     FIELDS.forEach(f => { d[f] = gv(f); });
-    d.templateName = window._activeTemplateName || '';
+    d.templateName   = window._activeTemplateName   || '';
+    d.templateClient = window._activeTemplateClient || '';
     d.templateId   = window._activeTemplateId   || null;
     d.recordId     = window._activeRecordId     || null;
     d['plateTractor'] = (d['plateTractor'] || '').toUpperCase();
@@ -2146,7 +2167,7 @@ window.newCMR = window.doNewCMR = function() {
     clearSig(); clearSigSender();
     sv('docNum', genDocNum());
     sv('docDate', new Date().toISOString().split('T')[0]);
-    window._activeTemplateName = ''; updateTplBanner();
+    window._activeTemplateName = ''; window._activeTemplateClient = ''; updateTplBanner();
     window._activeTemplateId = null;
     window._activeRecordId = null;
     clearDraft(); tab('form'); toast('✓ Formulario limpio', 'ok');
@@ -2557,6 +2578,7 @@ window.renderHoy = async function() {
     const todayStr = ymd(now);
     const data = all.filter(r => { try { return ymd(new Date(r.savedAt)) === todayStr; } catch { return false; } })
                     .sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
+    const tplClientMap = await buildTplClientMap();
 
     // Cabecera fecha
     const fechaEl = document.getElementById('hoy-fecha-txt');
@@ -2583,11 +2605,10 @@ window.renderHoy = async function() {
         el.innerHTML = '<div class="hist-empty">Aún no has generado ningún CMR hoy.<br>Pulsa <b>+ Nuevo CMR</b> para empezar.</div>';
         return;
     }
-    const makeHoyItem = (r, idx) => {
+    const makeHoyItem = (r, numLabel) => {
         const hora     = r.savedAt ? new Date(r.savedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '—';
-        const numLabel = `#${data.length - idx}`;
-        const tplName  = r.templateName || r.templateClient || (r.rcvBlock || '').split('\n')[0].trim() || '';
-        const isTpl    = !!(r.templateName || r.templateClient);
+        const tplName  = r.templateName || (r.rcvBlock || '').split('\n')[0].trim() || '';
+        const isTpl    = !!r.templateName;
         const docNum   = r.docNum || 'Sin N.º';
         const ref      = r.clientRef || '';
         const kg       = getGoodsTotals(r).weight ? getGoodsTotals(r).weight.toFixed(0) + ' kg' : '';
@@ -2610,7 +2631,39 @@ window.renderHoy = async function() {
             </div>
         </div>`;
     };
-    el.innerHTML = data.map((r,i) => makeHoyItem(r,i)).join('');
+
+    // Numeración global (orden cronológico de hoy), pero agrupado visualmente por cliente
+    const numByRecId = {};
+    data.forEach((r, idx) => { numByRecId[r.id] = data.length - idx; });
+
+    const grouped = {};
+    data.forEach(r => {
+        const cli = getRecordClient(r, tplClientMap) || 'Sin cliente / manual';
+        if (!grouped[cli]) grouped[cli] = [];
+        grouped[cli].push(r);
+    });
+    const clients = Object.keys(grouped).sort((a, b) =>
+        a === 'Sin cliente / manual' ? 1 : b === 'Sin cliente / manual' ? -1 : a.localeCompare(b, 'es')
+    );
+
+    if (clients.length <= 1) {
+        // Un solo cliente (o ninguno identificado): lista plana, sin cabeceras de grupo
+        el.innerHTML = data.map(r => makeHoyItem(r, `#${numByRecId[r.id]}`)).join('');
+    } else {
+        el.innerHTML = clients.map(cli => {
+            const items = grouped[cli];
+            const kgGroup = items.reduce((s, r) => s + getGoodsTotals(r).weight, 0);
+            return `<div class="hist-group">
+                <div class="hist-gh" style="cursor:default">
+                    <span class="btag b" style="font-size:.52rem;padding:2px 7px">CLI</span>
+                    <span style="font-size:.82rem;font-weight:600;color:var(--snow);flex:1">${cli}</span>
+                    ${kgGroup ? `<span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim);margin-right:6px">${kgGroup.toFixed(0)} kg</span>` : ''}
+                    <span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim)">${items.length} doc${items.length===1?'':'s'}</span>
+                </div>
+                <div style="margin-top:4px">${items.map(r => makeHoyItem(r, `#${numByRecId[r.id]}`)).join('')}</div>
+            </div>`;
+        }).join('');
+    }
     el.querySelectorAll('[data-act="load"]').forEach(b => b.addEventListener('click', () => loadRec(b.dataset.id)));
     el.querySelectorAll('[data-act="dup"]').forEach(b  => b.addEventListener('click', () => dupRec(b.dataset.id)));
     el.querySelectorAll('[data-act="pdf"]').forEach(b  => b.addEventListener('click', () => regenPDF(b.dataset.id)));
@@ -2632,7 +2685,8 @@ window.renderHist = async function() {
     const el = document.getElementById('histList');
     const makeItem = (r, style = '') => {
         const dt = r.savedAt ? new Date(r.savedAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—';
-        const tplLabel = r.templateName ? `<span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim);font-weight:600;margin-right:4px">${r.templateName} ·</span>` : '';
+        const cliTag = (r.templateClient || '').trim();
+        const tplLabel = r.templateName ? `<span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim);font-weight:600;margin-right:4px">${r.templateName}${cliTag ? ' <span style="color:var(--blue-l)">· ' + cliTag + '</span>' : ''} ·</span>` : '';
         return `<div class="hitem" data-id="${r.id}" ${style}><div class="hico">📄</div><div class="hinfo"><div class="hnum">${tplLabel}${r.docNum || 'Sin N.º'} ${r.tipoDoc === 'nacional' ? '<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>' : ''} ${getGoodsTotals(r).weight ? `<span class="hwbadge">${getGoodsTotals(r).weight.toFixed(0)}kg</span>` : ''}</div>${r.clientRef ? `<div class="hrefbadge">🏷 ${r.clientRef}</div>` : ''}<div class="hsub">${[(r.rcvBlock || '').split('\n')[0], r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" data-id="${r.id}" data-act="load">⬆</div><div class="hb du" data-id="${r.id}" data-act="dup">📋</div><div class="hb pd" data-id="${r.id}" data-act="pdf">📄</div><div class="hb de" data-id="${r.id}" data-act="del">🗑</div></div></div>`;
     };
     if (group) {
@@ -2696,8 +2750,8 @@ window.renderHist = async function() {
     document.getElementById('st3').textContent = monthKg > 0 ? (monthKg >= 1000 ? (monthKg / 1000).toFixed(1) + 't' : Math.round(monthKg)) : '—';
 };
 
-window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; window._activeRecordId = r.id; _lastDraftHash = null; clearSig(); clearSigSender(); tab('form'); updateTplBanner(); toast('✓ Documento cargado — se actualizará al regenerar el PDF', 'ok', 4000); };
-window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); window._activeTemplateName = r.templateName || ''; window._activeTemplateId = null; window._activeRecordId = null; sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); updateTplBanner(); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
+window.loadRec = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; fill(r); window._activeTemplateName = r.templateName || ''; window._activeTemplateClient = r.templateClient || ''; window._activeTemplateId = null; window._activeRecordId = r.id; _lastDraftHash = null; clearSig(); clearSigSender(); tab('form'); updateTplBanner(); toast('✓ Documento cargado — se actualizará al regenerar el PDF', 'ok', 4000); };
+window.dupRec  = async id => { const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return; const d = { ...r }; delete d.id; d.docDate = new Date().toISOString().split('T')[0]; d.savedAt = new Date().toISOString(); fill(d); window._activeTemplateName = r.templateName || ''; window._activeTemplateClient = r.templateClient || ''; window._activeTemplateId = null; window._activeRecordId = null; sv('docNum', genDocNum()); clearSig(); clearSigSender(); tab('form'); updateTplBanner(); toast('✓ Duplicado — cambia el albarán para actualizar el N.º', 'warn', 5000); };
 window.regenPDF = async function(id) {
     const all = await dbAll(STORE); const r = all.find(x => x.id == id); if (!r) return;
     const chosenLayout = await _askPDFLayout(); if (!chosenLayout) return;
@@ -2871,7 +2925,7 @@ window._tplRename = async function() {
     setTimeout(() => { const inp = document.getElementById(inputId); if (inp) { inp.focus(); inp.select(); } }, 80);
 };
 
-window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); window._activeTemplateName = tpl.templateName || ''; window._activeTemplateId = tpl.id; window._activeRecordId = null; _lastDraftHash = null; tab('form'); updateTplBanner(); toast('✓ Plantilla cargada — los cambios se guardarán en ella automáticamente', 'ok', 4000); };
+window.loadTemplate   = async id => { const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return; fill(tpl); sv('docNum', genDocNum()); sv('docDate', new Date().toISOString().split('T')[0]); window._activeTemplateName = tpl.templateName || ''; window._activeTemplateClient = tpl.templateClient || ''; window._activeTemplateId = tpl.id; window._activeRecordId = null; _lastDraftHash = null; tab('form'); updateTplBanner(); toast('✓ Plantilla cargada — los cambios se guardarán en ella automáticamente', 'ok', 4000); };
 window.updateTemplate = async function(id) {
     const all = await dbAll(TPL); const tpl = all.find(x => x.id == id); if (!tpl) return;
     showBS('Actualizar plantilla', `<p>Se sobreescribirá <b>${tpl.templateName}</b> con los datos actuales del formulario.</p>`,
@@ -3127,7 +3181,7 @@ window._clearOk = async function() { closeBS(); await dbClear(STORE); await rend
 // ── Borrador helpers (delegan a autosave.js) ──────────────────
 window._restoreDraft = function() {
     closeBS(); const draft = loadDraft(); if (!draft) return;
-    fill(draft); window._activeTemplateName = draft.templateName || ''; window._activeTemplateId = draft.templateId || null; window._activeRecordId = draft.recordId || null; _lastDraftHash = null; updateTplBanner(); toast('✓ Borrador restaurado', 'ok');
+    fill(draft); window._activeTemplateName = draft.templateName || ''; window._activeTemplateClient = draft.templateClient || ''; window._activeTemplateId = draft.templateId || null; window._activeRecordId = draft.recordId || null; _lastDraftHash = null; updateTplBanner(); toast('✓ Borrador restaurado', 'ok');
 };
 window._discardDraft = function() { closeBS(); clearDraft(); toast('Borrador descartado', 'warn'); };
 
