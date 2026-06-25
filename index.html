@@ -1874,6 +1874,22 @@ const gv   = id => (document.getElementById(id) || {}).value?.trim() || '';
 const gvUp = id => gv(id).toUpperCase();
 const sv   = (id, v) => { const e = document.getElementById(id); if (e) e.value = v || ''; };
 
+// Totales de mercancía de un registro: usa los campos agregados si existen
+// (registros nuevos), y si no, los recalcula a partir de goodsLines —
+// esto repara automáticamente los documentos antiguos guardados antes de
+// que se empezaran a persistir goodsWeight/goodsQty/goodsVolume.
+window.getGoodsTotals = function(r) {
+    if (r.goodsWeight || r.goodsQty || r.goodsVolume) {
+        return { qty: parseFloat(r.goodsQty) || 0, weight: parseFloat(r.goodsWeight) || 0, volume: parseFloat(r.goodsVolume) || 0 };
+    }
+    const lines = Array.isArray(r.goodsLines) ? r.goodsLines : [];
+    return {
+        qty:    lines.reduce((s, l) => s + (parseFloat(l.qty)    || 0), 0),
+        weight: lines.reduce((s, l) => s + (parseFloat(l.weight) || 0), 0),
+        volume: lines.reduce((s, l) => s + (parseFloat(l.volume) || 0), 0)
+    };
+};
+
 const FIELDS = ['docNum','docDate','placeEmission','docsAnexos','senderBlock','senderNIF','rcvBlock',
     'placeLoading','placeDelivery','dateDelivery','clientRef','carrierBlock','carrierNIF','driverName',
     'driverDNI','plateTractor','plateTrailer','senderInstr','freightTerms','codAmount',
@@ -1888,6 +1904,9 @@ window.collect = function() {
     d['plateTractor'] = (d['plateTractor'] || '').toUpperCase();
     d['plateTrailer'] = (d['plateTrailer'] || '').toUpperCase();
     d.goodsLines = collectGoodsLines();
+    d.goodsQty    = d.goodsLines.reduce((s, l) => s + (parseFloat(l.qty)    || 0), 0);
+    d.goodsWeight = d.goodsLines.reduce((s, l) => s + (parseFloat(l.weight) || 0), 0);
+    d.goodsVolume = d.goodsLines.reduce((s, l) => s + (parseFloat(l.volume) || 0), 0);
     d.successiveCarriers = collectSuccessiveCarriers();
     const compressSig = (pad) => {
         if (!pad || pad.isEmpty()) return null;
@@ -2544,9 +2563,10 @@ window.renderHoy = async function() {
     if (fechaEl) fechaEl.textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
     // Stats del día
-    const totalKg  = data.reduce((s,r) => s + (parseFloat(r.goodsWeight)  || 0), 0);
-    const totalBlt = data.reduce((s,r) => s + (parseFloat(r.goodsQty)     || 0), 0);
-    const totalVol = data.reduce((s,r) => s + (parseFloat(r.goodsVolume)  || 0), 0);
+    const totals  = data.map(getGoodsTotals);
+    const totalKg  = totals.reduce((s,t) => s + t.weight, 0);
+    const totalBlt = totals.reduce((s,t) => s + t.qty,    0);
+    const totalVol = totals.reduce((s,t) => s + t.volume, 0);
     document.getElementById('hoy-st0').textContent = data.length;
     document.getElementById('hoy-st1').textContent = totalKg  > 0 ? (totalKg  >= 1000 ? (totalKg/1000).toFixed(1)+'t' : Math.round(totalKg))  : '—';
     document.getElementById('hoy-st2').textContent = totalBlt > 0 ? Math.round(totalBlt) : '—';
@@ -2570,7 +2590,7 @@ window.renderHoy = async function() {
         const isTpl    = !!(r.templateName || r.templateClient);
         const docNum   = r.docNum || 'Sin N.º';
         const ref      = r.clientRef || '';
-        const kg       = r.goodsWeight ? r.goodsWeight + ' kg' : '';
+        const kg       = getGoodsTotals(r).weight ? getGoodsTotals(r).weight.toFixed(0) + ' kg' : '';
         const nacBadge = r.tipoDoc === 'nacional'
             ? `<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>`
             : '';
@@ -2613,7 +2633,7 @@ window.renderHist = async function() {
     const makeItem = (r, style = '') => {
         const dt = r.savedAt ? new Date(r.savedAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—';
         const tplLabel = r.templateName ? `<span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim);font-weight:600;margin-right:4px">${r.templateName} ·</span>` : '';
-        return `<div class="hitem" data-id="${r.id}" ${style}><div class="hico">📄</div><div class="hinfo"><div class="hnum">${tplLabel}${r.docNum || 'Sin N.º'} ${r.tipoDoc === 'nacional' ? '<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>' : ''} ${r.goodsWeight ? `<span class="hwbadge">${r.goodsWeight}kg</span>` : ''}</div>${r.clientRef ? `<div class="hrefbadge">🏷 ${r.clientRef}</div>` : ''}<div class="hsub">${[(r.rcvBlock || '').split('\n')[0], r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" data-id="${r.id}" data-act="load">⬆</div><div class="hb du" data-id="${r.id}" data-act="dup">📋</div><div class="hb pd" data-id="${r.id}" data-act="pdf">📄</div><div class="hb de" data-id="${r.id}" data-act="del">🗑</div></div></div>`;
+        return `<div class="hitem" data-id="${r.id}" ${style}><div class="hico">📄</div><div class="hinfo"><div class="hnum">${tplLabel}${r.docNum || 'Sin N.º'} ${r.tipoDoc === 'nacional' ? '<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>' : ''} ${getGoodsTotals(r).weight ? `<span class="hwbadge">${getGoodsTotals(r).weight.toFixed(0)}kg</span>` : ''}</div>${r.clientRef ? `<div class="hrefbadge">🏷 ${r.clientRef}</div>` : ''}<div class="hsub">${[(r.rcvBlock || '').split('\n')[0], r.placeDelivery].filter(Boolean).join(' → ')}</div></div><div class="hdate">${dt}</div><div class="hacts"><div class="hb lo" data-id="${r.id}" data-act="load">⬆</div><div class="hb du" data-id="${r.id}" data-act="dup">📋</div><div class="hb pd" data-id="${r.id}" data-act="pdf">📄</div><div class="hb de" data-id="${r.id}" data-act="del">🗑</div></div></div>`;
     };
     if (group) {
         const grouped = {};
@@ -2668,8 +2688,8 @@ window.renderHist = async function() {
     el.querySelectorAll('[data-act="pdf"]').forEach(b  => b.addEventListener('click', () => regenPDF(b.dataset.id)));
     el.querySelectorAll('[data-act="del"]').forEach(b  => b.addEventListener('click', () => delRec(b.dataset.id)));
     const allMonth = all.filter(r => { try { const d = new Date(r.savedAt); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); } catch { return false; } });
-    const totalKg  = all.reduce((s, r) => s + (parseFloat(r.goodsWeight) || 0), 0);
-    const monthKg  = allMonth.reduce((s, r) => s + (parseFloat(r.goodsWeight) || 0), 0);
+    const totalKg  = all.reduce((s, r) => s + getGoodsTotals(r).weight, 0);
+    const monthKg  = allMonth.reduce((s, r) => s + getGoodsTotals(r).weight, 0);
     document.getElementById('st0').textContent = all.length;
     document.getElementById('st1').textContent = allMonth.length;
     document.getElementById('st2').textContent = totalKg > 0 ? (totalKg >= 1000 ? (totalKg / 1000).toFixed(1) + 't' : Math.round(totalKg)) : '—';
