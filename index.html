@@ -1227,7 +1227,7 @@ select {
     #panel-form .block:nth-child(12) { grid-column: 2 / span 2; grid-row: 7; }
     #panel-form > div:not(.block):not(#tpl-banner) { grid-column: 2 / span 2; }
 
-    #panel-hist.active, #panel-hoy.active, #panel-agenda.active, #panel-tmpl.active, #panel-cfg.active {
+    #panel-hist.active, #panel-hoy.active, #panel-ayer.active, #panel-manana.active, #panel-agenda.active, #panel-tmpl.active, #panel-cfg.active {
         max-width: 960px; margin: 0 auto; display: block;
     }
 
@@ -1315,8 +1315,9 @@ select {
 
     <div id="tabs" role="tablist" aria-label="Secciones de la aplicación">
         <div class="tab active" role="tab" tabindex="0" aria-selected="true"  aria-controls="panel-form"   data-p="form"   onclick="tab('form')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('form')">Documento</div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-ayer"   data-p="ayer"   onclick="tab('ayer')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('ayer')">Ayer <span class="tbadge" id="ayerBadge" aria-label="CMR de ayer">0</span></div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-hoy"    data-p="hoy"    onclick="tab('hoy')"    onkeydown="if(event.key==='Enter'||event.key===' ')tab('hoy')">Hoy <span class="tbadge" id="hoyBadge" aria-label="CMR de hoy">0</span></div>
-        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-hist"   data-p="hist"   onclick="tab('hist')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('hist')">Historial <span class="tbadge" id="histBadge" aria-label="documentos guardados">0</span></div>
+        <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-manana" data-p="manana" onclick="tab('manana')" onkeydown="if(event.key==='Enter'||event.key===' ')tab('manana')">Mañana <span class="tbadge" id="mananaBadge" aria-label="CMR de mañana">0</span></div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-agenda" data-p="agenda" onclick="tab('agenda')" onkeydown="if(event.key==='Enter'||event.key===' ')tab('agenda')">Agenda</div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-tmpl"   data-p="tmpl"   onclick="tab('tmpl')"   onkeydown="if(event.key==='Enter'||event.key===' ')tab('tmpl')">Plantillas</div>
         <div class="tab"        role="tab" tabindex="0" aria-selected="false" aria-controls="panel-cfg"    data-p="cfg"    onclick="tab('cfg')"    onkeydown="if(event.key==='Enter'||event.key===' ')tab('cfg')">Config</div>
@@ -1421,6 +1422,43 @@ select {
     </div>
 
     <!-- ── Panel: Hoy ── -->
+    <div id="panel-ayer" role="tabpanel" class="panel">
+        <!-- Resumen del día -->
+        <div class="stats" id="ayer-stats">
+            <div class="stat"><div class="stat-n" id="ayer-st0">0</div><div class="stat-l">CMR Ayer</div></div>
+            <div class="stat"><div class="stat-n" id="ayer-st1">0</div><div class="stat-l">Kg Totales</div></div>
+            <div class="stat"><div class="stat-n" id="ayer-st2">0</div><div class="stat-l">Bultos</div></div>
+            <div class="stat"><div class="stat-n" id="ayer-st3">—</div><div class="stat-l">m³ Total</div></div>
+        </div>
+        <!-- Cabecera de fecha -->
+        <div id="ayer-fecha-hdr" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(240,234,220,.4));border:1px solid rgba(255,255,255,.8);border-bottom-color:var(--line);border-right-color:var(--line);border-radius:var(--r2);box-shadow:var(--sh-float)">
+            <span class="btag r" style="font-size:.6rem;padding:3px 9px">AYER</span>
+            <span id="ayer-fecha-txt" style="font-size:.84rem;font-weight:700;color:var(--snow);flex:1"></span>
+            <button onclick="newCMRForDay(-1)" style="height:30px;padding:0 12px;border-radius:7px;border:none;background:linear-gradient(180deg,#e87020,#b83812);color:#fff;font-size:.72rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;box-shadow:var(--sh-btn-primary)">+ Nuevo CMR</button>
+        </div>
+        <!-- Lista -->
+        <div id="ayerList"></div>
+    </div>
+
+    <!-- ── Panel: Mañana ── -->
+    <div id="panel-manana" role="tabpanel" class="panel">
+        <!-- Resumen del día -->
+        <div class="stats" id="manana-stats">
+            <div class="stat"><div class="stat-n" id="manana-st0">0</div><div class="stat-l">CMR Mañana</div></div>
+            <div class="stat"><div class="stat-n" id="manana-st1">0</div><div class="stat-l">Kg Totales</div></div>
+            <div class="stat"><div class="stat-n" id="manana-st2">0</div><div class="stat-l">Bultos</div></div>
+            <div class="stat"><div class="stat-n" id="manana-st3">—</div><div class="stat-l">m³ Total</div></div>
+        </div>
+        <!-- Cabecera de fecha -->
+        <div id="manana-fecha-hdr" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(240,234,220,.4));border:1px solid rgba(255,255,255,.8);border-bottom-color:var(--line);border-right-color:var(--line);border-radius:var(--r2);box-shadow:var(--sh-float)">
+            <span class="btag b" style="font-size:.6rem;padding:3px 9px">MAÑANA</span>
+            <span id="manana-fecha-txt" style="font-size:.84rem;font-weight:700;color:var(--snow);flex:1"></span>
+            <button onclick="newCMRForDay(1)" style="height:30px;padding:0 12px;border-radius:7px;border:none;background:linear-gradient(180deg,#e87020,#b83812);color:#fff;font-size:.72rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;box-shadow:var(--sh-btn-primary)">+ Nuevo CMR</button>
+        </div>
+        <!-- Lista -->
+        <div id="mananaList"></div>
+    </div>
+
     <div id="panel-hoy" role="tabpanel" class="panel">
         <!-- Resumen del día -->
         <div class="stats" id="hoy-stats">
@@ -1907,6 +1945,8 @@ window.tab = function(n) {
     if (n === 'tmpl')   renderTemplates();
     if (n === 'cfg')    syncCfgPanel();
     if (n === 'hoy')    renderHoy();
+    if (n === 'ayer')   renderAyer();
+    if (n === 'manana') renderManana();
 };
 
 // ── Field helpers ─────────────────────────────────────────────
@@ -2211,6 +2251,14 @@ window.newCMR = window.doNewCMR = function() {
     window._activeTemplateId = null;
     window._activeRecordId = null;
     clearDraft(); tab('form'); toast('✓ Formulario limpio', 'ok');
+};
+
+// Nuevo CMR con fecha de emisión desplazada (ayer = -1, mañana = +1)
+window.newCMRForDay = function(offsetDays) {
+    window.newCMR();
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    sv('docDate', d.toISOString().split('T')[0]);
 };
 
 // ── Líneas de mercancía ───────────────────────────────────────
@@ -2600,28 +2648,40 @@ window.editCar = async function(id) {
 window.updateHistBadge = async function() {
     const n = (await dbAll(STORE)).length;
     const el = document.getElementById('histBadge');
-    el.textContent = n; el.style.display = n ? 'inline' : 'none';
-    // también actualiza badge Hoy
-    const today = new Date();
-    const ymd = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (el) { el.textContent = n; el.style.display = n ? 'inline' : 'none'; }
     const all2 = await dbAll(STORE);
+    const ymd = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    // badge Hoy: por fecha de guardado (savedAt), como siempre
+    const today = new Date();
     const todayN = all2.filter(r => { try { return ymd(new Date(r.savedAt)) === ymd(today); } catch { return false; } }).length;
     const hb = document.getElementById('hoyBadge');
     if (hb) { hb.textContent = todayN; hb.style.display = todayN ? 'inline' : 'none'; }
+    // badges Ayer/Mañana: por fecha de emisión (docDate)
+    const ayerDate = new Date(); ayerDate.setDate(ayerDate.getDate() - 1);
+    const mananaDate = new Date(); mananaDate.setDate(mananaDate.getDate() + 1);
+    const ayerN   = all2.filter(r => r.docDate === ymd(ayerDate)).length;
+    const mananaN = all2.filter(r => r.docDate === ymd(mananaDate)).length;
+    const ab = document.getElementById('ayerBadge');
+    if (ab) { ab.textContent = ayerN; ab.style.display = ayerN ? 'inline' : 'none'; }
+    const mb = document.getElementById('mananaBadge');
+    if (mb) { mb.textContent = mananaN; mb.style.display = mananaN ? 'inline' : 'none'; }
 };
 
-// ── Panel HOY ─────────────────────────────────────────────────
-window.renderHoy = async function() {
+// ── Paneles AYER / HOY / MAÑANA ────────────────────────────────
+// offsetDays: -1 = ayer, 0 = hoy, 1 = mañana. Filtra por docDate (fecha de emisión del documento),
+// no por savedAt, para poder "adelantar trabajo" preparando CMR con fecha futura.
+window.renderDayPanel = async function(offsetDays, prefix, label) {
     const all  = await dbAll(STORE);
     const now  = new Date();
+    now.setDate(now.getDate() + offsetDays);
     const ymd  = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    const todayStr = ymd(now);
-    const data = all.filter(r => { try { return ymd(new Date(r.savedAt)) === todayStr; } catch { return false; } })
-                    .sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
+    const dayStr = ymd(now);
+    const data = all.filter(r => r.docDate === dayStr)
+                    .sort((a,b) => new Date(b.savedAt||0) - new Date(a.savedAt||0));
     const tplClientMap = await buildTplClientMap();
 
     // Cabecera fecha
-    const fechaEl = document.getElementById('hoy-fecha-txt');
+    const fechaEl = document.getElementById(prefix + '-fecha-txt');
     if (fechaEl) fechaEl.textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
     // Stats del día
@@ -2629,23 +2689,24 @@ window.renderHoy = async function() {
     const totalKg  = totals.reduce((s,t) => s + t.weight, 0);
     const totalBlt = totals.reduce((s,t) => s + t.qty,    0);
     const totalVol = totals.reduce((s,t) => s + t.volume, 0);
-    document.getElementById('hoy-st0').textContent = data.length;
-    document.getElementById('hoy-st1').textContent = totalKg  > 0 ? (totalKg  >= 1000 ? (totalKg/1000).toFixed(1)+'t' : Math.round(totalKg))  : '—';
-    document.getElementById('hoy-st2').textContent = totalBlt > 0 ? Math.round(totalBlt) : '—';
-    document.getElementById('hoy-st3').textContent = totalVol > 0 ? totalVol.toFixed(2) : '—';
+    const stEl = (i) => document.getElementById(prefix + '-st' + i);
+    if (stEl(0)) stEl(0).textContent = data.length;
+    if (stEl(1)) stEl(1).textContent = totalKg  > 0 ? (totalKg  >= 1000 ? (totalKg/1000).toFixed(1)+'t' : Math.round(totalKg))  : '—';
+    if (stEl(2)) stEl(2).textContent = totalBlt > 0 ? Math.round(totalBlt) : '—';
+    if (stEl(3)) stEl(3).textContent = totalVol > 0 ? totalVol.toFixed(2) : '—';
 
     // Badge
-    const hb = document.getElementById('hoyBadge');
+    const hb = document.getElementById(prefix + 'Badge');
     if (hb) { hb.textContent = data.length; hb.style.display = data.length ? 'inline' : 'none'; }
 
     // Lista
-    const el = document.getElementById('hoyList');
+    const el = document.getElementById(prefix + 'List');
     if (!el) return;
     if (!data.length) {
-        el.innerHTML = '<div class="hist-empty">Aún no has generado ningún CMR hoy.<br>Pulsa <b>+ Nuevo CMR</b> para empezar.</div>';
+        el.innerHTML = `<div class="hist-empty">Aún no hay ningún CMR con fecha de ${label}.<br>Pulsa <b>+ Nuevo CMR</b> para empezar.</div>`;
         return;
     }
-    const makeHoyItem = (r, numLabel) => {
+    const makeDayItem = (r, numLabel) => {
         const hora     = r.savedAt ? new Date(r.savedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '—';
         const tplName  = r.templateName || (r.rcvBlock || '').split('\n')[0].trim() || '';
         const isTpl    = !!r.templateName;
@@ -2672,7 +2733,7 @@ window.renderHoy = async function() {
         </div>`;
     };
 
-    // Numeración global (orden cronológico de hoy), pero agrupado visualmente por cliente
+    // Numeración global (orden cronológico del día), pero agrupado visualmente por cliente
     const numByRecId = {};
     data.forEach((r, idx) => { numByRecId[r.id] = data.length - idx; });
 
@@ -2688,7 +2749,7 @@ window.renderHoy = async function() {
 
     if (clients.length <= 1) {
         // Un solo cliente (o ninguno identificado): lista plana, sin cabeceras de grupo
-        el.innerHTML = data.map(r => makeHoyItem(r, `#${numByRecId[r.id]}`)).join('');
+        el.innerHTML = data.map(r => makeDayItem(r, `#${numByRecId[r.id]}`)).join('');
     } else {
         el.innerHTML = clients.map(cli => {
             const items = grouped[cli];
@@ -2700,7 +2761,7 @@ window.renderHoy = async function() {
                     ${kgGroup ? `<span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim);margin-right:6px">${kgGroup.toFixed(0)} kg</span>` : ''}
                     <span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim)">${items.length} doc${items.length===1?'':'s'}</span>
                 </div>
-                <div style="margin-top:4px">${items.map(r => makeHoyItem(r, `#${numByRecId[r.id]}`)).join('')}</div>
+                <div style="margin-top:4px">${items.map(r => makeDayItem(r, `#${numByRecId[r.id]}`)).join('')}</div>
             </div>`;
         }).join('');
     }
@@ -2709,6 +2770,10 @@ window.renderHoy = async function() {
     el.querySelectorAll('[data-act="pdf"]').forEach(b  => b.addEventListener('click', () => regenPDF(b.dataset.id)));
     el.querySelectorAll('[data-act="del"]').forEach(b  => b.addEventListener('click', () => delRec(b.dataset.id)));
 };
+
+window.renderHoy    = () => window.renderDayPanel(0,  'hoy',    'hoy');
+window.renderAyer   = () => window.renderDayPanel(-1, 'ayer',   'ayer');
+window.renderManana = () => window.renderDayPanel(1,  'manana', 'mañana');
 
 window.renderHist = async function() {
     const all  = await dbAll(STORE);
@@ -2832,7 +2897,7 @@ window.regenPDF = async function(id) {
     try { buildPDF_withSello(data, st); } catch (e) { clearTimeout(st); showOv(false); toast('⚠ Error: ' + e.message, 'err', 5000); }
 };
 window.delRec  = id => { showBS('Eliminar Documento', 'Este registro se eliminará permanentemente.', [{ label: 'Cancelar', cls: 'cancel', fn: closeBS }, { label: 'Eliminar', cls: 'danger', fn: () => _delOk(id) }]); };
-window._delOk  = async id => { closeBS(); await dbDel(STORE, id); await renderHist(); if (window.renderHoy) await renderHoy(); await updateHistBadge(); toast('Eliminado', 'warn'); };
+window._delOk  = async id => { closeBS(); await dbDel(STORE, id); await renderHist(); if (window.renderHoy) await renderHoy(); if (window.renderAyer) await renderAyer(); if (window.renderManana) await renderManana(); await updateHistBadge(); toast('Eliminado', 'warn'); };
 
 /* ── Banner nombre de plantilla ── */
 function updateTplBanner() {
@@ -2882,6 +2947,8 @@ window.deleteHistByRange = async function() {
                 for (const r of targets) await dbDel(STORE, r.id);
                 await renderHist();
                 if (window.renderHoy) await renderHoy();
+                if (window.renderAyer) await renderAyer();
+                if (window.renderManana) await renderManana();
                 await updateHistBadge();
                 toast(`🗑 ${targets.length} documento${targets.length === 1 ? '' : 's'} eliminado${targets.length === 1 ? '' : 's'}`, 'warn', 4000);
             }}
@@ -3216,7 +3283,7 @@ window.updateBackupStats = async function() {
 };
 
 window.confirmClear = () => { showBS('Vaciar Base de Datos', 'Se eliminarán TODOS los documentos.', [{ label: 'Cancelar', cls: 'cancel', fn: closeBS }, { label: 'Vaciar BD', cls: 'danger', fn: _clearOk }]); };
-window._clearOk = async function() { closeBS(); await dbClear(STORE); await renderHist(); await updateHistBadge(); toast('BD vaciada', 'warn'); };
+window._clearOk = async function() { closeBS(); await dbClear(STORE); await renderHist(); if (window.renderHoy) await renderHoy(); if (window.renderAyer) await renderAyer(); if (window.renderManana) await renderManana(); await updateHistBadge(); toast('BD vaciada', 'warn'); };
 
 // ── Borrador helpers (delegan a autosave.js) ──────────────────
 window._restoreDraft = function() {
@@ -3237,6 +3304,8 @@ window._appInit = async function() {
     window.renderCarQF      = renderCarQF;
     window.updateHistBadge  = updateHistBadge;
     window.renderHoy        = renderHoy;
+    window.renderAyer       = renderAyer;
+    window.renderManana     = renderManana;
     await updateHistBadge(); renderRcvQF(); renderDrvQF(); renderCarQF(); renderPackingQF();
     if (window._attachAutosaveListeners) window._attachAutosaveListeners();
     await updateBackupStats();
@@ -3449,6 +3518,8 @@ async function quickSaveCMR(){
         await updateHistBadge(); clearDraft();
         if (window.renderHist) renderHist();
         if (window.renderHoy)  renderHoy();
+        if (window.renderAyer) renderAyer();
+        if (window.renderManana) renderManana();
         toast(isEditing ? '✓ Documento actualizado en el historial' : '✓ Documento guardado en el historial', 'ok', 4000);
     } catch(e) {
         console.warn('Quick save:', e);
@@ -3607,6 +3678,8 @@ async function generateCMR(){
             await updateHistBadge(); clearDraft(); _advanceSeq();
             if (window.renderHist) renderHist();
             if (window.renderHoy)  renderHoy();
+            if (window.renderAyer) renderAyer();
+            if (window.renderManana) renderManana();
         }catch(e){console.warn('DB save:',e);toast('⚠ Error guardando en historial: '+e.message,'err',6000);}
     } else {
         clearDraft();
@@ -4824,6 +4897,15 @@ function _startListeners() {
         onSnapshot(collection(db, 'users', uid, 'cmr_docs'), () => {
             if (document.querySelector('.tab[data-p="hist"]')?.classList.contains('active')) {
                 if (window.renderHist) window.renderHist();
+            }
+            if (document.querySelector('.tab[data-p="hoy"]')?.classList.contains('active')) {
+                if (window.renderHoy) window.renderHoy();
+            }
+            if (document.querySelector('.tab[data-p="ayer"]')?.classList.contains('active')) {
+                if (window.renderAyer) window.renderAyer();
+            }
+            if (document.querySelector('.tab[data-p="manana"]')?.classList.contains('active')) {
+                if (window.renderManana) window.renderManana();
             }
             if (window.updateHistBadge) window.updateHistBadge();
         }),
