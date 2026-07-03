@@ -614,7 +614,7 @@ select {
     border: 1px solid rgba(255,255,255,.8);
     border-bottom-color: var(--line);
     border-right-color: var(--line);
-    border-radius: var(--r2); padding: 13px 10px; text-align: center;
+    border-radius: var(--r2); padding: 7px 8px; text-align: center;
     box-shadow: var(--sh-float);
     transition: box-shadow .15s;
 }
@@ -625,10 +625,10 @@ select {
         0 2px 6px rgba(0,0,0,.08);
 }
 .stat-n {
-    font-size: 1.4rem; font-weight: 700;
+    font-size: 1.1rem; font-weight: 700;
     font-family: 'JetBrains Mono', monospace; color: var(--snow);
 }
-.stat-l { font-size: .57rem; color: var(--dim); text-transform: uppercase; letter-spacing: .09em; margin-top: 3px; }
+.stat-l { font-size: .52rem; color: var(--dim); text-transform: uppercase; letter-spacing: .07em; margin-top: 2px; }
 
 /* ── BUSCADOR ────────────────────────────────────────────── */
 .search-row { display: flex; gap: 9px; margin-bottom: 14px; }
@@ -1254,7 +1254,51 @@ select {
     .goods-line { padding: 14px 18px; }
     #autosave-bar { top: 62px; }
 }
-    </style>
+    
+/* ── SWIPE EN TARJETAS DE DÍA ──────────────────────────────── */
+.hitem-wrap {
+    position: relative; overflow: hidden; border-radius: var(--r2);
+    margin-bottom: 9px;
+}
+.hitem-wrap .hitem {
+    margin-bottom: 0;
+    transform: translateX(0);
+    transition: transform .22s cubic-bezier(.25,.46,.45,.94);
+    position: relative; z-index: 1;
+    border-radius: var(--r2);
+    touch-action: pan-y;
+    user-select: none;
+}
+.hitem-wrap.swiped .hitem { transform: translateX(-132px); }
+.hitem-swipe-actions {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    display: flex; align-items: stretch; z-index: 0;
+}
+.hitem-swipe-actions .hb {
+    width: 44px; height: 100%; border-radius: 0;
+    border: none; border-left: 1px solid rgba(255,255,255,.08);
+    font-size: .9rem;
+}
+.hitem-swipe-actions .hb:first-child { border-radius: 0; }
+.hitem-swipe-actions .hb.lo { background: rgba(14,138,122,.85); color: #fff; }
+.hitem-swipe-actions .hb.du { background: rgba(91,33,182,.85);  color: #fff; }
+.hitem-swipe-actions .hb.pd { background: rgba(196,66,26,.85);  color: #fff; }
+.hitem-swipe-actions .hb.de { background: rgba(180,20,45,.90);  color: #fff; border-radius: 0 var(--r2) var(--r2) 0; }
+
+/* Buscador de día */
+.day-search-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.day-search-row input {
+    flex: 1; height: 36px; padding: 0 12px;
+    background: var(--bg2); border: 1px solid var(--line);
+    border-radius: 9px; color: var(--snow); font-size: .82rem;
+    font-family: 'Sora', sans-serif;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06) inset;
+    outline: none;
+}
+.day-search-row input:focus { border-color: var(--blue-l); box-shadow: 0 0 0 2px rgba(224,98,30,.18); }
+.day-search-row input::placeholder { color: var(--dim); }
+
+</style>
 </head>
 <body>
 
@@ -1450,6 +1494,8 @@ select {
             <span id="ayer-fecha-txt" style="font-size:.84rem;font-weight:700;color:var(--snow);flex:1"></span>
             <button onclick="newCMRForDay(-1)" style="height:30px;padding:0 12px;border-radius:7px;border:none;background:linear-gradient(180deg,#e87020,#b83812);color:#fff;font-size:.72rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;box-shadow:var(--sh-btn-primary)">+ Nuevo CMR</button>
         </div>
+        <!-- Buscador -->
+        <div class="day-search-row"><input id="ayerSearch" type="search" placeholder="🔍  Buscar CMR o cliente…" oninput="renderDayPanel('ayer',window._ayerData||[])"/></div>
         <!-- Lista -->
         <div id="ayerList"></div>
     </div>
@@ -1469,6 +1515,8 @@ select {
             <span id="manana-fecha-txt" style="font-size:.84rem;font-weight:700;color:var(--snow);flex:1"></span>
             <button onclick="newCMRForDay(1)" style="height:30px;padding:0 12px;border-radius:7px;border:none;background:linear-gradient(180deg,#e87020,#b83812);color:#fff;font-size:.72rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;box-shadow:var(--sh-btn-primary)">+ Nuevo CMR</button>
         </div>
+        <!-- Buscador -->
+        <div class="day-search-row"><input id="mananaSearch" type="search" placeholder="🔍  Buscar CMR o cliente…" oninput="renderDayPanel('manana',window._mananaData||[])"/></div>
         <!-- Lista -->
         <div id="mananaList"></div>
     </div>
@@ -1487,6 +1535,8 @@ select {
             <span id="hoy-fecha-txt" style="font-size:.84rem;font-weight:700;color:var(--snow);flex:1"></span>
             <button onclick="newCMR();tab('form')" style="height:30px;padding:0 12px;border-radius:7px;border:none;background:linear-gradient(180deg,#e87020,#b83812);color:#fff;font-size:.72rem;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;box-shadow:var(--sh-btn-primary)">+ Nuevo CMR</button>
         </div>
+        <!-- Buscador -->
+        <div class="day-search-row"><input id="hoySearch" type="search" placeholder="🔍  Buscar CMR o cliente…" oninput="renderDayPanel('hoy',window._hoyData||[])"/></div>
         <!-- Lista -->
         <div id="hoyList"></div>
     </div>
@@ -2684,34 +2734,52 @@ window.updateHistBadge = async function() {
 // ── Paneles AYER / HOY / MAÑANA ────────────────────────────────
 // offsetDays: -1 = ayer, 0 = hoy, 1 = mañana. Filtra por docDate (fecha de emisión del documento),
 // no por savedAt, para poder "adelantar trabajo" preparando CMR con fecha futura.
-window.renderDayPanel = async function(offsetDays, prefix, label) {
-    const all  = await dbAll(STORE);
-    const now  = new Date();
-    now.setDate(now.getDate() + offsetDays);
-    const ymd  = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    const dayStr = ymd(now);
-    const data = all.filter(r => r.docDate === dayStr)
-                    .sort((a,b) => new Date(b.savedAt||0) - new Date(a.savedAt||0));
-    const tplClientMap = await buildTplClientMap();
+window.renderDayPanel = async function(offsetDaysOrData, prefix, label) {
+    let data, tplClientMap;
+    if (Array.isArray(offsetDaysOrData)) {
+        // Llamada desde el buscador: datos ya cargados en caché
+        data = offsetDaysOrData;
+        tplClientMap = window['_tplClientMap'] || {};
+    } else {
+        const all  = await dbAll(STORE);
+        const now  = new Date();
+        now.setDate(now.getDate() + offsetDaysOrData);
+        const ymd  = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        const dayStr = ymd(now);
+        data = all.filter(r => r.docDate === dayStr)
+                  .sort((a,b) => new Date(b.savedAt||0) - new Date(a.savedAt||0));
+        tplClientMap = await buildTplClientMap();
+        window['_tplClientMap'] = tplClientMap;
+        // Cachear datos completos para el buscador
+        window['_' + prefix + 'Data'] = data;
+        // Cabecera fecha
+        const fechaEl = document.getElementById(prefix + '-fecha-txt');
+        if (fechaEl) fechaEl.textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        // Stats del día (solo con datos completos, no filtrados)
+        const totals  = data.map(getGoodsTotals);
+        const totalKg  = totals.reduce((s,t) => s + t.weight, 0);
+        const totalBlt = totals.reduce((s,t) => s + t.qty,    0);
+        const totalVol = totals.reduce((s,t) => s + t.volume, 0);
+        const stEl = (i) => document.getElementById(prefix + '-st' + i);
+        if (stEl(0)) stEl(0).textContent = data.length;
+        if (stEl(1)) stEl(1).textContent = totalKg  > 0 ? (totalKg  >= 1000 ? (totalKg/1000).toFixed(1)+'t' : Math.round(totalKg))  : '—';
+        if (stEl(2)) stEl(2).textContent = totalBlt > 0 ? Math.round(totalBlt) : '—';
+        if (stEl(3)) stEl(3).textContent = totalVol > 0 ? totalVol.toFixed(2) : '—';
+        // Badge
+        const hb = document.getElementById(prefix + 'Badge');
+        if (hb) { hb.textContent = data.length; hb.style.display = data.length ? 'inline' : 'none'; }
+    }
 
-    // Cabecera fecha
-    const fechaEl = document.getElementById(prefix + '-fecha-txt');
-    if (fechaEl) fechaEl.textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-    // Stats del día
-    const totals  = data.map(getGoodsTotals);
-    const totalKg  = totals.reduce((s,t) => s + t.weight, 0);
-    const totalBlt = totals.reduce((s,t) => s + t.qty,    0);
-    const totalVol = totals.reduce((s,t) => s + t.volume, 0);
-    const stEl = (i) => document.getElementById(prefix + '-st' + i);
-    if (stEl(0)) stEl(0).textContent = data.length;
-    if (stEl(1)) stEl(1).textContent = totalKg  > 0 ? (totalKg  >= 1000 ? (totalKg/1000).toFixed(1)+'t' : Math.round(totalKg))  : '—';
-    if (stEl(2)) stEl(2).textContent = totalBlt > 0 ? Math.round(totalBlt) : '—';
-    if (stEl(3)) stEl(3).textContent = totalVol > 0 ? totalVol.toFixed(2) : '—';
-
-    // Badge
-    const hb = document.getElementById(prefix + 'Badge');
-    if (hb) { hb.textContent = data.length; hb.style.display = data.length ? 'inline' : 'none'; }
+    // Filtro de búsqueda
+    const searchEl = document.getElementById(prefix + 'Search');
+    const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+    const filtered = q ? data.filter(r => {
+        const cli = getRecordClient(r, tplClientMap) || '';
+        return (r.docNum || '').toLowerCase().includes(q)
+            || cli.toLowerCase().includes(q)
+            || (r.rcvBlock || '').toLowerCase().includes(q)
+            || (r.clientRef || '').toLowerCase().includes(q);
+    }) : data;
 
     // Lista
     const el = document.getElementById(prefix + 'List');
@@ -2720,7 +2788,12 @@ window.renderDayPanel = async function(offsetDays, prefix, label) {
         el.innerHTML = `<div class="hist-empty">Aún no hay ningún CMR con fecha de ${label}.<br>Pulsa <b>+ Nuevo CMR</b> para empezar.</div>`;
         return;
     }
-    const makeDayItem = (r, numLabel) => {
+    if (q && !filtered.length) {
+        el.innerHTML = `<div class="hist-empty">Sin resultados para "<b>${q}</b>".</div>`;
+        return;
+    }
+
+    const makeSwipeItem = (r, numLabel) => {
         const hora     = r.savedAt ? new Date(r.savedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '—';
         const tplName  = r.templateName || (r.rcvBlock || '').split('\n')[0].trim() || '';
         const isTpl    = !!r.templateName;
@@ -2730,15 +2803,17 @@ window.renderDayPanel = async function(offsetDays, prefix, label) {
         const nacBadge = r.tipoDoc === 'nacional'
             ? `<span class="hwbadge" style="background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.2);color:var(--teal-l)">NAC</span>`
             : '';
-        return `<div class="hitem" data-id="${r.id}">
-            <div class="hico" style="width:36px;height:36px;border-radius:9px;background:linear-gradient(145deg,rgba(196,66,26,.12),rgba(196,66,26,.06));border:1px solid rgba(196,66,26,.25);border-bottom:2px solid rgba(196,66,26,.3);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 2px 6px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.72rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue-l)">${numLabel}</div>
-            <div class="hinfo">
-                ${tplName ? `<div style="font-size:.6rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:${isTpl ? 'var(--blue-l)' : 'var(--dim)'};letter-spacing:.04em;margin-bottom:2px;text-transform:uppercase">${tplName}</div>` : ''}
-                <div class="hnum" style="font-size:.82rem">${docNum} ${nacBadge} ${kg ? `<span class="hwbadge">${kg}</span>` : ''}</div>
-                ${ref ? `<div style="margin-top:3px"><span class="hrefbadge" style="font-size:.72rem;padding:2px 8px">🏷 ${ref}</span></div>` : ''}
+        return `<div class="hitem-wrap" data-id="${r.id}">
+            <div class="hitem" data-id="${r.id}">
+                <div class="hico" style="width:36px;height:36px;border-radius:9px;background:linear-gradient(145deg,rgba(196,66,26,.12),rgba(196,66,26,.06));border:1px solid rgba(196,66,26,.25);border-bottom:2px solid rgba(196,66,26,.3);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 2px 6px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.72rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue-l)">${numLabel}</div>
+                <div class="hinfo">
+                    ${tplName ? `<div style="font-size:.6rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:${isTpl ? 'var(--blue-l)' : 'var(--dim)'};letter-spacing:.04em;margin-bottom:2px;text-transform:uppercase">${tplName}</div>` : ''}
+                    <div class="hnum" style="font-size:.82rem">${docNum} ${nacBadge} ${kg ? `<span class="hwbadge">${kg}</span>` : ''}</div>
+                    ${ref ? `<div style="margin-top:3px"><span class="hrefbadge" style="font-size:.72rem;padding:2px 8px">🏷 ${ref}</span></div>` : ''}
+                </div>
+                <div class="hdate" style="font-size:.68rem;color:var(--blue-l);font-weight:600;flex-shrink:0">${hora}</div>
             </div>
-            <div class="hdate" style="font-size:.68rem;color:var(--blue-l);font-weight:600;flex-shrink:0">${hora}</div>
-            <div class="hacts">
+            <div class="hitem-swipe-actions">
                 <div class="hb lo" data-id="${r.id}" data-act="load" title="Cargar">⬆</div>
                 <div class="hb du" data-id="${r.id}" data-act="dup"  title="Duplicar">📋</div>
                 <div class="hb pd" data-id="${r.id}" data-act="pdf"  title="PDF">📄</div>
@@ -2747,12 +2822,11 @@ window.renderDayPanel = async function(offsetDays, prefix, label) {
         </div>`;
     };
 
-    // Numeración global (orden cronológico del día), pero agrupado visualmente por cliente
     const numByRecId = {};
     data.forEach((r, idx) => { numByRecId[r.id] = data.length - idx; });
 
     const grouped = {};
-    data.forEach(r => {
+    filtered.forEach(r => {
         const cli = getRecordClient(r, tplClientMap) || 'Sin cliente / manual';
         if (!grouped[cli]) grouped[cli] = [];
         grouped[cli].push(r);
@@ -2762,8 +2836,7 @@ window.renderDayPanel = async function(offsetDays, prefix, label) {
     );
 
     if (clients.length <= 1) {
-        // Un solo cliente (o ninguno identificado): lista plana, sin cabeceras de grupo
-        el.innerHTML = data.map(r => makeDayItem(r, `#${numByRecId[r.id]}`)).join('');
+        el.innerHTML = filtered.map(r => makeSwipeItem(r, `#${numByRecId[r.id]}`)).join('');
     } else {
         el.innerHTML = clients.map(cli => {
             const items = grouped[cli];
@@ -2775,14 +2848,56 @@ window.renderDayPanel = async function(offsetDays, prefix, label) {
                     ${kgGroup ? `<span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim);margin-right:6px">${kgGroup.toFixed(0)} kg</span>` : ''}
                     <span style="font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--dim)">${items.length} doc${items.length===1?'':'s'}</span>
                 </div>
-                <div style="margin-top:4px">${items.map(r => makeDayItem(r, `#${numByRecId[r.id]}`)).join('')}</div>
+                <div style="margin-top:4px">${items.map(r => makeSwipeItem(r, `#${numByRecId[r.id]}`)).join('')}</div>
             </div>`;
         }).join('');
     }
-    el.querySelectorAll('[data-act="load"]').forEach(b => b.addEventListener('click', () => loadRec(b.dataset.id)));
-    el.querySelectorAll('[data-act="dup"]').forEach(b  => b.addEventListener('click', () => dupRec(b.dataset.id)));
-    el.querySelectorAll('[data-act="pdf"]').forEach(b  => b.addEventListener('click', () => regenPDF(b.dataset.id)));
-    el.querySelectorAll('[data-act="del"]').forEach(b  => b.addEventListener('click', () => delRec(b.dataset.id)));
+
+    // Eventos de acción
+    el.querySelectorAll('[data-act="load"]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadRec(b.dataset.id); }));
+    el.querySelectorAll('[data-act="dup"]').forEach(b  => b.addEventListener('click', e => { e.stopPropagation(); dupRec(b.dataset.id); }));
+    el.querySelectorAll('[data-act="pdf"]').forEach(b  => b.addEventListener('click', e => { e.stopPropagation(); regenPDF(b.dataset.id); }));
+    el.querySelectorAll('[data-act="del"]').forEach(b  => b.addEventListener('click', e => { e.stopPropagation(); delRec(b.dataset.id); }));
+
+    // Swipe táctil
+    el.querySelectorAll('.hitem-wrap').forEach(wrap => {
+        let startX = 0, startY = 0, isDragging = false;
+        const item = wrap.querySelector('.hitem');
+        item.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isDragging = false;
+        }, { passive: true });
+        item.addEventListener('touchmove', e => {
+            const dx = e.touches[0].clientX - startX;
+            const dy = e.touches[0].clientY - startY;
+            if (!isDragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) isDragging = true;
+            if (isDragging) e.preventDefault();
+        }, { passive: false });
+        item.addEventListener('touchend', e => {
+            if (!isDragging) return;
+            const dx = e.changedTouches[0].clientX - startX;
+            if (dx < -50) {
+                // Cerrar otros abiertos
+                el.querySelectorAll('.hitem-wrap.swiped').forEach(w => { if (w !== wrap) w.classList.remove('swiped'); });
+                wrap.classList.add('swiped');
+            } else if (dx > 30) {
+                wrap.classList.remove('swiped');
+            }
+        });
+        // Tap en la tarjeta cuando está cerrada → cargar registro
+        item.addEventListener('click', () => {
+            if (wrap.classList.contains('swiped')) { wrap.classList.remove('swiped'); return; }
+            loadRec(wrap.dataset.id);
+        });
+    });
+
+    // Tap fuera cierra cualquier swipe abierto
+    el._swipeOutside = e => {
+        if (!e.target.closest('.hitem-wrap')) el.querySelectorAll('.hitem-wrap.swiped').forEach(w => w.classList.remove('swiped'));
+    };
+    document.removeEventListener('click', el._swipeOutside);
+    document.addEventListener('click', el._swipeOutside);
 };
 
 window.renderHoy    = () => window.renderDayPanel(0,  'hoy',    'hoy');
